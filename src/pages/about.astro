@@ -2,13 +2,6 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { email, wechat, mcmPlatform } from "../config";
 
-const orgStructure = [
-  { role: "会长", duty: "统筹协会各项事务（由换届产生）" },
-  { role: "副会长", duty: "协助会长开展协会事务，重点负责建模案例板块建设与推进；协调技术部与宣传部，参与部长团每周例会" },
-  { role: "技术部（部长 2 名）", duty: "负责数据可视化、建模案例等专业技术板块；组织技术培训、知识分享、竞赛支持等活动" },
-  { role: "宣传部（部长 1 名）", duty: "负责公众号运营、活动宣传、形象推广；统筹推送制作、海报设计、活动记录" },
-];
-
 const activities = [
   {
     title: "竞赛集训队（核心活动）",
@@ -33,7 +26,7 @@ const activities = [
 ];
 ---
 
-<BaseLayout title="团队介绍" description="上海交通大学数学建模协会介绍：协会简介、组织架构、指导老师与主要活动。">
+<BaseLayout title="团队介绍" description="上海交通大学数学建模协会介绍：协会简介、指导老师与主要活动。">
   <h1 class="page-title">团队介绍</h1>
   <p class="page-subtitle">数学科学学院 + 学生创新中心共同组织的科创类协会。</p>
 
@@ -50,26 +43,6 @@ const activities = [
           为各学科领域对数学建模感兴趣的同学提供基础学习、技能提高和组队参赛的平台。
         </p>
       </div>
-    </div>
-  </section>
-
-  <!-- 组织架构 -->
-  <section class="section">
-    <h2 class="section-title">组织架构 <small>会长团 + 部长团结构，部长团每周例会</small></h2>
-    <div class="table-wrap">
-      <table class="data-table">
-        <thead>
-          <tr><th style="width: 200px;">岗位</th><th>职责</th></tr>
-        </thead>
-        <tbody>
-          {orgStructure.map((o) => (
-            <tr>
-              <td><strong>{o.role}</strong></td>
-              <td>{o.duty}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   </section>
 
