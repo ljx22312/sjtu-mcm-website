@@ -282,37 +282,49 @@ function searchText(it: CourseItem): string {
       const countNum = panel.querySelector<HTMLElement>(".kb-count-num")!;
       const emptyRow = panel.querySelector<HTMLElement>(".kb-empty");
       const emptyCards = panel.querySelector<HTMLElement>(".kb-empty-cards");
+      const cardsWrap = panel.querySelector<HTMLElement>(".kb-cards");
       let module = "";
 
       function applyFilter() {
         const q = search.value.trim().toLowerCase();
-        let visible = 0;
-        const groupVisible = new Map<number, number>();
-        for (const el of [...rows, ...cards]) {
-          const ok =
-            (!module || el.dataset.module === module) &&
-            (!q || (el.dataset.search ?? "").includes(q));
-          if (el.classList.contains("kb-row")) {
-            el.style.display = ok ? "" : "none";
-            const next = el.nextElementSibling as HTMLElement | null;
-            if (!ok && next?.classList.contains("kb-detail")) next.hidden = true;
-            el.setAttribute("aria-expanded", "false");
-          } else {
-            el.style.display = ok ? "" : "none";
-          }
+        const match = (el: HTMLElement) =>
+          (!module || el.dataset.module === module) &&
+          (!q || (el.dataset.search ?? "").includes(q));
+
+        // row 与 card 是同一条数据的两套渲染，各自应用显隐并分别计数（每条数据只计一次）
+        let rowVisible = 0;
+        const groupVisible = new Map<number, number>(); // 分组行只存在于表格侧
+        for (const el of rows) {
+          const ok = match(el);
+          el.style.display = ok ? "" : "none";
+          const next = el.nextElementSibling as HTMLElement | null;
+          if (!ok && next?.classList.contains("kb-detail")) next.hidden = true;
+          el.setAttribute("aria-expanded", "false");
           if (ok) {
-            visible++;
+            rowVisible++;
             const gi = Number(el.dataset.group ?? -1);
             if (gi >= 0) groupVisible.set(gi, (groupVisible.get(gi) ?? 0) + 1);
           }
         }
+
+        let cardVisible = 0;
+        for (const el of cards) {
+          const ok = match(el);
+          el.style.display = ok ? "" : "none";
+          if (ok) cardVisible++;
+        }
+
         for (const gr of groupRows) {
           const n = groupVisible.get(Number(gr.dataset.group)) ?? 0;
           gr.style.display = n > 0 ? "" : "none";
         }
-        countNum.textContent = String(visible);
-        if (emptyRow) emptyRow.hidden = visible > 0;
-        if (emptyCards) emptyCards.hidden = visible > 0;
+
+        // 计数器只统计当前视口实际可见的那套渲染：移动端（≤860px）卡片容器为 grid 布局
+        const isMobile = cardsWrap ? getComputedStyle(cardsWrap).display === "grid" : rows.length === 0;
+        countNum.textContent = String(isMobile ? cardVisible : rowVisible);
+        // 空态提示各自跟随自己那套渲染：桌面在表格侧、移动在卡片侧
+        if (emptyRow) emptyRow.hidden = isMobile || rowVisible > 0;
+        if (emptyCards) emptyCards.hidden = !isMobile || cardVisible > 0;
       }
 
       // 行点击 / 键盘展开详情
@@ -337,6 +349,9 @@ function searchText(it: CourseItem): string {
       });
 
       search.addEventListener("input", applyFilter);
+
+      // 视口跨越桌面表格 / 移动卡片断点（860px）后重新计数
+      window.addEventListener("resize", applyFilter);
 
       panel.querySelector(".kb-chips")?.addEventListener("click", (e) => {
         const chip = (e.target as HTMLElement).closest(".chip") as HTMLElement | null;
