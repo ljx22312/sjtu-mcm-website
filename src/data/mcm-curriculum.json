@@ -372,7 +372,7 @@
    "topic": "数据可视化进阶（基于Python-Plotly-Folium+Pyecharts+Seaborn）",
    "format": "文档",
    "format_detail": [],
-   "intro": "建议先修 TOOL103",
+   "intro": "建议先修 TOOL102",
    "contact": "于景同、崔轩瑞、胡金磊",
    "no_playback": false,
    "resources": [
@@ -1216,10 +1216,6 @@
    "no_playback": false,
    "resources": [
     {
-     "type": "doc",
-     "name": "详见授课材料"
-    },
-    {
      "type": "link",
      "name": "2025年D题图论模型",
      "url": "https://sixkoiaf82a.feishu.cn/wiki/XII2wLXNNinYA9kBr2dcrM1Un0c"
@@ -1237,10 +1233,6 @@
    "contact": "张睿志",
    "no_playback": false,
    "resources": [
-    {
-     "type": "doc",
-     "name": "详见授课材料"
-    },
     {
      "type": "attachment",
      "name": "美赛E题分析.docx",
