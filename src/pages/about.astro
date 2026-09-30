@@ -1,0 +1,150 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { email, wechat, gitee, mcmPlatform } from "../config";
+
+const orgStructure = [
+  { role: "会长", duty: "统筹协会各项事务（由换届产生）" },
+  { role: "副会长", duty: "协助会长开展协会事务，重点负责建模案例板块建设与推进；协调技术部与宣传部，参与部长团每周例会" },
+  { role: "技术部（部长 2 名）", duty: "负责数据可视化、建模案例等专业技术板块；组织技术培训、知识分享、竞赛支持等活动" },
+  { role: "宣传部（部长 1 名）", duty: "负责公众号运营、活动宣传、形象推广；统筹推送制作、海报设计、活动记录" },
+];
+
+const activities = [
+  {
+    title: "竞赛集训队（核心活动）",
+    desc: "美赛/国赛前组织集训队招募与系统培训，课程按飞书集训大表体系组织（讲座、导论、模型与编程、工具与 AI、写作、经验分享、实战演示等模块，国赛、美赛共 106 条课程记录），并组织模拟赛。2024 美赛协会集训队 26 支队伍参赛，获奖率 77%（赛事平均获奖率的 2.6 倍）。",
+  },
+  {
+    title: "研讨班",
+    desc: "面向协会成员定期开展数学模型与算法研讨班，成员相互交流，共同学习数学模型、编程、论文写作与排版，以老带新。",
+  },
+  {
+    title: "校内赛协办",
+    desc: "上海交通大学数学建模校内赛由教务处指导，学生创新中心与数学科学学院主办，协会协办。2021 年首届以来已办六届，2026 年报名 1283 人，是国赛选拔与练兵的重要平台。",
+  },
+  {
+    title: "社团招新与校园活动",
+    desc: "春季/秋季招新、“百团大战”摊位活动（数模知识拼拼图等趣味挑战）、“春日雅集”集赞抽奖等。",
+  },
+  {
+    title: "交大荣昶杯数学建模挑战赛",
+    desc: "面向中学生的数学建模赛事，协会参与组织与公示，2023 年 95 支赛队参赛。",
+  },
+];
+---
+
+<BaseLayout title="团队介绍" description="上海交通大学数学建模协会介绍：协会简介、组织架构、指导老师与主要活动。">
+  <h1 class="page-title">团队介绍</h1>
+  <p class="page-subtitle">数学科学学院 + 学生创新中心共同组织的科创类协会。</p>
+
+  <!-- 协会简介 -->
+  <section class="section">
+    <h2 class="section-title">协会简介</h2>
+    <div class="card intro-card">
+      <img src="/images/img06.jpg" alt="协会会徽" class="intro-logo" />
+      <div>
+        <p>
+          上海交通大学数学建模协会成立于 2018 年，是由<strong>数学科学学院</strong>和<strong>学生创新中心</strong>
+          共同组织的科创类协会（挂靠学生创新中心数学科学学院分中心），专注于数学建模竞赛与数模知识科普。
+          协会旨在服务全体交大学生，集聚了大量建模竞赛获奖选手，开发了一套成体系的建模培训资料，
+          为各学科领域对数学建模感兴趣的同学提供基础学习、技能提高和组队参赛的平台。
+        </p>
+        <p>
+          2021 年，协会获评<strong>首批上海市学生科技创新社团</strong>（沪教委体〔2021〕49 号），
+          是交大两个入选社团之一。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 组织架构 -->
+  <section class="section">
+    <h2 class="section-title">组织架构 <small>会长团 + 部长团结构，部长团每周例会</small></h2>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th style="width: 200px;">岗位</th><th>职责</th></tr>
+        </thead>
+        <tbody>
+          {orgStructure.map((o) => (
+            <tr>
+              <td><strong>{o.role}</strong></td>
+              <td>{o.duty}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 指导老师 -->
+  <section class="section">
+    <h2 class="section-title">指导老师</h2>
+    <div class="card">
+      <h3 style="margin-top: 0;">任桐鑫 <span class="badge badge-blue">学生创新中心实验师 · 协会指导老师</span></h3>
+      <p>
+        负责校内赛组织与赛前集训。2019 校学生年度人物；个人曾获 2018 美赛特等奖及 INFORMS 冠名奖、
+        2019 深圳杯唯一特等奖；指导协会集训队学生获 2023 国赛全国一等奖、2024/2025 美赛 F 奖（特等奖提名）多项；
+        2025 全国数模微课程教学竞赛上海赛区一等奖。
+      </p>
+    </div>
+  </section>
+
+  <!-- 主要活动 -->
+  <section class="section">
+    <h2 class="section-title">主要活动</h2>
+    <div class="grid grid-2">
+      {activities.map((a) => (
+        <article class="card">
+          <h3 style="margin-top: 0;">{a.title}</h3>
+          <p class="muted" style="margin-bottom: 0;">{a.desc}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 联系方式 -->
+  <section class="section">
+    <h2 class="section-title">联系方式</h2>
+    <div class="card contact-card">
+      <p><strong>邮箱：</strong><a href={`mailto:${email}`}>{email}</a></p>
+      <p><strong>公众号：</strong>微信搜索「{wechat}」（ID: sjtumcm）</p>
+      <p><strong>校内竞赛平台：</strong><a href={mcmPlatform} target="_blank" rel="noopener noreferrer">{mcmPlatform}</a></p>
+      <p><strong>Gitee 资料仓库：</strong><a href={gitee} target="_blank" rel="noopener noreferrer">{gitee}</a></p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .intro-card {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .intro-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .intro-card p {
+    margin-top: 0;
+  }
+
+  .contact-card p {
+    margin: 8px 0;
+  }
+
+  @media (max-width: 640px) {
+    .intro-card {
+      flex-direction: column;
+    }
+
+    .intro-logo {
+      width: 88px;
+      height: 88px;
+    }
+  }
+</style>

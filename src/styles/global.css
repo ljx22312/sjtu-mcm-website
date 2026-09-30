@@ -1,0 +1,272 @@
+:root {
+  --red: #cc0000;
+  --red-dark: #a30000;
+  --blue: #1f4e9c;
+  --blue-dark: #173c7a;
+  --bg: #fafafa;
+  --text: #333;
+  --text-light: #666;
+  --border: #e5e5e5;
+  --card-bg: #ffffff;
+  --radius: 10px;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  --container: 1200px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.7;
+}
+
+a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--blue-dark);
+  text-decoration: underline;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.container {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.page-main {
+  min-height: 60vh;
+  padding: 40px 0 64px;
+}
+
+h1, h2, h3, h4 {
+  line-height: 1.35;
+  color: #222;
+}
+
+.page-title {
+  font-size: 2rem;
+  margin: 0 0 8px;
+  padding-left: 14px;
+  border-left: 5px solid var(--red);
+}
+
+.page-subtitle {
+  color: var(--text-light);
+  margin: 0 0 32px;
+}
+
+.section {
+  margin: 48px 0;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  margin: 0 0 20px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.section-title small {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  font-weight: normal;
+}
+
+/* 按钮 */
+.btn {
+  display: inline-block;
+  padding: 10px 26px;
+  border-radius: 6px;
+  font-size: 1rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn:hover {
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--red);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--red-dark);
+  color: #fff;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--blue);
+  border-color: var(--blue);
+}
+
+.btn-outline:hover {
+  background: var(--blue);
+  color: #fff;
+}
+
+.btn-disabled,
+.btn-disabled:hover {
+  background: #e0e0e0;
+  color: #999;
+  border-color: #e0e0e0;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+/* 卡片与网格 */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* 徽章 */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.badge-red {
+  background: #fdecec;
+  color: var(--red);
+  border: 1px solid #f3c1c1;
+}
+
+.badge-blue {
+  background: #eaf1fb;
+  color: var(--blue);
+  border: 1px solid #c4d6ef;
+}
+
+.badge-gray {
+  background: #f1f1f1;
+  color: #555;
+  border: 1px solid #ddd;
+}
+
+.badge-gold {
+  background: #fff8e6;
+  color: #8a6d1a;
+  border: 1px solid #ecd9a0;
+}
+
+/* 表格 */
+.table-wrap {
+  overflow-x: auto;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-bg);
+  font-size: 0.95rem;
+}
+
+table.data-table th,
+table.data-table td {
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+
+table.data-table th {
+  background: #f2f5fa;
+  color: var(--blue-dark);
+  white-space: nowrap;
+}
+
+table.data-table tr:nth-child(even) td {
+  background: #fbfbfd;
+}
+
+/* 标签 */
+.tag {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--text-light);
+  background: #f4f4f4;
+  border-radius: 4px;
+  padding: 1px 8px;
+  margin-right: 6px;
+}
+
+.notice-bar {
+  background: #fff8e6;
+  border: 1px solid #ecd9a0;
+  color: #7a6413;
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  margin-bottom: 28px;
+  font-size: 0.95rem;
+}
+
+.muted {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+  .page-title {
+    font-size: 1.6rem;
+  }
+}

@@ -1,0 +1,129 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import newsData from "../data/news.json";
+import { sortNews, type NewsItem } from "../lib/data";
+
+const groups: { key: NewsItem["category"]; label: string; badge: string; desc: string }[] = [
+  { key: "notice", label: "通知", badge: "badge-blue", desc: "集训招募、校内赛与公示通知" },
+  { key: "activity", label: "动态", badge: "badge-gray", desc: "协会活动与招新动态" },
+];
+
+const items = newsData.items as NewsItem[];
+
+/** 历史推送封面配图（按标题关键字匹配） */
+const coverMap: [RegExp, string][] = [
+  [/校内赛/, "/images/img17.jpg"],
+  [/招新啦/, "/images/img18.jpg"],
+  [/上海市学生科技创新社团/, "/images/img19.jpg"],
+];
+function coverOf(n: NewsItem): string | undefined {
+  return coverMap.find(([re]) => re.test(n.title))?.[1];
+}
+---
+
+<BaseLayout title="新闻动态" description="上海交通大学数学建模协会新闻动态：通知与活动动态。">
+  <h1 class="page-title">新闻动态</h1>
+  <p class="page-subtitle">协会公众号推送归档与官网消息，按通知 / 动态分类。</p>
+
+  {groups.map((g) => {
+    const list = sortNews(items.filter((n) => n.category === g.key));
+    if (list.length === 0) return null;
+    return (
+      <section class="section">
+        <h2 class="section-title">
+          {g.label} <small>{g.desc}</small>
+        </h2>
+        <div class="news-list">
+          {list.map((n) => {
+            const cover = coverOf(n);
+            return (
+              <article class="card news-item">
+                <div class="news-body">
+                  <div class="news-meta">
+                    <time datetime={n.date}>{n.date}</time>
+                    <span class={`badge ${g.badge}`}>{g.label}</span>
+                    {n.pinned && <span class="badge badge-red">置顶</span>}
+                    {n.tags.map((t) => <span class="tag">{t}</span>)}
+                  </div>
+                  <h3>{n.title}</h3>
+                  <p class="summary">{n.summary}</p>
+                  <p class="source muted">
+                    {n.source_url ? (
+                      <a href={n.source_url} target="_blank" rel="noopener noreferrer">查看原文 →</a>
+                    ) : (
+                      <span>公众号文章 · 链接待补充</span>
+                    )}
+                    {n.note && <span>（{n.note}）</span>}
+                  </p>
+                </div>
+                {cover && (
+                  <img class="news-cover" src={cover} alt={`${n.title}封面`} loading="lazy" />
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    );
+  })}
+</BaseLayout>
+
+<style>
+  .news-list {
+    display: grid;
+    gap: 16px;
+  }
+
+  .news-item {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .news-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .news-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+
+  .news-item h3 {
+    margin: 8px 0 6px;
+    font-size: 1.1rem;
+  }
+
+  .summary {
+    margin: 0 0 8px;
+    color: #444;
+    font-size: 0.95rem;
+  }
+
+  .source {
+    margin: 0;
+  }
+
+  .news-cover {
+    width: 200px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+
+  @media (max-width: 640px) {
+    .news-item {
+      flex-direction: column;
+    }
+
+    .news-cover {
+      width: 100%;
+    }
+  }
+</style>

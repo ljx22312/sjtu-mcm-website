@@ -1,0 +1,880 @@
+---
+/**
+ * 右下角 agent 悬浮球 + 聊天面板（纯浏览器脚本，无前端框架依赖）。
+ * 默认需登录（jAccount）；服务端开启匿名模式（AGENT_ALLOW_ANONYMOUS=1，内测期）时未登录也可直接对话。
+ *
+ * 样式注意：消息气泡由 JS 动态创建，拿不到 Astro 作用域 cid 属性，
+ * 因此这里必须用 is:global，选择器统一挂在 #agent-widget 下避免泄漏。
+ */
+---
+
+<div id="agent-widget">
+  <section id="agent-panel" hidden aria-label="智能助手对话面板">
+    <header class="agent-head">
+      <div class="agent-head-info">
+        <h3>数模小助手</h3>
+      </div>
+      <div class="agent-head-actions">
+        <button type="button" id="agent-history" title="历史对话（恢复之前的话题）" aria-label="历史对话">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+        </button>
+        <button type="button" id="agent-clear" title="重新开始（清除我的对话记录）" aria-label="重新开始">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"/></svg>
+        </button>
+        <button type="button" id="agent-close" title="收起面板" aria-label="收起面板">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </header>
+    <div id="agent-body">
+      <p class="agent-notice">对话记录仅保存在协会服务器，用于保留你的对话上下文，可随时清除。</p>
+    </div>
+    <div id="agent-sessions" hidden aria-label="历史对话列表">
+      <div class="agent-sessions-head">
+        <button type="button" id="agent-sessions-back" aria-label="返回对话">‹ 返回</button>
+        <span>历史对话</span>
+      </div>
+      <div id="agent-sessions-list"></div>
+    </div>
+    <footer class="agent-input">
+      <textarea id="agent-input" rows="1" placeholder="问问我：国赛集训的论文写作课在哪看回放？"></textarea>
+      <button type="button" id="agent-send" aria-label="发送">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>
+      </button>
+    </footer>
+  </section>
+
+  <button type="button" id="agent-fab" aria-label="打开智能助手" title="智能助手">
+    <svg id="agent-fab-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </button>
+</div>
+
+<style is:global>
+  #agent-widget {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 999;
+    font-size: 0.92rem;
+    --agent-accent: var(--red, #cc0000);
+    /* 消息气泡配色：用户浅红橙底黑字，助手浅蓝底黑字（微信式） */
+    --agent-user-bg: #ffe3d3;
+    --agent-user-color: #1f1f1f;
+    --agent-bot-bg: #dceafa;
+    --agent-bot-color: #1f1f1f;
+  }
+
+  /* 悬浮球 */
+  #agent-fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    margin-left: auto;
+    border: none;
+    border-radius: 50%;
+    background: var(--agent-accent);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(204, 0, 0, 0.35);
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  #agent-fab:hover {
+    background: var(--red-dark, #a30000);
+    transform: translateY(-2px);
+  }
+
+  /* 面板 */
+  #agent-panel {
+    position: absolute;
+    right: 0;
+    bottom: 68px;
+    width: min(380px, calc(100vw - 40px));
+    height: min(560px, calc(100vh - 120px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: var(--radius, 10px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  }
+  /* display:flex 会覆盖 hidden 属性的默认 display:none，必须显式压制，
+     否则面板初始即打开、点 × 也关不掉 */
+  #agent-panel[hidden] {
+    display: none !important;
+  }
+
+  .agent-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--agent-accent);
+    color: #fff;
+  }
+  .agent-head-info h3 {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+  .agent-head-info p {
+    margin: 2px 0 0;
+    font-size: 0.75rem;
+    opacity: 0.85;
+  }
+  .agent-head-actions {
+    display: flex;
+    gap: 4px;
+  }
+  .agent-head-actions button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    opacity: 0.85;
+  }
+  .agent-head-actions button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    opacity: 1;
+  }
+
+  #agent-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    background: var(--bg, #fafafa);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .agent-notice {
+    margin: 0;
+    font-size: 0.72rem;
+    color: var(--text-light, #666);
+    text-align: center;
+  }
+
+  /* 历史恢复分隔提示：打开面板时若拉到历史记录，插在正文最前 */
+  .agent-resume {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 2px 0;
+    font-size: 0.72rem;
+    color: var(--text-light, #666);
+    white-space: nowrap;
+  }
+  .agent-resume::before,
+  .agent-resume::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid var(--border, #e5e5e5);
+  }
+
+  /* 消息气泡（微信式双色） */
+  .agent-msg {
+    max-width: 86%;
+    padding: 8px 12px;
+    border-radius: 10px;
+    line-height: 1.6;
+    word-break: break-word;
+    white-space: normal;
+  }
+  .agent-msg.user {
+    align-self: flex-end;
+    background: var(--agent-user-bg);
+    color: var(--agent-user-color);
+    border-bottom-right-radius: 3px;
+  }
+  .agent-msg.assistant {
+    align-self: flex-start;
+    background: var(--agent-bot-bg);
+    color: var(--agent-bot-color);
+    border-bottom-left-radius: 3px;
+  }
+  .agent-msg a {
+    color: var(--blue, #1f4e9c);
+    word-break: break-all;
+  }
+  .agent-msg.status {
+    align-self: flex-start;
+    font-size: 0.75rem;
+    color: var(--text-light, #666);
+    background: transparent;
+    border: none;
+    padding: 0 4px;
+  }
+  .agent-msg.error {
+    align-self: flex-start;
+    color: #a30000;
+    background: #fdf0f0;
+    border: 1px solid #f2caca;
+  }
+
+  /* 思考折叠块：挂在助手消息上方，流式时展开、正文出现后收起为摘要行 */
+  .agent-think {
+    align-self: flex-start;
+    width: 86%;
+    font-size: 0.78rem;
+    color: var(--text-light, #666);
+  }
+  .agent-think-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 999px;
+    background: var(--card-bg, #fff);
+    color: var(--text-light, #666);
+    font-size: 0.72rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  .agent-think-toggle:hover {
+    color: var(--text, #333);
+    border-color: #ccc;
+  }
+  .agent-think-toggle .agent-think-caret {
+    transition: transform 0.15s ease;
+    font-size: 0.62rem;
+  }
+  .agent-think.expanded .agent-think-caret {
+    transform: rotate(90deg);
+  }
+  .agent-think-body {
+    display: none;
+    margin-top: 6px;
+    padding: 8px 10px;
+    max-height: 180px;
+    overflow-y: auto;
+    background: var(--card-bg, #fff);
+    border: 1px dashed var(--border, #e5e5e5);
+    border-radius: 8px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .agent-think.expanded .agent-think-body {
+    display: block;
+  }
+  .agent-think-body::-webkit-scrollbar {
+    width: 4px;
+  }
+  .agent-think-body::-webkit-scrollbar-thumb {
+    background: #d8d8d8;
+    border-radius: 2px;
+  }
+
+  .agent-login {
+    margin: auto;
+    text-align: center;
+    padding: 20px;
+  }
+  .agent-login p {
+    margin: 0 0 14px;
+    color: var(--text-light, #666);
+  }
+
+  .agent-btn-primary {
+    display: inline-block;
+    padding: 9px 26px;
+    border: none;
+    border-radius: 6px;
+    background: var(--red, #cc0000);
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .agent-btn-primary:hover {
+    background: var(--red-dark, #a30000);
+    text-decoration: none;
+  }
+
+  /* 历史对话恢复入口：面板头部时钟图标 → 会话列表覆盖层 */
+  #agent-sessions {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg, #fff);
+    z-index: 2;
+  }
+  #agent-sessions[hidden] {
+    display: none !important;
+  }
+  .agent-sessions-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border, #e5e5e5);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text, #333);
+  }
+  #agent-sessions-back {
+    border: none;
+    background: transparent;
+    color: var(--blue, #1f4e9c);
+    font-size: 0.82rem;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+  }
+  #agent-sessions-back:hover {
+    background: var(--bg, #fafafa);
+  }
+  #agent-sessions-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .agent-session-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 12px;
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 10px;
+    background: var(--bg, #fafafa);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .agent-session-item:hover {
+    border-color: var(--blue, #1f4e9c);
+    background: #fff;
+  }
+  .agent-session-item.current {
+    border-color: var(--red, #cc0000);
+  }
+  .agent-session-title {
+    font-size: 0.85rem;
+    color: var(--text, #333);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .agent-session-meta {
+    font-size: 0.72rem;
+    color: var(--text-light, #666);
+  }
+  .agent-sessions-empty {
+    margin: auto;
+    font-size: 0.8rem;
+    color: var(--text-light, #666);
+    text-align: center;
+    padding: 20px;
+  }
+
+  .agent-input {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 10px;
+    border-top: 1px solid var(--border, #e5e5e5);
+    background: var(--card-bg, #fff);
+  }
+  #agent-input {
+    flex: 1;
+    resize: none;
+    max-height: 110px;
+    padding: 8px 10px;
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 8px;
+    font: inherit;
+    color: var(--text, #333);
+    background: var(--bg, #fafafa);
+    line-height: 1.5;
+  }
+  #agent-input:focus {
+    outline: none;
+    border-color: var(--blue, #1f4e9c);
+  }
+  #agent-send {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 8px;
+    background: var(--red, #cc0000);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  #agent-send:hover:not(:disabled) {
+    background: var(--red-dark, #a30000);
+  }
+  #agent-send:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 640px) {
+    #agent-widget {
+      right: 12px;
+      bottom: 12px;
+    }
+    #agent-fab {
+      width: 48px;
+      height: 48px;
+    }
+    #agent-panel {
+      right: 0;
+      bottom: 60px;
+      width: calc(100vw - 24px);
+      height: min(70vh, 560px);
+    }
+    .agent-msg {
+      max-width: 92%;
+    }
+    .agent-think {
+      width: 92%;
+    }
+  }
+</style>
+
+<script>
+  const panel = document.getElementById("agent-panel") as HTMLElement;
+  const fab = document.getElementById("agent-fab") as HTMLButtonElement;
+  const body = document.getElementById("agent-body") as HTMLElement;
+  const input = document.getElementById("agent-input") as HTMLTextAreaElement;
+  const sendBtn = document.getElementById("agent-send") as HTMLButtonElement;
+  const clearBtn = document.getElementById("agent-clear") as HTMLButtonElement;
+  const closeBtn = document.getElementById("agent-close") as HTMLButtonElement;
+  const historyBtn = document.getElementById("agent-history") as HTMLButtonElement;
+  const sessionsView = document.getElementById("agent-sessions") as HTMLElement;
+  const sessionsList = document.getElementById("agent-sessions-list") as HTMLElement;
+  const sessionsBack = document.getElementById("agent-sessions-back") as HTMLButtonElement;
+  const NOTICE = (document.querySelector("#agent-body .agent-notice") as HTMLElement)?.outerHTML ?? "";
+
+  let ready = false; // 已确认可对话（已登录，或服务端开启匿名模式）
+  let streaming = false;
+  /** 当前对话归属的会话；null = 全新会话（首条消息发送后由服务端分配） */
+  let currentSessionId: number | null = null;
+
+  /* ---------- 渲染 ---------- */
+
+  function escapeHtml(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+  }
+
+  /** 轻量渲染：转义后做链接化 / 换行 / 粗体 */
+  function renderRich(s: string): string {
+    let html = escapeHtml(s);
+    html = html.replace(/(https?:\/\/[^\s<)"']+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+    html = html.replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>");
+    return html.replace(/\n/g, "<br>");
+  }
+
+  function scrollBottom() {
+    requestAnimationFrame(() => {
+      body.scrollTop = body.scrollHeight;
+    });
+  }
+
+  function addMsg(role: "user" | "assistant" | "status" | "error", text: string): HTMLElement {
+    const div = document.createElement("div");
+    div.className = `agent-msg ${role}`;
+    if (role === "status") {
+      div.textContent = text;
+    } else if (role === "user") {
+      div.textContent = text;
+    } else {
+      div.innerHTML = renderRich(text);
+    }
+    body.appendChild(div);
+    scrollBottom();
+    return div;
+  }
+
+  interface ThinkBlock {
+    root: HTMLElement;
+    toggle: HTMLButtonElement;
+    bodyEl: HTMLElement;
+  }
+
+  /**
+   * 助手消息的思考折叠块：
+   *  - 流式阶段 expanded=true，正文出现后收起（collapsed label：「已深度思考 · 点击查看」）
+   *  - 点击 toggle 随时展开 / 收起
+   */
+  function makeThinkBlock(initialExpanded: boolean): ThinkBlock {
+    const root = document.createElement("div");
+    root.className = `agent-think${initialExpanded ? " expanded" : ""}`;
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "agent-think-toggle";
+    const label = document.createElement("span");
+    label.className = "agent-think-label";
+    label.textContent = "正在深度思考…";
+    const caret = document.createElement("span");
+    caret.className = "agent-think-caret";
+    caret.textContent = "▶";
+    toggle.append(caret, label);
+    const bodyEl = document.createElement("div");
+    bodyEl.className = "agent-think-body";
+    root.append(toggle, bodyEl);
+    body.appendChild(root);
+
+    const tb: ThinkBlock = { root, toggle, bodyEl };
+    toggle.addEventListener("click", () => {
+      const open = !tb.root.classList.contains("expanded");
+      tb.root.classList.toggle("expanded", open);
+      if (open) tb.bodyEl.scrollTop = 0; /* 展开定位到思考开头 */
+    });
+    return tb;
+  }
+
+  /** 流式中：追加思考文本，保持滚动到底 */
+  function appendThinking(tb: ThinkBlock, text: string) {
+    tb.bodyEl.textContent += text;
+    tb.bodyEl.scrollTop = tb.bodyEl.scrollHeight;
+    /* 思考中面板整体也跟随，避免长思考把输入框顶出视野 */
+    scrollBottom();
+  }
+
+
+  /** 思考结束（正文开始）：自动收起，摘要行可点击展开 */
+  function collapseThinking(tb: ThinkBlock) {
+    tb.root.classList.remove("expanded");
+    const label = tb.toggle.querySelector(".agent-think-label") as HTMLElement;
+    label.textContent = "已深度思考 · 点击查看";
+  }
+
+  /** 恢复历史时：直接渲染为收起态的思考块（点开可看全程） */
+  function addHistoryThink(text: string) {
+    const tb = makeThinkBlock(false);
+    tb.bodyEl.textContent = text;
+    tb.bodyEl.scrollTop = 0; /* 展开时从头可读 */
+    const label = tb.toggle.querySelector(".agent-think-label") as HTMLElement;
+    label.textContent = "已深度思考 · 点击查看";
+  }
+
+  function resetBody() {
+    body.innerHTML = NOTICE;
+  }
+
+  /** 把一段消息序列渲染成红/蓝气泡（历史恢复与刷新载入共用） */
+  function renderMessages(msgs: { role: string; content: string; thinking?: string | null }[]) {
+    for (const m of msgs) {
+      if (m.role === "assistant" && m.thinking) addHistoryThink(m.thinking);
+      addMsg(m.role as "user" | "assistant", m.content);
+    }
+    scrollBottom();
+  }
+
+  function showLoginPrompt() {
+    resetBody();
+    const box = document.createElement("div");
+    box.className = "agent-login";
+    const p = document.createElement("p");
+    p.textContent = "登录 jAccount 后即可使用智能助手";
+    const a = document.createElement("a");
+    a.className = "agent-btn-primary";
+    a.href = `/api/auth/login?redirect=${encodeURIComponent(location.pathname + location.search)}`;
+    a.textContent = "去登录";
+    box.append(p, a);
+    body.appendChild(box);
+  }
+
+  /* ---------- 打开 / 关闭 ---------- */
+
+  async function openPanel() {
+    panel.hidden = false;
+    fab.setAttribute("aria-label", "收起智能助手");
+    if (!ready) {
+      /* 直接探测历史接口：200 = 已登录或服务端开了匿名模式；401 = 需要登录 */
+      try {
+        const res = await fetch("/api/agent/history");
+        if (res.status === 401) {
+          showLoginPrompt();
+          return;
+        }
+        ready = true;
+        /* 打开面板默认接续最近一场对话（若有）；想换话题走「历史对话」按钮 */
+        if (currentSessionId === null) await loadLatestSession();
+      } catch {
+        ready = true; /* 网络抖动不拦着，发消息时再报错 */
+      }
+    }
+    input.focus();
+  }
+
+  /** 载入最近一场对话（打开面板时自动续上） */
+  async function loadLatestSession() {
+    try {
+      const res = await fetch("/api/agent/sessions");
+      if (!res.ok) return;
+      const data = await res.json();
+      const sessions = data.sessions ?? [];
+      if (sessions.length === 0) return;
+      await loadSession(sessions[0].session_id, false);
+    } catch {
+      /* 网络异常时保持空白新会话即可 */
+    }
+  }
+
+  /** 恢复指定会话：完整重放该场消息（红/蓝气泡 + 思考块），并把后续提问续在场内 */
+  async function loadSession(sessionId: number, announce = true) {
+    try {
+      const res = await fetch(`/api/agent/sessions?id=${sessionId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const msgs = data.messages ?? [];
+      if (msgs.length === 0) return;
+      currentSessionId = sessionId;
+      resetBody();
+      if (announce) {
+        const sep = document.createElement("div");
+        sep.className = "agent-resume";
+        sep.textContent = "已恢复该场对话，可继续提问";
+        body.appendChild(sep);
+      }
+      renderMessages(msgs);
+    } catch {
+      addMsg("error", "恢复对话失败，请稍后重试。");
+    }
+  }
+
+  /* ---------- 历史对话列表 ---------- */
+
+  function fmtTime(ts: number): string {
+    const d = new Date(ts);
+    const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    const hm = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    return sameDay ? `今天 ${hm}` : `${d.getMonth() + 1}/${d.getDate()} ${hm}`;
+  }
+
+  async function showSessions() {
+    if (!ready) {
+      await openPanel();
+      if (!ready) return;
+    }
+    sessionsList.innerHTML = "";
+    const empty = document.createElement("p");
+    empty.className = "agent-sessions-empty";
+    empty.textContent = "正在加载历史对话…";
+    sessionsList.appendChild(empty);
+    sessionsView.hidden = false;
+    try {
+      const res = await fetch("/api/agent/sessions");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const sessions = data.sessions ?? [];
+      sessionsList.innerHTML = "";
+      if (sessions.length === 0) {
+        const p = document.createElement("p");
+        p.className = "agent-sessions-empty";
+        p.textContent = "还没有历史对话，先聊一句吧";
+        sessionsList.appendChild(p);
+        return;
+      }
+      for (const s of sessions) {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = `agent-session-item${s.session_id === currentSessionId ? " current" : ""}`;
+        item.dataset.sessionId = String(s.session_id);
+        const title = document.createElement("span");
+        title.className = "agent-session-title";
+        title.textContent = s.title || "(无提问)";
+        const meta = document.createElement("span");
+        meta.className = "agent-session-meta";
+        meta.textContent = `${fmtTime(s.last_active_at)} · ${s.message_count} 条消息`;
+        item.append(title, meta);
+        item.addEventListener("click", () => {
+          void loadSession(s.session_id);
+          sessionsView.hidden = true;
+          input.focus();
+        });
+        sessionsList.appendChild(item);
+      }
+    } catch {
+      sessionsList.innerHTML = "";
+      const p = document.createElement("p");
+      p.className = "agent-sessions-empty";
+      p.textContent = "加载失败，请稍后重试";
+      sessionsList.appendChild(p);
+    }
+  }
+
+  function hideSessions() {
+    sessionsView.hidden = true;
+  }
+
+  historyBtn.addEventListener("click", showSessions);
+  sessionsBack.addEventListener("click", () => {
+    hideSessions();
+    input.focus();
+  });
+
+  function closePanel() {
+    panel.hidden = true;
+    hideSessions();
+    fab.setAttribute("aria-label", "打开智能助手");
+  }
+
+  fab.addEventListener("click", () => (panel.hidden ? openPanel() : closePanel()));
+  closeBtn.addEventListener("click", closePanel);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !panel.hidden) closePanel();
+  });
+
+  /* ---------- 重新开始 ---------- */
+
+  clearBtn.addEventListener("click", async () => {
+    if (!ready) return;
+    if (currentSessionId !== null) {
+      /* 正在某场对话中：回到全新会话（原对话保留，可从「历史对话」再进入） */
+      if (!confirm("开始一段新对话吗？当前对话会保留在「历史对话」里。")) return;
+      currentSessionId = null;
+      resetBody();
+      addMsg("status", "已开始新对话。");
+    } else {
+      /* 已在新会话：二次确认后清空全部历史记录 */
+      if (!confirm("当前是新对话。要清除你在这个助手中的全部历史记录吗？")) return;
+      try {
+        await fetch("/api/agent/history", { method: "DELETE", headers: { "Content-Type": "application/json" } });
+        currentSessionId = null;
+        resetBody();
+        addMsg("status", "全部对话记录已清除。");
+      } catch {
+        addMsg("error", "清除失败，请稍后重试。");
+      }
+    }
+  });
+
+  /* ---------- 输入 ---------- */
+
+  function autoGrow() {
+    input.style.height = "auto";
+    input.style.height = `${Math.min(input.scrollHeight, 110)}px`;
+  }
+  input.addEventListener("input", autoGrow);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  });
+  sendBtn.addEventListener("click", send);
+
+  function setStreaming(on: boolean) {
+    streaming = on;
+    sendBtn.disabled = on;
+    input.disabled = on;
+  }
+
+  async function send() {
+    const text = input.value.trim();
+    if (!text || streaming) return;
+    if (!ready) {
+      await openPanel();
+      if (!ready) return;
+    }
+    input.value = "";
+    autoGrow();
+    addMsg("user", text);
+
+    setStreaming(true);
+    let bubble: HTMLElement | null = null;
+    let status: HTMLElement | null = null;
+    let think: ThinkBlock | null = null;
+    let thinkingDone = false;
+    let acc = "";
+    try {
+      const res = await fetch("/api/agent/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, sessionId: currentSessionId ?? undefined }),
+      });
+      if (res.status === 401) {
+        ready = false;
+        addMsg("error", "登录已过期，请重新登录后使用。");
+        showLoginPrompt();
+        return;
+      }
+      if (res.status === 429) {
+        addMsg("error", "提问太频繁啦，请一小时后再试。");
+        return;
+      }
+      if (!res.ok || !res.body) {
+        addMsg("error", "服务暂不可用，请稍后再试。");
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const parts = buf.split("\n\n");
+        buf = parts.pop() ?? "";
+        for (const part of parts) {
+          const line = part.split("\n").find((l) => l.startsWith("data: "));
+          if (!line) continue;
+          let ev: any;
+          try {
+            ev = JSON.parse(line.slice(6));
+          } catch {
+            continue;
+          }
+          if (ev.type === "session") {
+            /* 服务端分配/确认本场会话 id，后续刷新或恢复时按此归场 */
+            if (typeof ev.sessionId === "number") currentSessionId = ev.sessionId;
+          } else if (ev.type === "thinking") {
+            /* 思考流：懒建折叠块，正文出现前保持展开滚动 */
+            if (!think) think = makeThinkBlock(true);
+            appendThinking(think, ev.text);
+          } else if (ev.type === "delta") {
+            /* 第一个正文 token 到达：收起思考块 */
+            if (think && !thinkingDone) {
+              collapseThinking(think);
+              thinkingDone = true;
+            }
+            acc += ev.text;
+            if (status) {
+              status.remove();
+              status = null;
+            }
+            if (!bubble) bubble = addMsg("assistant", "");
+            bubble.innerHTML = renderRich(acc);
+            scrollBottom();
+          } else if (ev.type === "tool") {
+            if (!status) status = addMsg("status", "正在检索课程库…");
+          } else if (ev.type === "error") {
+            addMsg("error", ev.message ?? "出错了，请稍后重试。");
+          }
+        }
+      }
+    } catch {
+      addMsg("error", "网络异常，请稍后重试。");
+    } finally {
+      if (think && !thinkingDone) collapseThinking(think); /* 无正文（异常）也收起 */
+      if (status) status.remove();
+      setStreaming(false);
+      input.focus();
+    }
+  }
+</script>

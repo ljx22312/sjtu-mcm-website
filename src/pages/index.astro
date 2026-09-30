@@ -1,0 +1,303 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import newsData from "../data/news.json";
+import compsData from "../data/competitions.json";
+import {
+  sortNews,
+  recentCompetitions,
+  tierLabels,
+  statusLabels,
+  type NewsItem,
+  type Competition,
+} from "../lib/data";
+
+const news = sortNews(newsData.items as NewsItem[]).slice(0, 3);
+const upcoming = recentCompetitions(compsData.competitions as Competition[]);
+const nowMonth = new Date().getMonth() + 1;
+
+const entries = [
+  {
+    href: "/knowledge",
+    title: "知识库",
+    desc: "国赛、美赛两张集训大表共 106 条课程记录，含回放与课件索引",
+  },
+  {
+    href: "/ai-tools",
+    title: "数模 AI 工具",
+    desc: "文献调研、论文配图、数据图、论文写作四个自研 Skill",
+  },
+  {
+    href: "/calendar",
+    title: "赛事日历",
+    desc: "全年 16 项数模赛事时间轴：美赛、国赛、研赛、校内赛与练兵赛",
+  },
+  {
+    href: "/join",
+    title: "集训队报名",
+    desc: "美赛/国赛集训队招募信息与报名入口（开放时启用）",
+  },
+];
+
+const categoryLabels: Record<string, string> = {
+  award: "喜报",
+  notice: "通知",
+  activity: "动态",
+};
+const categoryBadge: Record<string, string> = {
+  award: "badge-red",
+  notice: "badge-blue",
+  activity: "badge-gray",
+};
+---
+
+<BaseLayout title="首页">
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-text">
+      <img src="/images/img06.jpg" alt="上海交通大学数学建模协会会徽" class="hero-logo" />
+      <h1>上海交通大学数学建模协会</h1>
+      <p class="slogan">服务全体交大学生的数学建模学习、训练与参赛平台</p>
+      <p class="hero-desc">
+        由数学科学学院与学生创新中心共同组织的科创类协会，首批上海市学生科技创新社团，
+        为对数学建模感兴趣的同学提供基础学习、技能提高和组队参赛的平台。
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="/about">了解协会</a>
+        <a class="btn btn-outline" href="/calendar">查看赛事日历</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 荣誉数字条 -->
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-num">2018</div>
+      <div class="stat-label">协会成立年份</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">首批</div>
+      <div class="stat-label">上海市学生科技创新社团（交大两个入选社团之一）</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">77%</div>
+      <div class="stat-label">2024 美赛集训队获奖率（赛事平均的 2.6 倍）</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">85<span class="stat-unit">讲</span></div>
+      <div class="stat-label">国赛 + 美赛集训课程体系</div>
+    </div>
+  </section>
+
+  <!-- 近期赛事 -->
+  <section class="section">
+    <h2 class="section-title">近期赛事 <small>{nowMonth} 月前后各两个月窗口 · 完整安排见赛事日历</small></h2>
+    <div class="grid grid-3">
+      {upcoming.map((c) => (
+        <article class="card comp-card">
+          <div class="comp-head">
+            <h3>{c.name}</h3>
+            <span class={`badge ${c.tier === "core" ? "badge-red" : c.tier === "research" ? "badge-gold" : "badge-blue"}`}>
+              {tierLabels[c.tier] ?? c.tier}
+            </span>
+          </div>
+          <p class="muted">{c.level}{c.status !== "normal" ? ` · ${statusLabels[c.status]}` : ""}</p>
+          <dl class="comp-meta">
+            <div><dt>报名窗口</dt><dd>{c.reg_window}</dd></div>
+            <div><dt>比赛窗口</dt><dd>{c.contest_window}</dd></div>
+          </dl>
+          <a href="/calendar" class="more-link">查看详情 →</a>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 最新新闻 -->
+  <section class="section">
+    <h2 class="section-title">最新新闻 <small><a href="/news">全部新闻 →</a></small></h2>
+    <div class="grid grid-3">
+      {news.map((n) => (
+        <article class="card news-card">
+          <div class="news-meta">
+            <time datetime={n.date}>{n.date}</time>
+            <span class={`badge ${categoryBadge[n.category]}`}>{categoryLabels[n.category]}</span>
+            {n.pinned && <span class="badge badge-red">置顶</span>}
+          </div>
+          <h3>{n.title}</h3>
+          <p class="muted">{n.summary}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 四大入口 -->
+  <section class="section">
+    <h2 class="section-title">快速入口</h2>
+    <div class="grid grid-4">
+      {entries.map((e) => (
+        <a href={e.href} class="card entry-card">
+          <h3>{e.title}</h3>
+          <p class="muted">{e.desc}</p>
+          <span class="more-link">进入 →</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    display: flex;
+    padding: 40px 0 24px;
+  }
+
+  .hero-text {
+    max-width: 760px;
+  }
+
+  .hero-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-size: 2.2rem;
+    margin: 0 0 8px;
+    color: var(--blue-dark);
+  }
+
+  .slogan {
+    font-size: 1.15rem;
+    color: var(--red);
+    font-weight: 600;
+    margin: 0 0 12px;
+  }
+
+  .hero-desc {
+    color: var(--text-light);
+    margin: 0 0 24px;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .stat-num {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--red);
+  }
+
+  .stat-unit {
+    font-size: 1rem;
+    margin-left: 2px;
+  }
+
+  .stat-label {
+    font-size: 0.88rem;
+    color: var(--text-light);
+  }
+
+  .comp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .comp-card h3 {
+    margin: 0 0 4px;
+    font-size: 1.08rem;
+  }
+
+  .comp-meta {
+    margin: 12px 0;
+    display: grid;
+    gap: 8px;
+    font-size: 0.9rem;
+  }
+
+  .comp-meta div {
+    display: flex;
+    gap: 8px;
+  }
+
+  .comp-meta dt {
+    color: var(--text-light);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .comp-meta dt::after {
+    content: "：";
+  }
+
+  .comp-meta dd {
+    margin: 0;
+  }
+
+  .more-link {
+    font-size: 0.9rem;
+  }
+
+  .news-card h3 {
+    margin: 8px 0;
+    font-size: 1.05rem;
+  }
+
+  .news-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+
+  .entry-card {
+    color: var(--text);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .entry-card:hover {
+    text-decoration: none;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+
+  .entry-card h3 {
+    margin: 0 0 8px;
+    color: var(--blue-dark);
+  }
+
+  @media (max-width: 900px) {
+    .stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero h1 {
+      font-size: 1.6rem;
+    }
+
+    .hero-logo {
+      width: 88px;
+      height: 88px;
+    }
+  }
+</style>

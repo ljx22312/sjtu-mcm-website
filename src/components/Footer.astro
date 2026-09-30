@@ -1,0 +1,89 @@
+---
+import { siteName, email, wechat, friendLinks } from "../config";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-col footer-brand">
+      <p class="footer-title">© {year} {siteName}</p>
+      <p class="muted">指导单位：数学科学学院、学生创新中心</p>
+      <p class="muted">公众号：{wechat} ｜ 邮箱：<a href={`mailto:${email}`}>{email}</a></p>
+    </div>
+    <div class="footer-col">
+      <p class="footer-heading">友情链接</p>
+      <ul>
+        {friendLinks.map((link) => (
+          <li><a href={link.url} target="_blank" rel="noopener noreferrer">{link.name}</a></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span class="muted">沪ICP备XXXXXXXX号</span>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: #22304a;
+    color: #d7dce5;
+    margin-top: 64px;
+    padding: 40px 0 20px;
+    font-size: 0.92rem;
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: space-between;
+  }
+
+  .footer-title {
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 6px;
+  }
+
+  .footer-heading {
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 8px;
+  }
+
+  .site-footer a {
+    color: #b9c8e2;
+  }
+
+  .site-footer a:hover {
+    color: #fff;
+  }
+
+  .site-footer .muted {
+    color: #9aa5b8;
+    margin: 4px 0;
+  }
+
+  .footer-col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .footer-col li {
+    margin: 4px 0;
+  }
+
+  .footer-bottom {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .footer-bottom .muted {
+    color: #8b96a9;
+    font-size: 0.85rem;
+  }
+</style>
