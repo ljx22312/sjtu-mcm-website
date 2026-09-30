@@ -33,21 +33,127 @@ interface TrackDoc {
   items: CourseItem[];
 }
 
+/** 系列课合并后的单集 */
+interface Episode {
+  episode: number;
+  course_id: string;
+  stage: string;
+  intro: string;
+  resources: Resource[];
+}
+
+/** 展示层条目：普通课程 / 系列课（合并为一行）/ 正式比赛时间线节点 */
+interface DisplayItem {
+  kind: "course" | "series" | "milestone";
+  module: string;
+  course_id: string;
+  topic: string;
+  format: string;
+  format_detail: string[];
+  intro: string;
+  contact: string;
+  no_playback: boolean;
+  resources: Resource[];
+  /** series：全部分集 */
+  episodes?: Episode[];
+}
+
 interface Track {
   key: string;
   label: string;
   doc: TrackDoc;
+  items: DisplayItem[];
+  modules: { name: string; count: number }[];
 }
 
-const tracks: Track[] = [
+/**
+ * 源数据 → 展示条目：
+ * - 同名 series 的连续行合并为一条，分集收入 episodes（表格里 31 行「第N集」刷屏的根治）
+ * - 「正式比赛」模块标记为 milestone，走时间线渲染，日期全文可见不被截断
+ */
+/**
+ * 系列首集（如 MCMA23-1）在源数据里没有 series/episode 字段（采集时只给续行打标），
+ * 先回填：某行 topic 与紧随其后行的 series 同名且同模块 → 它是该系列第 1 集。
+ */
+function backfillSeries(items: CourseItem[]): CourseItem[] {
+  const out = items.map((it) => ({ ...it }));
+  for (let i = 0; i < out.length; i++) {
+    const cur = out[i];
+    if (cur.module === "正式比赛" || cur.series) continue;
+    const next = out[i + 1];
+    if (next?.series && next.series === cur.topic && next.module === cur.module) {
+      cur.series = cur.topic;
+      cur.episode = 1;
+    }
+  }
+  return out;
+}
+
+function buildDisplay(doc: TrackDoc): DisplayItem[] {
+  const out: DisplayItem[] = [];
+  for (const it of backfillSeries(doc.items)) {
+    if (it.module === "正式比赛") {
+      out.push({
+        kind: "milestone", module: it.module, course_id: it.course_id,
+        topic: it.topic, format: it.format, format_detail: it.format_detail,
+        intro: it.intro, contact: it.contact, no_playback: it.no_playback,
+        resources: it.resources,
+      });
+      continue;
+    }
+    if (it.series) {
+      const ep: Episode = {
+        episode: it.episode ?? 0,
+        course_id: it.course_id,
+        stage: it.format,
+        intro: it.intro,
+        resources: it.resources,
+      };
+      const last = out[out.length - 1];
+      if (last && last.kind === "series" && last.topic === it.series) {
+        last.episodes!.push(ep);
+        continue;
+      }
+      out.push({
+        kind: "series", module: it.module, course_id: it.course_id,
+        topic: it.series, format: "", format_detail: it.format_detail,
+        intro: it.intro, contact: it.contact, no_playback: it.no_playback,
+        // 行上只挂系列级材料（文档/附件）；每集的「回放」留在分集列表里
+        resources: it.resources.filter((r) => r.name !== "回放"),
+        episodes: [ep],
+      });
+      continue;
+    }
+    out.push({
+      kind: "course", module: it.module, course_id: it.course_id,
+      topic: it.topic, format: it.format, format_detail: it.format_detail,
+      intro: it.intro, contact: it.contact, no_playback: it.no_playback,
+      resources: it.resources,
+    });
+  }
+  return out;
+}
+
+function withDisplayCounts(doc: TrackDoc, items: DisplayItem[]) {
+  const counts = new Map<string, number>();
+  for (const it of items) counts.set(it.module, (counts.get(it.module) ?? 0) + 1);
+  return doc.modules.map((m) => ({ name: m.name, count: counts.get(m.name) ?? m.count }));
+}
+
+const trackDocs: { key: string; label: string; doc: TrackDoc }[] = [
   { key: "cumcm", label: "2026 国赛集训", doc: cumcmData as unknown as TrackDoc },
   { key: "mcm", label: "2026 美赛集训", doc: mcmData as unknown as TrackDoc },
 ];
 
+const tracks: Track[] = trackDocs.map((t) => {
+  const items = buildDisplay(t.doc);
+  return { ...t, items, modules: withDisplayCounts(t.doc, items) };
+});
+
 /** 按原表顺序（模块列纵向合并）聚成分组 */
-function groupsOf(doc: TrackDoc) {
-  const groups: { name: string; items: CourseItem[] }[] = [];
-  for (const it of doc.items) {
+function groupsOf(items: DisplayItem[]) {
+  const groups: { name: string; items: DisplayItem[] }[] = [];
+  for (const it of items) {
     if (!groups.length || groups[groups.length - 1].name !== it.module) {
       groups.push({ name: it.module, items: [] });
     }
@@ -56,23 +162,27 @@ function groupsOf(doc: TrackDoc) {
   return groups;
 }
 
-function displayTopic(it: CourseItem): string {
-  return it.topic || (it.episode ? `第 ${it.episode} 集` : "—");
+/** 系列课行的形式列 */
+function seriesFormat(it: DisplayItem): string {
+  return `${it.episodes!.length} 集系列`;
 }
 
-function searchText(it: CourseItem): string {
-  return [
+function searchText(it: DisplayItem): string {
+  const parts = [
     it.module,
     it.course_id,
     it.topic,
-    it.series ?? "",
     it.intro,
     it.contact,
     it.format,
     ...it.resources.map((r) => r.name),
-  ]
-    .join(" ")
-    .toLowerCase();
+  ];
+  if (it.episodes) {
+    for (const ep of it.episodes) {
+      parts.push(ep.course_id, ep.stage, ep.intro, ...ep.resources.map((r) => r.name));
+    }
+  }
+  return parts.filter(Boolean).join(" ").toLowerCase();
 }
 ---
 
@@ -81,21 +191,20 @@ function searchText(it: CourseItem): string {
   <p class="page-subtitle">两次集训的完整课程大表，与协会飞书集训表同构：按模块分组，支持搜索与筛选。</p>
 
   <div class="notice-bar">
-    数据整理自协会飞书<strong>集训大表</strong>；课件原件与飞书回放<strong>仅协会成员可见</strong>，
-    入队后即可获取。点击任意一行可展开完整介绍与全部资料。
+    整理自协会飞书<strong>集训大表</strong>；课件与回放<strong>仅协会成员可见</strong>，入队后即可获取。点击行可展开完整介绍与分集列表。
   </div>
 
   <!-- 集训批次 tab（对应两张飞书大表） -->
   <div class="tabs" id="track-tabs">
     {tracks.map((t, i) => (
       <button class:list={["tab", { active: i === 0 }]} data-track={t.key}>
-        {t.label} <span class="tab-count">{t.doc.items.length} 条</span>
+        {t.label} <span class="tab-count">{t.items.length} 条</span>
       </button>
     ))}
   </div>
 
   {tracks.map((t, i) => {
-    const groups = groupsOf(t.doc);
+    const groups = groupsOf(t.items);
     return (
       <section class="track-panel" data-track-panel={t.key} hidden={i !== 0}>
         <!-- 工具栏：搜索 + 模块筛选 + 计数 -->
@@ -103,19 +212,19 @@ function searchText(it: CourseItem): string {
           <input
             class="kb-search"
             type="search"
-            placeholder="搜索课程 / 编号 / 联络人 / 关键词…"
+            placeholder="搜索课程 / 编号 / 关键词，可多词（空格分隔）…"
             aria-label="搜索课程"
           />
           <div class="kb-chips">
             <button class="chip active" data-module="">全部模块</button>
-            {t.doc.modules.map((m) => (
+            {t.modules.map((m) => (
               <button class="chip" data-module={m.name}>
                 {m.name}<span class="chip-cnt">{m.count}</span>
               </button>
             ))}
           </div>
           <span class="kb-count muted">
-            显示 <b class="kb-count-num">{t.doc.items.length}</b> / {t.doc.items.length} 条
+            显示 <b class="kb-count-num">{t.items.length}</b> / {t.items.length} 条
           </span>
         </div>
 
@@ -143,79 +252,118 @@ function searchText(it: CourseItem): string {
                       {g.name === "赛题实战" && <span class="badge badge-gold">模拟实战</span>}
                     </td>
                   </tr>
-                  {g.items.map((it) => (
-                    <>
-                      <tr
-                        class="kb-row"
-                        data-module={it.module}
-                        data-group={gi}
-                        data-search={searchText(it)}
-                        tabindex="0"
-                        aria-expanded="false"
-                      >
-                        <td class="c-id">{it.course_id || "·"}</td>
-                        <td class="c-topic">
-                          {displayTopic(it)}
-                          {it.series && <span class="badge badge-gray series-badge">系列课</span>}
-                        </td>
-                        <td class="c-fmt">{it.format || "—"}</td>
-                        <td class="c-intro">
-                          {it.intro ? <span>{it.intro}</span> : <span class="muted">—</span>}
-                        </td>
-                        <td class="c-ct">{it.contact || "—"}</td>
-                        <td class="c-res">
-                          <div class="c-res-inner">
-                          {it.resources.map((r) => (
-                            r.url ? (
-                              <a class="res-link" href={r.url} target="_blank" rel="noopener noreferrer" title={r.name}>↗ {r.name}</a>
-                            ) : r.type === "attachment" ? (
-                              <span class="res-att" title="飞书附件 · 仅协会成员可见">📎 {r.name}</span>
-                            ) : (
-                              <span class="res-doc" title="飞书文档/材料 · 仅协会成员可见">{r.name}</span>
-                            )
+
+                  {/* 正式比赛：时间线渲染，日期全文可见（原先放介绍列会被两行截断） */}
+                  {g.name === "正式比赛" ? (
+                    <tr class="kb-timeline kb-filter" data-group={gi} data-module={g.name} data-search={g.items.map(searchText).join(" ")}>
+                      <td colspan={6}>
+                        <ul class="tl">
+                          {g.items.map((m) => (
+                            <li class="tl-item">
+                              <div class="tl-body">
+                                <span class="tl-title">{m.topic}</span>
+                                <span class="tl-time">{m.intro}</span>
+                              </div>
+                            </li>
                           ))}
-                          {it.resources.length === 0 && (it.no_playback
-                            ? <span class="muted noplay">无回放</span>
-                            : <span class="muted">—</span>)}
-                          </div>
-                        </td>
-                      </tr>
-                      <tr class="kb-detail" hidden>
-                        <td colspan={6}>
-                          <div class="detail-grid">
-                            {it.series && (
-                              <div class="d-row"><span class="d-dt">系列</span><span class="d-dd">{it.series}{it.episode ? `（第 ${it.episode} 集）` : ""}</span></div>
+                        </ul>
+                      </td>
+                    </tr>
+                  ) : (
+                    g.items.map((it) => (
+                      <>
+                        <tr
+                          class="kb-row kb-filter"
+                          data-module={it.module}
+                          data-group={gi}
+                          data-search={searchText(it)}
+                          tabindex="0"
+                          aria-expanded="false"
+                        >
+                          <td class="c-id">{it.course_id || "·"}</td>
+                          <td class="c-topic">
+                            {it.topic}
+                            {it.kind === "series" && (
+                              <span class="badge badge-gray series-badge">{it.episodes!.length} 集</span>
                             )}
-                            {(it.format || it.format_detail.length > 0) && (
-                              <div class="d-row">
-                                <span class="d-dt">形式与安排</span>
-                                <span class="d-dd">{[it.format, ...it.format_detail].filter(Boolean).join("；")}</span>
-                              </div>
-                            )}
-                            {it.intro && <div class="d-row"><span class="d-dt">课程介绍</span><span class="d-dd">{it.intro}</span></div>}
-                            {it.contact && <div class="d-row"><span class="d-dt">联络人</span><span class="d-dd">{it.contact}</span></div>}
-                            {it.resources.length > 0 && (
-                              <div class="d-row">
-                                <span class="d-dt">资料与回放</span>
-                                <span class="d-dd d-res">
-                                  {it.resources.map((r) => (
-                                    r.url ? (
-                                      <a href={r.url} target="_blank" rel="noopener noreferrer">↗ {r.name}</a>
-                                    ) : r.type === "attachment" ? (
-                                      <span title="飞书附件 · 仅协会成员可见">📎 {r.name}</span>
-                                    ) : (
-                                      <span title="飞书文档/材料 · 仅协会成员可见">📄 {r.name}</span>
-                                    )
-                                  ))}
-                                </span>
-                              </div>
-                            )}
-                            {it.no_playback && <div class="d-row"><span class="d-dt">回放</span><span class="d-dd muted">无回放</span></div>}
-                          </div>
-                        </td>
-                      </tr>
-                    </>
-                  ))}
+                          </td>
+                          <td class="c-fmt">{it.kind === "series" ? seriesFormat(it) : it.format || "—"}</td>
+                          <td class="c-intro">
+                            {it.intro ? <span>{it.intro}</span> : <span class="muted">—</span>}
+                          </td>
+                          <td class="c-ct">{it.contact || "—"}</td>
+                          <td class="c-res">
+                            <div class="c-res-inner">
+                              {it.resources.map((r) => (
+                                r.url ? (
+                                  <a class="res-link" href={r.url} target="_blank" rel="noopener noreferrer" title={r.name}>↗ {r.name}</a>
+                                ) : r.type === "attachment" ? (
+                                  <span class="res-att" title="飞书附件 · 仅协会成员可见">📎 {r.name}</span>
+                                ) : (
+                                  <span class="res-doc" title="飞书文档/材料 · 仅协会成员可见">{r.name}</span>
+                                )
+                              ))}
+                              {it.kind === "series" && (
+                                <span class="res-ep-hint">每集回放见展开</span>
+                              )}
+                              {it.resources.length === 0 && it.kind !== "series" && (it.no_playback
+                                ? <span class="muted noplay">无回放</span>
+                                : <span class="muted">—</span>)}
+                            </div>
+                          </td>
+                        </tr>
+                        <tr class="kb-detail" hidden>
+                          <td colspan={6}>
+                            <div class="detail-grid">
+                              {(it.format || it.format_detail.length > 0) && (
+                                <div class="d-row">
+                                  <span class="d-dt">形式与安排</span>
+                                  <span class="d-dd">{[it.format, ...it.format_detail].filter(Boolean).join("；")}</span>
+                                </div>
+                              )}
+                              {it.intro && <div class="d-row"><span class="d-dt">课程介绍</span><span class="d-dd">{it.intro}</span></div>}
+                              {it.contact && <div class="d-row"><span class="d-dt">联络人</span><span class="d-dd">{it.contact}</span></div>}
+                              {it.resources.length > 0 && (
+                                <div class="d-row">
+                                  <span class="d-dt">资料</span>
+                                  <span class="d-dd d-res">
+                                    {it.resources.map((r) => (
+                                      r.url ? (
+                                        <a href={r.url} target="_blank" rel="noopener noreferrer">↗ {r.name}</a>
+                                      ) : r.type === "attachment" ? (
+                                        <span title="飞书附件 · 仅协会成员可见">📎 {r.name}</span>
+                                      ) : (
+                                        <span title="飞书文档/材料 · 仅协会成员可见">📄 {r.name}</span>
+                                      )
+                                    ))}
+                                  </span>
+                                </div>
+                              )}
+                              {it.kind === "series" && (
+                                <div class="d-row">
+                                  <span class="d-dt">分集</span>
+                                  <ol class="ep-list">
+                                    {it.episodes!.map((ep) => (
+                                      <li>
+                                        <span class="ep-head">
+                                          第 {ep.episode} 集{ep.stage ? ` · ${ep.stage}` : ""}
+                                        </span>
+                                        {ep.intro && <span class="ep-intro">{ep.intro}</span>}
+                                        {ep.resources.filter((r) => r.url).map((r) => (
+                                          <a href={r.url} target="_blank" rel="noopener noreferrer">↗ {r.name}</a>
+                                        ))}
+                                      </li>
+                                    ))}
+                                  </ol>
+                                </div>
+                              )}
+                              {it.no_playback && <div class="d-row"><span class="d-dt">回放</span><span class="d-dd muted">无回放</span></div>}
+                            </div>
+                          </td>
+                        </tr>
+                      </>
+                    ))
+                  )}
                 </>
               ))}
               <tr class="kb-empty" hidden><td colspan={6}>没有匹配的条目，换个关键词试试。</td></tr>
@@ -223,43 +371,86 @@ function searchText(it: CourseItem): string {
           </table>
         </div>
 
-        <!-- 移动端：卡片（原生 details，无 JS 也可展开） -->
+        <!-- 移动端：卡片（原生 details，无 JS 也可展开），带模块分组标题 -->
         <div class="kb-cards">
-          {t.doc.items.map((it) => (
-            <details class="kb-card" data-module={it.module} data-search={searchText(it)}>
-              <summary>
-                <span class="kb-card-id">{it.course_id || "·"}</span>
-                <span class="kb-card-topic">{displayTopic(it)}</span>
-                {it.resources.some((r) => r.url) ? (
-                  <span class="kb-card-links">↗ {it.resources.filter((r) => r.url).length}</span>
-                ) : it.resources.length > 0 ? (
-                  <span class="kb-card-atts">📎 {it.resources.length}</span>
-                ) : null}
-                <span class="kb-card-fmt">{it.format}</span>
-              </summary>
-              <div class="kb-card-body">
-                {it.series && <p class="muted">系列：{it.series}{it.episode ? `（第 ${it.episode} 集）` : ""}</p>}
-                {(it.format || it.format_detail.length > 0) && (
-                  <p class="muted">形式与安排：{[it.format, ...it.format_detail].filter(Boolean).join("；")}</p>
-                )}
-                {it.intro && <p>{it.intro}</p>}
-                {it.contact && <p class="muted">联络人：{it.contact}</p>}
-                {it.resources.length > 0 && (
-                  <p class="kb-card-res">
-                    {it.resources.map((r) => (
-                      r.url ? (
-                        <a href={r.url} target="_blank" rel="noopener noreferrer">↗ {r.name}</a>
-                      ) : r.type === "attachment" ? (
-                        <span title="飞书附件 · 仅协会成员可见">📎 {r.name}</span>
-                      ) : (
-                        <span title="飞书文档/材料 · 仅协会成员可见">📄 {r.name}</span>
-                      )
-                    ))}
-                  </p>
-                )}
-                {it.no_playback && <p class="muted">无回放</p>}
-              </div>
-            </details>
+          {groups.map((g, gi) => (
+            <>
+              <p class="kb-group-label" data-group-label={gi}>
+                {g.name} <span>{g.items.length} 条</span>
+              </p>
+              {g.name === "正式比赛" ? (
+                <details class="kb-card kb-filter-card" data-module={g.name} data-group={gi} data-search={g.items.map(searchText).join(" ")}>
+                  <summary>
+                    <span class="kb-card-topic">正式比赛 · 赛程时间线</span>
+                  </summary>
+                  <div class="kb-card-body">
+                    <ul class="tl">
+                      {g.items.map((m) => (
+                        <li class="tl-item">
+                          <div class="tl-body">
+                            <span class="tl-title">{m.topic}</span>
+                            <span class="tl-time">{m.intro}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </details>
+              ) : (
+                g.items.map((it) => (
+                  <details class="kb-card kb-filter-card" data-module={it.module} data-group={gi} data-search={searchText(it)}>
+                    <summary>
+                      <span class="kb-card-id">{it.course_id || "·"}</span>
+                      <span class="kb-card-topic">{it.topic}</span>
+                      {it.kind === "series" ? (
+                        <span class="kb-card-links">{it.episodes!.length} 集</span>
+                      ) : it.resources.some((r) => r.url) ? (
+                        <span class="kb-card-links">↗ {it.resources.filter((r) => r.url).length}</span>
+                      ) : it.resources.length > 0 ? (
+                        <span class="kb-card-atts">📎 {it.resources.length}</span>
+                      ) : null}
+                      <span class="kb-card-fmt">{it.kind === "series" ? seriesFormat(it) : it.format}</span>
+                    </summary>
+                    <div class="kb-card-body">
+                      {(it.format || it.format_detail.length > 0) && (
+                        <p class="muted">形式与安排：{[it.format, ...it.format_detail].filter(Boolean).join("；")}</p>
+                      )}
+                      {it.intro && <p>{it.intro}</p>}
+                      {it.contact && <p class="muted">联络人：{it.contact}</p>}
+                      {it.resources.length > 0 && (
+                        <p class="kb-card-res">
+                          {it.resources.map((r) => (
+                            r.url ? (
+                              <a href={r.url} target="_blank" rel="noopener noreferrer">↗ {r.name}</a>
+                            ) : r.type === "attachment" ? (
+                              <span title="飞书附件 · 仅协会成员可见">📎 {r.name}</span>
+                            ) : (
+                              <span title="飞书文档/材料 · 仅协会成员可见">📄 {r.name}</span>
+                            )
+                          ))}
+                        </p>
+                      )}
+                      {it.kind === "series" && (
+                        <ol class="ep-list">
+                          {it.episodes!.map((ep) => (
+                            <li>
+                              <span class="ep-head">
+                                第 {ep.episode} 集{ep.stage ? ` · ${ep.stage}` : ""}
+                              </span>
+                              {ep.intro && <span class="ep-intro">{ep.intro}</span>}
+                              {ep.resources.filter((r) => r.url).map((r) => (
+                                <a href={r.url} target="_blank" rel="noopener noreferrer">↗ {r.name}</a>
+                              ))}
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+                      {it.no_playback && <p class="muted">无回放</p>}
+                    </div>
+                  </details>
+                ))
+              )}
+            </>
           ))}
           <p class="kb-empty-cards muted" hidden>没有匹配的条目，换个关键词试试。</p>
         </div>
@@ -276,9 +467,11 @@ function searchText(it: CourseItem): string {
     const panels = document.querySelectorAll<HTMLElement>("[data-track-panel]");
 
     function setupPanel(panel: HTMLElement) {
-      const rows = Array.from(panel.querySelectorAll<HTMLElement>(".kb-row"));
-      const cards = Array.from(panel.querySelectorAll<HTMLElement>(".kb-card"));
+      // 表格侧可过滤元素：课程/系列行 + 正式比赛时间线行
+      const filterEls = Array.from(panel.querySelectorAll<HTMLElement>(".kb-filter"));
+      const cards = Array.from(panel.querySelectorAll<HTMLElement>(".kb-filter-card"));
       const groupRows = Array.from(panel.querySelectorAll<HTMLElement>(".kb-group"));
+      const groupLabels = Array.from(panel.querySelectorAll<HTMLElement>("[data-group-label]"));
       const search = panel.querySelector<HTMLInputElement>(".kb-search")!;
       const chips = Array.from(panel.querySelectorAll<HTMLElement>(".kb-chips .chip"));
       const countNum = panel.querySelector<HTMLElement>(".kb-count-num")!;
@@ -287,50 +480,65 @@ function searchText(it: CourseItem): string {
       const cardsWrap = panel.querySelector<HTMLElement>(".kb-cards");
       let module = "";
 
+      // 多词搜索：空格分词，每个词都要命中
+      function tokens(): string[] {
+        return search.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      }
+
       function applyFilter() {
-        const q = search.value.trim().toLowerCase();
+        const ts = tokens();
         const match = (el: HTMLElement) =>
           (!module || el.dataset.module === module) &&
-          (!q || (el.dataset.search ?? "").includes(q));
+          (ts.length === 0 || ts.every((t) => (el.dataset.search ?? "").includes(t)));
 
-        // row 与 card 是同一条数据的两套渲染，各自应用显隐并分别计数（每条数据只计一次）
-        let rowVisible = 0;
-        const groupVisible = new Map<number, number>(); // 分组行只存在于表格侧
-        for (const el of rows) {
+        let tableVisible = 0;
+        const groupVisible = new Map<number, number>();
+        for (const el of filterEls) {
           const ok = match(el);
           el.style.display = ok ? "" : "none";
-          const next = el.nextElementSibling as HTMLElement | null;
-          if (!ok && next?.classList.contains("kb-detail")) next.hidden = true;
-          el.setAttribute("aria-expanded", "false");
           if (ok) {
-            rowVisible++;
+            tableVisible++;
             const gi = Number(el.dataset.group ?? -1);
             if (gi >= 0) groupVisible.set(gi, (groupVisible.get(gi) ?? 0) + 1);
+          }
+          // 被过滤掉的展开行同时收起详情行
+          if (el.classList.contains("kb-row")) {
+            const next = el.nextElementSibling as HTMLElement | null;
+            if (!ok && next?.classList.contains("kb-detail")) next.hidden = true;
+            el.setAttribute("aria-expanded", "false");
           }
         }
 
         let cardVisible = 0;
+        const cardGroupVisible = new Map<number, number>();
         for (const el of cards) {
           const ok = match(el);
           el.style.display = ok ? "" : "none";
-          if (ok) cardVisible++;
+          if (ok) {
+            cardVisible++;
+            const gi = Number(el.dataset.group ?? -1);
+            if (gi >= 0) cardGroupVisible.set(gi, (cardGroupVisible.get(gi) ?? 0) + 1);
+          }
         }
 
         for (const gr of groupRows) {
           const n = groupVisible.get(Number(gr.dataset.group)) ?? 0;
           gr.style.display = n > 0 ? "" : "none";
         }
+        for (const gl of groupLabels) {
+          const n = cardGroupVisible.get(Number(gl.dataset.groupLabel)) ?? 0;
+          gl.style.display = n > 0 ? "" : "none";
+        }
 
         // 计数器只统计当前视口实际可见的那套渲染：移动端（≤860px）卡片容器为 grid 布局
-        const isMobile = cardsWrap ? getComputedStyle(cardsWrap).display === "grid" : rows.length === 0;
-        countNum.textContent = String(isMobile ? cardVisible : rowVisible);
-        // 空态提示各自跟随自己那套渲染：桌面在表格侧、移动在卡片侧
-        if (emptyRow) emptyRow.hidden = isMobile || rowVisible > 0;
+        const isMobile = cardsWrap ? getComputedStyle(cardsWrap).display === "grid" : filterEls.length === 0;
+        countNum.textContent = String(isMobile ? cardVisible : tableVisible);
+        if (emptyRow) emptyRow.hidden = isMobile || tableVisible > 0;
         if (emptyCards) emptyCards.hidden = !isMobile || cardVisible > 0;
       }
 
       // 行点击 / 键盘展开详情
-      rows.forEach((row) => {
+      panel.querySelectorAll<HTMLElement>(".kb-row").forEach((row) => {
         const toggle = () => {
           const detail = row.nextElementSibling as HTMLElement | null;
           if (!detail?.classList.contains("kb-detail")) return;
@@ -445,6 +653,7 @@ function searchText(it: CourseItem): string {
     font-size: 0.85rem;
     cursor: pointer;
     color: var(--text-light);
+    white-space: nowrap;
   }
 
   .chip.active {
@@ -621,6 +830,11 @@ function searchText(it: CourseItem): string {
     text-overflow: ellipsis;
   }
 
+  .res-ep-hint {
+    font-size: 0.78rem;
+    color: var(--text-light);
+  }
+
   .noplay {
     font-size: 0.82rem;
   }
@@ -666,6 +880,101 @@ function searchText(it: CourseItem): string {
     color: var(--blue);
   }
 
+  /* 系列课分集列表 */
+  .ep-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .ep-list li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: baseline;
+    font-size: 0.88rem;
+  }
+
+  .ep-head {
+    color: var(--blue-dark);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .ep-intro {
+    color: var(--text-light);
+  }
+
+  .ep-list a {
+    color: var(--blue);
+    font-size: 0.84rem;
+    white-space: nowrap;
+  }
+
+  /* ---------- 正式比赛时间线 ---------- */
+  .kb-timeline td {
+    background: #fcfdfe;
+  }
+
+  .tl {
+    margin: 0;
+    padding: 6px 4px 6px 18px;
+    list-style: none;
+    display: grid;
+    gap: 14px;
+  }
+
+  .tl-item {
+    position: relative;
+  }
+
+  .tl-item::before {
+    content: "";
+    position: absolute;
+    left: -12px;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--blue);
+  }
+
+  .tl-item::after {
+    content: "";
+    position: absolute;
+    left: -9px;
+    top: 18px;
+    bottom: -18px;
+    width: 2px;
+    background: #d3e0f0;
+  }
+
+  .tl-item:last-child::after {
+    display: none;
+  }
+
+  .tl-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    align-items: baseline;
+  }
+
+  .tl-title {
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .tl-time {
+    color: var(--text-light);
+    font-size: 0.88rem;
+    white-space: pre-line;
+  }
+
   .kb-empty td {
     text-align: center;
     color: var(--text-light);
@@ -683,6 +992,44 @@ function searchText(it: CourseItem): string {
   }
 
   @media (max-width: 860px) {
+    /* 首屏减压：副标题让位，说明条收紧 */
+    :global(.page-subtitle) {
+      display: none;
+    }
+
+    .notice-bar {
+      font-size: 0.82rem;
+      padding: 8px 12px;
+    }
+
+    .kb-toolbar {
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .kb-search {
+      flex: 1 1 100%;
+    }
+
+    /* 模块 chips 单行横滑，不再换行占三行 */
+    .kb-chips {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+
+    .kb-chips::-webkit-scrollbar {
+      display: none;
+    }
+
+    .kb-count {
+      flex-basis: 100%;
+      text-align: right;
+      margin: 2px 0 0;
+    }
+
     .kb-scroll {
       display: none;
     }
@@ -690,6 +1037,22 @@ function searchText(it: CourseItem): string {
     .kb-cards {
       display: grid;
       gap: 10px;
+      /* 给右下角 AI 悬浮按钮留出净空（按钮高 48px + 底部 20px 定位 + 余量） */
+      padding-bottom: 96px;
+    }
+
+    .kb-group-label {
+      margin: 10px 0 0;
+      font-weight: 700;
+      color: var(--blue-dark);
+      font-size: 0.9rem;
+    }
+
+    .kb-group-label span {
+      margin-left: 8px;
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--text-light);
     }
 
     .kb-card {
@@ -751,13 +1114,6 @@ function searchText(it: CourseItem): string {
       white-space: nowrap;
     }
 
-    /* 计数独占一行右对齐，避免挤进 chips 换行行尾 */
-    .kb-count {
-      flex-basis: 100%;
-      text-align: right;
-      margin: 2px 0 0;
-    }
-
     .kb-card-fmt {
       font-size: 0.8rem;
       color: var(--text-light);
@@ -782,6 +1138,10 @@ function searchText(it: CourseItem): string {
 
     .kb-card-res a {
       color: var(--blue);
+    }
+
+    .tl {
+      padding: 4px 2px 4px 16px;
     }
   }
 </style>
