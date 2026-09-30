@@ -58,33 +58,13 @@ const categoryBadge: Record<string, string> = {
       <h1>上海交通大学数学建模协会</h1>
       <p class="slogan">服务全体交大学生的数学建模学习、训练与参赛平台</p>
       <p class="hero-desc">
-        由数学科学学院与学生创新中心共同组织的科创类协会，首批上海市学生科技创新社团，
+        由数学科学学院与学生创新中心共同组织的科创类协会，
         为对数学建模感兴趣的同学提供基础学习、技能提高和组队参赛的平台。
       </p>
       <div class="hero-cta">
         <a class="btn btn-primary" href="/about">了解协会</a>
         <a class="btn btn-outline" href="/calendar">查看赛事日历</a>
       </div>
-    </div>
-  </section>
-
-  <!-- 荣誉数字条 -->
-  <section class="stats">
-    <div class="stat">
-      <div class="stat-num">2018</div>
-      <div class="stat-label">协会成立年份</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num">首批</div>
-      <div class="stat-label">上海市学生科技创新社团（交大两个入选社团之一）</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num">77%</div>
-      <div class="stat-label">2024 美赛集训队获奖率（赛事平均的 2.6 倍）</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num">85<span class="stat-unit">讲</span></div>
-      <div class="stat-label">国赛 + 美赛集训课程体系</div>
     </div>
   </section>
 
@@ -186,33 +166,6 @@ const categoryBadge: Record<string, string> = {
     flex-wrap: wrap;
   }
 
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px 24px;
-    box-shadow: var(--shadow);
-  }
-
-  .stat-num {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--red);
-  }
-
-  .stat-unit {
-    font-size: 1rem;
-    margin-left: 2px;
-  }
-
-  .stat-label {
-    font-size: 0.88rem;
-    color: var(--text-light);
-  }
-
   .comp-head {
     display: flex;
     justify-content: space-between;
@@ -282,12 +235,6 @@ const categoryBadge: Record<string, string> = {
   .entry-card h3 {
     margin: 0 0 8px;
     color: var(--blue-dark);
-  }
-
-  @media (max-width: 900px) {
-    .stats {
-      grid-template-columns: repeat(2, 1fr);
-    }
   }
 
   @media (max-width: 640px) {

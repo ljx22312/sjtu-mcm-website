@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { email, wechat, gitee, mcmPlatform } from "../config";
+import { email, wechat, mcmPlatform } from "../config";
 
 const orgStructure = [
   { role: "会长", duty: "统筹协会各项事务（由换届产生）" },
@@ -12,7 +12,7 @@ const orgStructure = [
 const activities = [
   {
     title: "竞赛集训队（核心活动）",
-    desc: "美赛/国赛前组织集训队招募与系统培训，课程按飞书集训大表体系组织（讲座、导论、模型与编程、工具与 AI、写作、经验分享、实战演示等模块，国赛、美赛共 106 条课程记录），并组织模拟赛。2024 美赛协会集训队 26 支队伍参赛，获奖率 77%（赛事平均获奖率的 2.6 倍）。",
+    desc: "美赛/国赛前组织集训队招募与系统培训，课程按飞书集训大表体系组织（讲座、导论、模型与编程、工具与 AI、写作、经验分享、实战演示等模块，国赛、美赛共 106 条课程记录），并组织模拟赛。",
   },
   {
     title: "研讨班",
@@ -48,10 +48,6 @@ const activities = [
           共同组织的科创类协会（挂靠学生创新中心数学科学学院分中心），专注于数学建模竞赛与数模知识科普。
           协会旨在服务全体交大学生，集聚了大量建模竞赛获奖选手，开发了一套成体系的建模培训资料，
           为各学科领域对数学建模感兴趣的同学提供基础学习、技能提高和组队参赛的平台。
-        </p>
-        <p>
-          2021 年，协会获评<strong>首批上海市学生科技创新社团</strong>（沪教委体〔2021〕49 号），
-          是交大两个入选社团之一。
         </p>
       </div>
     </div>
@@ -110,7 +106,6 @@ const activities = [
       <p><strong>邮箱：</strong><a href={`mailto:${email}`}>{email}</a></p>
       <p><strong>公众号：</strong>微信搜索「{wechat}」（ID: sjtumcm）</p>
       <p><strong>校内竞赛平台：</strong><a href={mcmPlatform} target="_blank" rel="noopener noreferrer">{mcmPlatform}</a></p>
-      <p><strong>Gitee 资料仓库：</strong><a href={gitee} target="_blank" rel="noopener noreferrer">{gitee}</a></p>
     </div>
   </section>
 </BaseLayout>

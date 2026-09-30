@@ -14,7 +14,6 @@ const items = newsData.items as NewsItem[];
 const coverMap: [RegExp, string][] = [
   [/校内赛/, "/images/img17.jpg"],
   [/招新啦/, "/images/img18.jpg"],
-  [/上海市学生科技创新社团/, "/images/img19.jpg"],
 ];
 function coverOf(n: NewsItem): string | undefined {
   return coverMap.find(([re]) => re.test(n.title))?.[1];

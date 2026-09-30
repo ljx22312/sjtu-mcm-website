@@ -2,7 +2,6 @@ export const siteName = "上海交通大学数学建模协会";
 export const shortName = "SJTU数学建模";
 export const email = "446067754@sjtu.edu.cn";
 export const wechat = "SJTU数学建模";
-export const gitee = "https://gitee.com/leon-lyx/math_modeling";
 export const mcmPlatform = "https://mcm.math.sjtu.edu.cn";
 
 export const features = {
