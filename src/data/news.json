@@ -1,0 +1,206 @@
+{
+  "$comment": "协会官网新闻初始数据（已按组织边界清洗，只含本协会=数院+学创线的内容）。category: award|notice|activity。组织边界红线见 additional/ORG-BOUNDARY.md：电院+学联线'数学建模培训营'（高晓沨团队）及'策联杯'的任何信息不得收录。source_url 为空者为公众号文章（biz=MzkxMTIyNjk3NA==），待协会后台取永久链接。整理于 2026-09-29。 按协会要求删除两条喜报（2026-09-30）：数学建模协会在美国大学生数学建模竞赛再创佳绩;喜报！协会获评首批上海市学生科技创新社团。",
+  "items": [
+    {
+      "date": "2026-09-22",
+      "category": "notice",
+      "title": "关于“华为杯”第二十三届中国研究生数学建模竞赛赛题下载及提交作品的重要提醒",
+      "summary": "研赛开赛提醒，含参赛选手须知、赛题下载与论文提交说明。",
+      "source_url": "",
+      "tags": [
+        "研赛"
+      ]
+    },
+    {
+      "date": "2026-07-06",
+      "category": "activity",
+      "title": "2026国赛集训队暑期集训启动",
+      "summary": "7月6–8日系列讲座：陈雄达（同济，论文写作）、董程栋（上财，常微分方程）、张向韵（华师大，2025国赛B题解析）、郭睿恒（最优化建模）、吴睿曦（AI4MCM工作流）、袁若水（数据分析类经验），随后进入模型/工具/写作系列课程与模拟赛。",
+      "source_url": "https://sixkoiaf82a.feishu.cn/sheets/DMdSsfzVCh9bnFtwFORc4pWCnkh",
+      "tags": [
+        "集训",
+        "国赛"
+      ]
+    },
+    {
+      "date": "2026-03-20",
+      "category": "activity",
+      "title": "集赞抽奖 | 数学建模协会春日雅集",
+      "summary": "百团大战摆摊活动：数模知识拼拼图趣味挑战（咖啡店利润/摸鱼圣地/食堂排队三题）。",
+      "source_url": "",
+      "tags": [
+        "协会",
+        "招新"
+      ],
+      "note": "公众号文章，长海报见 additional/images/img10.png"
+    },
+    {
+      "date": "2026-01-03",
+      "category": "activity",
+      "title": "2026美赛集训队导论课开讲",
+      "summary": "1月3日18:00–20:30思源楼200报告厅：美赛介绍、组队分工、飞书集训材料与实战演示、经验分享（曹紫宸/曹成悦/崔轩瑞）。",
+      "source_url": "https://my.feishu.cn/sheets/DtlZsui0ohJ63ZtGQKxcSaKHnPc",
+      "tags": [
+        "集训",
+        "美赛"
+      ]
+    },
+    {
+      "date": "2025-09-04",
+      "category": "activity",
+      "title": "2025年协会部长团换届报名",
+      "summary": "招募副会长1名、技术部部长2名、宣传部部长1名；含岗位职责与参选条件，协会组织架构一手资料。",
+      "source_url": "http://mp.weixin.qq.com/s?__biz=MzkxMTIyNjk3NA==&mid=2247488462&idx=1&sn=d4e8cf5ac71bea9735429e29ab8a8af9",
+      "tags": [
+        "协会"
+      ]
+    },
+    {
+      "date": "2025-06-16",
+      "category": "notice",
+      "title": "2025年国赛赛前系列课程通知（协会集训导师授课）",
+      "summary": "数学科学学院+学生创新中心主办6讲课程；协会指导老师任桐鑫、技术部部长阎冠举任导师；2024国赛A题国一团队（游天明、陈诺严、陈静怡）线上分享。",
+      "source_url": "https://www.jwc.sjtu.edu.cn/info/1027/121731.htm",
+      "tags": [
+        "集训",
+        "国赛"
+      ]
+    },
+    {
+      "date": "2025-03-16",
+      "category": "activity",
+      "title": "百团大战·活动预告",
+      "summary": "22号摊位预告，含数模知识拼拼图摊位活动和协会完整介绍（协会性质、上海市学生科技创新社团荣誉）。",
+      "source_url": "http://mp.weixin.qq.com/s?__biz=MzkxMTIyNjk3NA==&mid=2247488202&idx=1&sn=06624de45fe151ea393a189442f199e9",
+      "tags": [
+        "协会",
+        "招新"
+      ]
+    },
+    {
+      "date": "2023-12-20",
+      "category": "notice",
+      "title": "倒计时7天！2024美赛数学建模集训队招募",
+      "summary": "美赛集训队招募，公众号回复“美赛集训队”获取微信群二维码。",
+      "source_url": "",
+      "tags": [
+        "集训",
+        "美赛"
+      ]
+    },
+    {
+      "date": "2023-09-24",
+      "category": "activity",
+      "title": "数学建模协会召开23学年第一次全员大会",
+      "summary": "回顾集训队与校内赛工作，介绍圆桌会等品牌活动。",
+      "source_url": "",
+      "tags": [
+        "协会"
+      ]
+    },
+    {
+      "date": "2023-08-25",
+      "category": "activity",
+      "title": "第四届交大荣昶杯系列赛事颁奖典礼举行（附数学建模赛道获奖名单）",
+      "summary": "协会参与组织/公示的中学生数学建模赛事；2023年95支赛队参赛。",
+      "source_url": "",
+      "tags": [
+        "荣昶杯"
+      ]
+    },
+    {
+      "date": "2023-08-18",
+      "category": "notice",
+      "title": "入围公示 | 2023年交大荣昶杯数学建模挑战赛",
+      "summary": "95支赛队入围名单公示。",
+      "source_url": "",
+      "tags": [
+        "荣昶杯"
+      ]
+    },
+    {
+      "date": "2023-08-13",
+      "category": "notice",
+      "title": "赛题发布 | 2023上海交通大学数学建模校内赛",
+      "summary": "第三届校内赛赛题：A 太阳能光伏电池的利用、B 大语言模型等。",
+      "source_url": "",
+      "tags": [
+        "校内赛"
+      ]
+    },
+    {
+      "date": "2023-06-02",
+      "category": "notice",
+      "title": "2023-2024赛季数学建模竞赛集训队征集令",
+      "summary": "赛季集训队招募，回复“集训队”获取二维码。",
+      "source_url": "",
+      "tags": [
+        "集训"
+      ]
+    },
+    {
+      "date": "2022-09-14",
+      "category": "notice",
+      "title": "2022年上海交通大学数学建模校内赛评审结果公示",
+      "summary": "第二届校内赛（2022-08-09至08-13）评审结果。",
+      "source_url": "",
+      "tags": [
+        "校内赛"
+      ]
+    },
+    {
+      "date": "2022-03-07",
+      "category": "activity",
+      "title": "SJTU数学建模协会招新啦！",
+      "summary": "春季招新推送。",
+      "source_url": "",
+      "tags": [
+        "协会",
+        "招新"
+      ],
+      "note": "封面见 additional/images/img18.jpg"
+    },
+    {
+      "date": "2021-09-14",
+      "category": "activity",
+      "title": "2021年上海交通大学数学建模校内赛举行",
+      "summary": "首届校内赛：教务处指导、学生创新中心+数学科学学院主办、协会协办；近300名本研学生报名、来自20余个学院；每份论文由两名校内外专家独立打分。",
+      "source_url": "https://news.sjtu.edu.cn/zhxw/20210914/158047.html",
+      "tags": [
+        "校内赛"
+      ]
+    },
+    {
+      "date": "2021-09-11",
+      "category": "notice",
+      "title": "2021年上海交通大学数学建模校内赛评审结果公示",
+      "summary": "首届校内赛评审结果公示（含获奖名单）。",
+      "source_url": "https://jwc.sjtu.edu.cn/info/1222/11108.htm",
+      "tags": [
+        "校内赛"
+      ]
+    },
+    {
+      "date": "2021-08-20",
+      "category": "notice",
+      "title": "2021上海交通大学数学建模校内赛赛题公布",
+      "summary": "首届校内赛赛题：A 双足步行、B 复杂约束下的排序问题、C 题；比赛8月20日18:00至24日22:00（100小时）。",
+      "source_url": "",
+      "tags": [
+        "校内赛"
+      ],
+      "note": "封面见 additional/images/img17.jpg（通知推送2021-07-09）"
+    },
+    {
+      "date": "2020-04-05",
+      "category": "activity",
+      "title": "上海交通大学数学建模协会2020春季招新",
+      "summary": "含“什么是数学建模”科普与协会简介（学术交大公众号转发佐证）。",
+      "source_url": "",
+      "tags": [
+        "协会",
+        "招新"
+      ]
+    }
+  ]
+}

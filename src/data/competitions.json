@@ -1,0 +1,292 @@
+{
+  "$comment": "上海交通大学数学建模协会官网·全年赛事日历数据。times 为最近一届（约2026年）实际值，每年浮动，以当年官方通知为准；status: normal|paused|tbc。整理于 2026-09-29。 按协会要求：跨多月赛事仅保留首月（2026-09-30）。",
+  "updated": "2026-09-29",
+  "competitions": [
+    {
+      "id": "mcm-icm",
+      "name": "美国大学生数学建模竞赛",
+      "name_en": "MCM/ICM",
+      "abbr": "美赛",
+      "tier": "core",
+      "organizer": "美国数学及其应用联合会（COMAP）",
+      "team_size": "1–3名同校学生+1名指导顾问（研究生不可参加）",
+      "duration": "约96小时",
+      "months": [
+        11
+      ],
+      "reg_window": "约11月开放报名，截止次年1月下旬",
+      "contest_window": "1月底–2月初（2026年：1月30日06:00–2月3日09:00 北京时间）",
+      "level": "国际顶级",
+      "url": "https://www.comap.org",
+      "status": "normal",
+      "notes": "国内多经校内统一组织/辅助平台报名；交大美赛集训队秋季学期招生"
+    },
+    {
+      "id": "cumcm",
+      "name": "全国大学生数学建模竞赛",
+      "name_en": "CUMCM",
+      "abbr": "国赛",
+      "tier": "core",
+      "organizer": "中国工业与应用数学学会（高教社杯）",
+      "team_size": "3名同校学生+指导教师",
+      "duration": "约72+2小时",
+      "months": [
+        9
+      ],
+      "reg_window": "校内5–8月组织；全国截止约9月7日",
+      "contest_window": "9月上中旬（2026年：9月10日18:00–9月13日20:00）",
+      "level": "国家级最高（竞赛排行榜目录内）",
+      "url": "https://www.mcm.edu.cn",
+      "url_reg": "https://cumcm.cnki.net",
+      "status": "normal",
+      "notes": "交大由教务处统一组织校内报名；协会国赛集训7月启动（见知识库）"
+    },
+    {
+      "id": "cpmcm",
+      "name": "“华为杯”中国研究生数学建模竞赛",
+      "name_en": "CPMCM",
+      "abbr": "研赛",
+      "tier": "core",
+      "organizer": "中国学位与研究生教育学会等",
+      "team_size": "每队3人（在读硕士/博士，除当年秋季入学新生外不允许跨校）",
+      "duration": "约100小时",
+      "months": [
+        6
+      ],
+      "reg_window": "6月1日–9月19日",
+      "contest_window": "9月下旬（2026年：9月23日08:00–9月27日12:00）",
+      "level": "研究生顶级",
+      "url": "https://cpipc.acge.org.cn/cw/hp/4",
+      "status": "normal",
+      "notes": "交大由研究生院组织报名；本科生不可参加"
+    },
+    {
+      "id": "sjtu-internal",
+      "name": "上海交通大学数学建模校内竞赛",
+      "name_en": "SJTU MCM Internal",
+      "abbr": "校内赛",
+      "tier": "core",
+      "organizer": "教务处指导，学生创新中心+数学科学学院主办",
+      "team_size": "约3人一队",
+      "duration": "线上赛（数天）",
+      "months": [
+        4
+      ],
+      "reg_window": "报名通知约4月中旬（2026年第六届为4月16日发布）",
+      "contest_window": "历年多在暑期8月（首届2021-08-20–24、第二届2022-08-09–13、第三届2023-08-13发布赛题）；近年有前移迹象（2025年第五届5月启动）——均以当年通知为准",
+      "level": "校级（国赛选拔与练兵）",
+      "url": "https://mcm.math.sjtu.edu.cn",
+      "status": "tbc",
+      "notes": "JAccount登录；2026第六届报名1283人；协会组织集训队（美赛秋季招募/国赛5-8月招募）；该平台亦承载集训队报名"
+    },
+    {
+      "id": "huadong-cup",
+      "name": "华东杯大学生数学建模邀请赛",
+      "name_en": "East China Cup",
+      "abbr": "华东杯",
+      "tier": "practice",
+      "organizer": "复旦大学数学科学学院发起，华东地区数模联盟",
+      "team_size": "≤3人（含研究生）",
+      "duration": "4天",
+      "months": [
+        4
+      ],
+      "reg_window": "约4月中下旬",
+      "contest_window": "4月30日20:00–5月4日20:00",
+      "level": "区域级（组织规范，奖金高：特等奖1万元/队）",
+      "url": "https://www.saikr.com/vse/hdmcm/2026",
+      "status": "normal",
+      "notes": "国赛前重要春季练兵赛"
+    },
+    {
+      "id": "mathorcup",
+      "name": "MathorCup 数学应用挑战赛",
+      "abbr": "MathorCup",
+      "tier": "practice",
+      "organizer": "中国优选法统筹法与经济数学研究会",
+      "team_size": "1–3人，允许跨年级/跨专业，不允许跨校（可配1名指导教师）",
+      "duration": "4天",
+      "months": [
+        4
+      ],
+      "reg_window": "约前一年12月底–当年4月中旬",
+      "contest_window": "4月中下旬（2026年：4月17日08:00–4月21日09:00）",
+      "level": "国家级学会（企业真题特色）",
+      "url": "https://www.mathorcup.org",
+      "status": "normal",
+      "notes": "姊妹赛事 MathorCup 大数据竞赛在秋季；跨校规则以当年章程为准"
+    },
+    {
+      "id": "dianjiangbei",
+      "name": "“电工杯”全国大学生电工数学建模竞赛",
+      "abbr": "电工杯",
+      "tier": "practice",
+      "organizer": "中国电机工程学会",
+      "team_size": "≤3名学生+1名指导教师",
+      "duration": "72小时",
+      "months": [
+        5
+      ],
+      "reg_window": "4月–5月中旬",
+      "contest_window": "5月下旬（2026年：5月22日–5月25日）",
+      "level": "国家级学会（免费参赛）",
+      "url": "https://www.saikr.com/vse/EECMCM2026",
+      "status": "normal"
+    },
+    {
+      "id": "wuyi-cup",
+      "name": "五一数学建模竞赛",
+      "abbr": "五一杯",
+      "tier": "practice",
+      "organizer": "江苏省工业与应用数学学会、中国矿业大学等",
+      "team_size": "约3人",
+      "duration": "约74小时",
+      "months": [
+        5
+      ],
+      "reg_window": "4月",
+      "contest_window": "五一假期（5月1日10:00–5月4日12:00）",
+      "level": "省级学会",
+      "url": "https://51mcm.cumt.edu.cn",
+      "status": "normal"
+    },
+    {
+      "id": "shenzhou-cup",
+      "name": "“深圳杯”数学建模挑战赛",
+      "abbr": "深圳杯",
+      "tier": "research",
+      "organizer": "中国工业与应用数学学会、深圳市科协",
+      "team_size": "每队≤4人，免费（2025届口径）",
+      "duration": "2–3个月开放式研究",
+      "months": [
+        4
+      ],
+      "reg_window": "约4月发题",
+      "contest_window": "6月10日前提交，7–8月答辩",
+      "level": "国家级研究型",
+      "url": "http://szb.m2ct.org",
+      "status": "paused",
+      "notes": "2026年度暂停举办（2026-05-09通知）；2027待官方通知"
+    },
+    {
+      "id": "apmcm",
+      "name": "APMCM 亚太地区大学生数学建模竞赛",
+      "abbr": "亚太杯",
+      "tier": "practice",
+      "organizer": "民间学会（历届有变化）",
+      "team_size": "1–3人一队，允许跨校",
+      "duration": "4天",
+      "months": [
+        9
+      ],
+      "reg_window": "9月–11月下旬",
+      "contest_window": "约11月下旬",
+      "level": "练兵型'国际赛'",
+      "url": "https://www.apmcm.org",
+      "status": "tbc",
+      "notes": "国赛后秋季练兵；含金量认定各校不一；另有7月\"中文赛项\"热身赛（2025年为7-11至7-15）"
+    },
+    {
+      "id": "xiaomeisai",
+      "name": "“认证杯”数学中国数学建模国际赛",
+      "abbr": "小美赛",
+      "tier": "practice",
+      "organizer": "数学中国（madio.net）",
+      "team_size": "1–3人",
+      "duration": "4天",
+      "months": [
+        12
+      ],
+      "reg_window": "约10–11月",
+      "contest_window": "11月底–12月初",
+      "level": "民间（美赛预演）",
+      "url": "http://mcm.tzmcm.cn",
+      "status": "tbc"
+    },
+    {
+      "id": "renzheng-cup",
+      "name": "“认证杯”数学中国数学建模网络挑战赛",
+      "abbr": "认证杯",
+      "tier": "practice",
+      "organizer": "内蒙古自治区数学学会、数学中国",
+      "team_size": "1–3人",
+      "duration": "两阶段各约3天",
+      "months": [
+        4
+      ],
+      "reg_window": "约3月中下旬–4月初",
+      "contest_window": "第一阶段4月9–12日；第二阶段5月14–17日",
+      "level": "民间",
+      "url": "http://www.tzmcm.cn",
+      "status": "tbc"
+    },
+    {
+      "id": "huashu-cup",
+      "name": "“华数杯”大学生数学建模竞赛（国内赛/国际赛）",
+      "abbr": "华数杯",
+      "tier": "practice",
+      "organizer": "天津市未来与预测科学研究会等",
+      "team_size": "1–3人",
+      "duration": "约3–4天",
+      "months": [
+        1
+      ],
+      "reg_window": "国内赛约5–8月；国际赛约11月–次年1月",
+      "contest_window": "国际赛1月中下旬；国内赛8月上旬（国赛前模拟）",
+      "level": "民间练兵",
+      "url": "https://m.saikr.com/vse/chinamcm26",
+      "status": "tbc"
+    },
+    {
+      "id": "shuwei-cup",
+      "name": "数维杯全国大学生数学建模挑战赛（春/秋）",
+      "abbr": "数维杯",
+      "tier": "practice",
+      "organizer": "春季：天津市虚拟仿真学会；秋季：中国仿真学会等",
+      "team_size": "1–3人，可跨校",
+      "duration": "3–4天",
+      "months": [
+        5
+      ],
+      "reg_window": "春季约3–5月；秋季至11月20日",
+      "contest_window": "春季5月8–11日；秋季（英文赛制）11月20–24日",
+      "level": "民间练兵（秋季纯英文，对标美赛）",
+      "url": "https://www.nmmcm.org.cn",
+      "status": "tbc"
+    },
+    {
+      "id": "zhongqing-cup",
+      "name": "中青杯全国大学生数学建模竞赛",
+      "abbr": "中青杯",
+      "tier": "practice",
+      "organizer": "中国国际科技促进会综合素质与职业发展教育专业委员会",
+      "team_size": "1–3人，可跨校",
+      "duration": "约72小时",
+      "months": [
+        6
+      ],
+      "reg_window": "约3–6月初",
+      "contest_window": "6月上旬（2026年：6月4–7日；往届多在5月底）",
+      "level": "民间练兵（新手友好）",
+      "url": "http://www.cycmcm.com",
+      "status": "tbc"
+    },
+    {
+      "id": "csf-challenge",
+      "name": "全国大学生仿真建模应用挑战赛",
+      "abbr": "仿真赛",
+      "tier": "practice",
+      "organizer": "中国仿真学会、吉林财经大学",
+      "team_size": "1–3名学生+1名指导教师，不跨校",
+      "duration": "96小时",
+      "months": [
+        10
+      ],
+      "reg_window": "约8–10月16日",
+      "contest_window": "10月16日–10月20日",
+      "level": "国家级学会（仿真方向，填补秋季空档）",
+      "url": "https://www.mojinghub.com/competitions/csf/2026",
+      "status": "tbc"
+    }
+  ]
+}

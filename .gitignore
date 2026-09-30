@@ -23,5 +23,5 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# agent 运行时数据（SQLite 对话历史）
-data/
+# agent 运行时数据（SQLite 对话历史；仅根目录运行时目录，不含 src/data 站点数据）
+/data/

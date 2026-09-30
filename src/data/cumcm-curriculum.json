@@ -1,0 +1,800 @@
+{
+ "schema": "curriculum-v2",
+ "source": {
+  "title": "2026 全国大学生数学建模竞赛（国赛）集训队日程",
+  "feishu": "https://sixkoiaf82a.feishu.cn/sheets/DMdSsfzVCh9bnFtwFORc4pWCnkh",
+  "sheet": "集训大表",
+  "fetched_at": "2026-09-30"
+ },
+ "columns": [
+  "模块",
+  "课程编号",
+  "主题",
+  "形式与安排",
+  "课程介绍",
+  "联络人",
+  "资料与回放",
+  "授课材料"
+ ],
+ "modules": [
+  {
+   "name": "讲座",
+   "count": 6
+  },
+  {
+   "name": "导论",
+   "count": 4
+  },
+  {
+   "name": "模型&编程",
+   "count": 8
+  },
+  {
+   "name": "工具课&AI使用",
+   "count": 6
+  },
+  {
+   "name": "写作",
+   "count": 5
+  },
+  {
+   "name": "经验分享",
+   "count": 2
+  },
+  {
+   "name": "赛题实战",
+   "count": 3
+  },
+  {
+   "name": "正式比赛",
+   "count": 4
+  }
+ ],
+ "items": [
+  {
+   "row": 2,
+   "module": "讲座",
+   "course_id": "Lecture100",
+   "topic": "数学建模竞赛论文写作",
+   "format": "线下讲座",
+   "format_detail": [
+    "地点：学生创新中心B楼303-305翻转教室",
+    "7月6日13:30—15:00"
+   ],
+   "intro": "陈雄达，同济大学数学科学学院教授，1993年毕业于厦门大学数学系, 1998年在中国科学院计算数学研究所获得理学博士学位，曾在中科院软件研究所和新加坡麻省理工联盟从事博士后研究。长期从事数学建模的教学及竞赛指导工作，现为上海市数学建模委员会组委，出版和合作出版多部教材，主持和参与上海市多项教研教改课题，曾获得上海市优秀青年教师, 宝钢优秀教师奖和数学建模全国优秀指导教师。现任全国大学生数模竞赛上海赛区组委会副秘书长，中国工业与应用数学学会数学模型专业委员会副秘书长。",
+   "contact": "任桐鑫",
+   "no_playback": true,
+   "resources": [
+    {
+     "type": "attachment",
+     "name": "陈雄达-论文写作AI规范及提交要求-上海交大.pdf",
+     "token": "VomDbX4AaoBiOdx0KHFcbuRnnZc",
+     "size_kb": 12394
+    }
+   ]
+  },
+  {
+   "row": 3,
+   "module": "讲座",
+   "course_id": "",
+   "topic": "常微分方程在数模竞赛中的应用",
+   "format": "线下讲座",
+   "format_detail": [
+    "地点：学生创新中心B楼303-305翻转教室",
+    "7月6日15:15—16:45"
+   ],
+   "intro": "董程栋，上海财经大学数学学院教授，全国大学生数模竞赛上海市组委会委员，校数模竞赛负责人。连续五届荣获上海财经大学“我心目中的好老师”荣誉称号，上海财经大学教书育人标兵。长期从事数模竞赛组织和阅卷工作，带领上海财经大学学生参加全国大学生数模竞赛获得佳绩，并因此荣获上海市优秀教练员和全国优秀指导教师称号。",
+   "contact": "",
+   "no_playback": true,
+   "resources": [
+    {
+     "type": "attachment",
+     "name": "董程栋-常微分方程建模.pdf",
+     "token": "IzhhbrsFAoSAuPxaCvPcxHkPncc",
+     "size_kb": 1751
+    }
+   ]
+  },
+  {
+   "row": 4,
+   "module": "讲座",
+   "course_id": "",
+   "topic": "碳化硅外延层厚度确定问题的建模与解析（2025年国赛B题解析",
+   "format": "线下讲座",
+   "format_detail": [
+    "地点：学生创新中心B楼303-305翻转教室",
+    "7月7日13:30—15:00"
+   ],
+   "intro": "张向韵，华东师范大学数学科学学院副教授，华东师范大学数学建模竞赛负责人，2021年被评为全国大学生数学建模竞赛“优秀教练员”，目前主要从事矩阵和张量分解的随机算法，博弈动力学算法，大规模分布式人工智能理论与算法，广义扩散模型和流匹配模型的快速采样及应用研究。作为骨干参与国家重点研发计划新一代人工智能2030项目1项，“数学与应用研究”专项2项和上海市科委人工智能专项的研究，在国际知名期刊和ICML会议发表高水平学术论文20余篇。",
+   "contact": "",
+   "no_playback": true,
+   "resources": [
+    {
+     "type": "attachment",
+     "name": "03-碳化硅外延层厚度的确定——基于红外反射光谱法的建模与解析.pdf",
+     "token": "EOhub5HbSoXQ3mxFQ9zcusQfnnh",
+     "size_kb": 12076
+    }
+   ]
+  },
+  {
+   "row": 5,
+   "module": "讲座",
+   "course_id": "",
+   "topic": "最优化建模与案例分析",
+   "format": "线下讲座",
+   "format_detail": [
+    "地点：学生创新中心B楼303-305翻转教室",
+    "7月7日15:15—16:45"
+   ],
+   "intro": "郭睿恒，上海交通大学电气工程学院博士研究生，具备丰富数学建模参赛经验。曾获数模国赛全国一等奖&MATLAB创新奖、深圳杯数模竞赛优秀论文提名奖、电工杯数模竞赛二等奖，以及全国大学生数学竞赛、物理竞赛一等奖。",
+   "contact": "",
+   "no_playback": true,
+   "resources": [
+    {
+     "type": "attachment",
+     "name": "04.郭睿恒-最优化建模与案例分析.pdf",
+     "token": "DHy3bpsZNoQwENx1TzocUxaWnZr",
+     "size_kb": 3331
+    }
+   ]
+  },
+  {
+   "row": 6,
+   "module": "讲座",
+   "course_id": "",
+   "topic": "AI4MCM：AI工作流赋能数模竞赛的实践经验分享",
+   "format": "线下讲座",
+   "format_detail": [
+    "地点：学生创新中心B楼303-305翻转教室",
+    "7月8日13:30—14:00"
+   ],
+   "intro": "吴睿曦，上海交通大学22级数学科学学院本科生，26级人工智能博士生，曾获美国大学生数学建模竞赛一等奖，上海交通大学数学建模协会部长团成员。",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://meeting.tencent.com/crm/29odYgk964"
+    },
+    {
+     "type": "attachment",
+     "name": "国赛数模 AI 讲座(1).pdf",
+     "token": "BPUqb9ilzosqGGxZuGVcTmQ1nSg",
+     "size_kb": 11238
+    }
+   ]
+  },
+  {
+   "row": 7,
+   "module": "讲座",
+   "course_id": "",
+   "topic": "国赛比赛的经验分享：以数据分析类题目为例",
+   "format": "线下讲座",
+   "format_detail": [
+    "地点：学生创新中心B楼303-305翻转教室",
+    "7月8日14:00—15:00"
+   ],
+   "intro": "袁若水 物理与天文学院物理学专业（2025级），电子信息与电气工程学院计算机专业（2024级），曾获全国大学生数学建模竞赛全国一等奖、美国大学生数学建模竞赛F奖、亚太地区数学建模竞赛二等奖。",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "attachment",
+     "name": "袁若水经验分享.pptx",
+     "token": "IbDNbK4qfoy5pUx1kGicyOo4n8f",
+     "size_kb": 12026
+    }
+   ]
+  },
+  {
+   "row": 8,
+   "module": "导论",
+   "course_id": "INTRO100",
+   "topic": "导论课",
+   "format": "线下",
+   "format_detail": [
+    "地点：学生创新中心B楼303-305翻转教室",
+    "7月8日15:00—16:00"
+   ],
+   "intro": "国赛介绍，集训整体安排，集训队资源支持",
+   "contact": "任桐鑫",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "attachment",
+     "name": "导论课20260708.pptx",
+     "token": "OkN8bv51WoGs2vxcza3cxuPLnfP",
+     "size_kb": 16143
+    }
+   ]
+  },
+  {
+   "row": 9,
+   "module": "导论",
+   "course_id": "",
+   "topic": "材料分享",
+   "format": "",
+   "format_detail": [],
+   "intro": "飞书集训材料介绍",
+   "contact": "于景同",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "集训队资料库介绍",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/JuoHw1Cu9iWKc3ka08NcSF2UnBF"
+    }
+   ]
+  },
+  {
+   "row": 10,
+   "module": "导论",
+   "course_id": "",
+   "topic": "组队与分工",
+   "format": "",
+   "format_detail": [],
+   "intro": "选题方法、组队分工建议、时间安排、常见误区",
+   "contact": "崔轩瑞",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "attachment",
+     "name": "国赛组队分工与时间安排.pptx",
+     "token": "QSYmb63zzoJsQVxIqR6cKXPencc",
+     "size_kb": 5398
+    }
+   ]
+  },
+  {
+   "row": 11,
+   "module": "导论",
+   "course_id": "",
+   "topic": "实战介绍",
+   "format": "",
+   "format_detail": [],
+   "intro": "实战要求、时间节点、反馈安排",
+   "contact": "崔轩瑞",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 12,
+   "module": "模型&编程",
+   "course_id": "MODEL101",
+   "topic": "国赛模型速览",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://meeting.tencent.com/crm/K07vxBMq5d"
+    },
+    {
+     "type": "link",
+     "name": "国赛模型汇总",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/Sq03dhKG7oyrUQxiudAcQT06nNb"
+    },
+    {
+     "type": "link",
+     "name": "数学建模六大模型",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/M9XAd4oAsozBEoxx6BDcIPTRnvD"
+    }
+   ]
+  },
+  {
+   "row": 13,
+   "module": "模型&编程",
+   "course_id": "MODEL102",
+   "topic": "通用编程课：Python入门",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "Python环境配置",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/Gl7hwAu7Kivjq1kk7JXcUtclnZc"
+    },
+    {
+     "type": "link",
+     "name": "Python学习笔记",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/CRKbddjj5oSfquxesHHclH8RnBc"
+    }
+   ]
+  },
+  {
+   "row": 14,
+   "module": "模型&编程",
+   "course_id": "MODEL201",
+   "topic": "微分方程模型建模和求解",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 MODEL102",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "微分方程模型",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/WjYldZcEdofZQHxqG0cc0kGinXd"
+    }
+   ]
+  },
+  {
+   "row": 15,
+   "module": "模型&编程",
+   "course_id": "MODEL202",
+   "topic": "运筹优化决策模型建模和求解",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 MODEL102",
+   "contact": "王琦瑄、王姿蘅",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "优化（运筹、决策）模型",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/MT5ddQsEUo5WSbx9zKGctfNQnac"
+    },
+    {
+     "type": "link",
+     "name": "启发式算法专题",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/O39mwtA5xi02ebkMx1Qcy7xEnQc"
+    },
+    {
+     "type": "link",
+     "name": "评价模型",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/UIPSdqSXloDxdixCG20cMobGnrt"
+    }
+   ]
+  },
+  {
+   "row": 16,
+   "module": "模型&编程",
+   "course_id": "MODEL203",
+   "topic": "预测分类回归模型建模和求解",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 MODEL102",
+   "contact": "冯渝粲",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "预测分类回归模型建模和求解",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/N32zwF30wisW58kpBwRcrP1YnWg"
+    }
+   ]
+  },
+  {
+   "row": 17,
+   "module": "模型&编程",
+   "course_id": "MODEL204",
+   "topic": "数理统计类模型建模和求解",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 MODEL102",
+   "contact": "刘韫齐",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "统计分析模型综述",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/H2UxwN0Z1iW934kkquNcNeTnntd"
+    }
+   ]
+  },
+  {
+   "row": 18,
+   "module": "模型&编程",
+   "course_id": "MODEL205",
+   "topic": "图论模型建模和求解",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 MODEL102",
+   "contact": "刘津希",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "图与网络模型与算法",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/DbAzw3LfMiCcN3kFjbkcjweknNg"
+    }
+   ]
+  },
+  {
+   "row": 19,
+   "module": "模型&编程",
+   "course_id": "MODEL206",
+   "topic": "评价类模型建模与实战",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 MODEL102",
+   "contact": "冯毓钦",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://meeting.tencent.com/user-center/shared-record-info?id=1fd38e1d-3c43-4d35-b8f0-b6243e03e804"
+    },
+    {
+     "type": "link",
+     "name": "meeting.sjtu.edu.cn",
+     "url": "http://meeting.sjtu.edu.cn"
+    },
+    {
+     "type": "attachment",
+     "name": "评价模型代码和课件.zip",
+     "token": "Ny4RbQHWWomkdVxUB5gcOSX0njd",
+     "size_kb": 16652
+    }
+   ]
+  },
+  {
+   "row": 20,
+   "module": "工具课&AI使用",
+   "course_id": "TOOL101",
+   "topic": "绘制流程图和示意图",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "郑黄杰、吴睿曦、王子搏",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "Microsoft Visio 使用文档",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/EiwLwcKPzi4cpQk3vhUcwlIMnbc"
+    },
+    {
+     "type": "link",
+     "name": "AI (Adobe Illustrator)教程",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/WuHVweMaCiUyshkDumKcn0h9nec"
+    }
+   ]
+  },
+  {
+   "row": 21,
+   "module": "工具课&AI使用",
+   "course_id": "TOOL102",
+   "topic": "数据可视化（基于Python-Matplotlib）",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "王姿蘅",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "基于Python-Matplotlib",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/Z0lGwvMYIi3NUdkZCnCcVFU7nCf"
+    }
+   ]
+  },
+  {
+   "row": 22,
+   "module": "工具课&AI使用",
+   "course_id": "TOOL103",
+   "topic": "数据可视化进阶（基于Python-Plotly-Folium+Pyecharts+Seaborn）",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 TOOL103",
+   "contact": "于景同、崔轩瑞、胡金磊",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "plotly入门",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/GPImd1OkooAtoPx6ARhct0RPnqn"
+    },
+    {
+     "type": "link",
+     "name": "seaborn可视化简介",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/JRJdweS9KiF3bKk1ufPcGowon3d"
+    },
+    {
+     "type": "link",
+     "name": "pyecharts可视化",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/J3ekwd9cCix3uRkHMzncupFgnRd"
+    }
+   ]
+  },
+  {
+   "row": 23,
+   "module": "工具课&AI使用",
+   "course_id": "TOOL104",
+   "topic": "国赛 AI 政策",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "于景同",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://mp.weixin.qq.com/s/UjO0LYInIClK8xtLPDH-xQ"
+    }
+   ]
+  },
+  {
+   "row": 24,
+   "module": "工具课&AI使用",
+   "course_id": "TOOL105",
+   "topic": "AI与模块化",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "模块化数学建模与AIGC在数学建模中的应用",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/B6vLdD2kWoGZGdxK9aQcdh6WnOg"
+    }
+   ]
+  },
+  {
+   "row": 25,
+   "module": "工具课&AI使用",
+   "course_id": "TOOL106",
+   "topic": "AIGC 绘图",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "崔轩瑞",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "AIGC",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/JuebwWW5OiNJP3k84DkcoU6Gnhf"
+    }
+   ]
+  },
+  {
+   "row": 26,
+   "module": "写作",
+   "course_id": "WRITING101",
+   "topic": "LaTeX语法基础、MCM/ICM模板使用、texpage工具使用",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "崔轩瑞",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "Latex入门 2026美赛集训队",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/N7FFwKmq9ibrGAk8rigcM3Spnle"
+    }
+   ]
+  },
+  {
+   "row": 27,
+   "module": "写作",
+   "course_id": "WRITING102",
+   "topic": "公式书写与识别软件",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "李晋宇",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "数学公式键入&LaTeX公式和排版",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/IkT0dxu3koq2Zdx5EUwcIK1tn9W"
+    }
+   ]
+  },
+  {
+   "row": 28,
+   "module": "写作",
+   "course_id": "WRITING103",
+   "topic": "飞书文档与latex进行协作",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "集训培养计划介绍&飞书协作",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/W3rQwKQT9iHAaxkoHV6cCdWanBe"
+    }
+   ]
+  },
+  {
+   "row": 29,
+   "module": "写作",
+   "course_id": "WRITING201",
+   "topic": "数模竞赛写作要求、注意事项以及工具使用",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "任桐鑫",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "attachment",
+     "name": "2025国赛系列课程数学建模竞赛论文写作-任桐鑫.pdf",
+     "token": "LjOdbJtsXoa26DxYdhmcAbywnDc",
+     "size_kb": 8122
+    }
+   ]
+  },
+  {
+   "row": 30,
+   "module": "写作",
+   "course_id": "WRITING202",
+   "topic": "学术写作大师班",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "Nature大师班-科研论文学习（Masterclass in Scientific Writing and Publishing）",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/NUVadCbsmooK3hxpCn5cfIK2nFe"
+    }
+   ]
+  },
+  {
+   "row": 31,
+   "module": "经验分享",
+   "course_id": "EXP101",
+   "topic": "2024国一团队&北太天元数学建模之星 经验分享",
+   "format": "2025年集训录播",
+   "format_detail": [],
+   "intro": "",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://meeting.tencent.com/crm/NAmgvXJrb6"
+    },
+    {
+     "type": "attachment",
+     "name": "2024北太天元数模之星国赛报告A题.pptx",
+     "token": "WleOblnGioa0r8xyUeHc4ViDnnc",
+     "size_kb": 43271
+    },
+    {
+     "type": "attachment",
+     "name": "论文和代码.zip",
+     "token": "P42Fb80UCogfu6xaXhOcVAkAnUe",
+     "size_kb": 14936
+    }
+   ]
+  },
+  {
+   "row": 32,
+   "module": "经验分享",
+   "course_id": "",
+   "topic": "2023国一团队，阎冠举",
+   "format": "2025年集训录播",
+   "format_detail": [],
+   "intro": "",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://meeting.tencent.com/crm/NAmgvXJrb6"
+    },
+    {
+     "type": "link",
+     "name": "模块化数学建模与AIGC在数学建模中的应用",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/B6vLdD2kWoGZGdxK9aQcdh6WnOg"
+    }
+   ]
+  },
+  {
+   "row": 33,
+   "module": "赛题实战",
+   "course_id": "Mock Competition",
+   "topic": "实战：集训队成员运用所学内容实战",
+   "format": "提交论文",
+   "format_detail": [],
+   "intro": "小组为单位真题复现",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "2026国赛集训队“真题复现” 实战安排",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/UwEJdP2PkozdHYxZYNQcg327nng"
+    }
+   ]
+  },
+  {
+   "row": 34,
+   "module": "赛题实战",
+   "course_id": "",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "第一轮反馈、反馈后修改",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 35,
+   "module": "赛题实战",
+   "course_id": "",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "第二轮反馈、反馈后修改",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 36,
+   "module": "正式比赛",
+   "course_id": "Competition",
+   "topic": "校内报名",
+   "format": "提交论文",
+   "format_detail": [],
+   "intro": "报名通知尚未发布，预计7月发布，8月中旬截止报名",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 37,
+   "module": "正式比赛",
+   "course_id": "",
+   "topic": "比赛正式开始",
+   "format": "",
+   "format_detail": [],
+   "intro": "2026/9/10 18:00",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 38,
+   "module": "正式比赛",
+   "course_id": "",
+   "topic": "比赛结束",
+   "format": "",
+   "format_detail": [],
+   "intro": "2026/9/13 20:00",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 39,
+   "module": "正式比赛",
+   "course_id": "",
+   "topic": "比赛结果公布",
+   "format": "",
+   "format_detail": [],
+   "intro": "约在2026年12月",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  }
+ ]
+}

@@ -1,0 +1,1355 @@
+{
+ "schema": "curriculum-v2",
+ "source": {
+  "title": "2026 美国大学生数学建模竞赛（美赛）集训队日程",
+  "feishu": "https://sixkoiaf82a.feishu.cn/sheets/DtlZsui0ohJ63ZtGQKxcSaKHnPc",
+  "sheet": "集训大表",
+  "fetched_at": "2026-09-30"
+ },
+ "columns": [
+  "模块",
+  "课程编号",
+  "主题",
+  "形式与安排",
+  "课程介绍",
+  "联络人",
+  "资料与回放",
+  "授课材料"
+ ],
+ "modules": [
+  {
+   "name": "导论",
+   "count": 7
+  },
+  {
+   "name": "模型&编程",
+   "count": 7
+  },
+  {
+   "name": "工具课&AI使用",
+   "count": 6
+  },
+  {
+   "name": "写作",
+   "count": 5
+  },
+  {
+   "name": "实战演示",
+   "count": 35
+  },
+  {
+   "name": "赛题实战",
+   "count": 3
+  },
+  {
+   "name": "正式比赛",
+   "count": 5
+  }
+ ],
+ "items": [
+  {
+   "row": 2,
+   "module": "导论",
+   "course_id": "INTRO100",
+   "topic": "导论课",
+   "format": "线下 2026年1月3日 18:00-20:30",
+   "format_detail": [
+    "地点：学生创新中心思源楼200报告厅，四餐附近"
+   ],
+   "intro": "导论课：美赛介绍，集训整体安排，集训队资源支持",
+   "contact": "任桐鑫",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "attachment",
+     "name": "比赛介绍.pptx",
+     "token": "E0F5bcW2AolpsJxyxSAcbqzbnpc",
+     "size_kb": 7371
+    }
+   ]
+  },
+  {
+   "row": 3,
+   "module": "导论",
+   "course_id": "",
+   "topic": "组队与分工",
+   "format": "",
+   "format_detail": [],
+   "intro": "组队与分工：组队分工建议和常见误区",
+   "contact": "冯毓钦",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "attachment",
+     "name": "美赛组队分工与时间安排.pptx",
+     "token": "SQnbbtnwJoLJFaxgRL2cN8esnOk",
+     "size_kb": 5334
+    }
+   ]
+  },
+  {
+   "row": 4,
+   "module": "导论",
+   "course_id": "",
+   "topic": "材料分享",
+   "format": "",
+   "format_detail": [],
+   "intro": "材料分享：飞书集训材料介绍，实战演示课介绍，飞书协作",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "集训培养计划介绍&飞书协作",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/W3rQwKQT9iHAaxkoHV6cCdWanBe"
+    }
+   ]
+  },
+  {
+   "row": 5,
+   "module": "导论",
+   "course_id": "",
+   "topic": "实战介绍",
+   "format": "",
+   "format_detail": [],
+   "intro": "实战介绍：实战要求、时间节点、反馈安排",
+   "contact": "刘韫齐",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "实战安排",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/FQUJwyO0XiyyJ0kN4AvcR9Yjn0d"
+    }
+   ]
+  },
+  {
+   "row": 6,
+   "module": "导论",
+   "course_id": "",
+   "topic": "大合影",
+   "format": "",
+   "format_detail": [],
+   "intro": "中场休息15min",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 7,
+   "module": "导论",
+   "course_id": "",
+   "topic": "获奖团队经验分享",
+   "format": "",
+   "format_detail": [],
+   "intro": "经验分享1：曹紫宸，上海交通大学巴黎卓越工程师学院大四能源与动力工程专业，曾获2023年美国大学生数学建模竞赛（MCM）O奖及Informs Award、2025年中国国际大学生创新大赛上海赛区金奖、2025年SPEIT院长奖 经验分享2：曹成悦，上海交通大学物理与天文学院2022级本科生，曾获美国大学生数学建模竞赛M奖一项、F奖一项及上海交通大学数学建模校内赛一等奖。 经验分享3：崔轩瑞，上海交通大学自动化专业2024级本科生，数学建模协会宣传部部长，曾获2025美赛M奖，2025RoboCup机器人世界杯中国赛冠军，校三好学生，校级B等奖学金等荣誉",
+   "contact": "任桐鑫",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "attachment",
+     "name": "美赛经验分享1-曹紫宸.pptx",
+     "token": "C2lHbkwAlo6cq1xhaZycUeyunoc",
+     "size_kb": 17326
+    },
+    {
+     "type": "attachment",
+     "name": "美赛经验分享2-曹成悦.pptx",
+     "token": "Ddajb6cFcobZ4uxDCMMc5Ij4njf",
+     "size_kb": 4964
+    },
+    {
+     "type": "attachment",
+     "name": "美赛经验分享3-崔轩瑞.pptx",
+     "token": "NEmZbuhSaor64BxuHZjcOZxbn1e",
+     "size_kb": 10945
+    }
+   ]
+  },
+  {
+   "row": 8,
+   "module": "导论",
+   "course_id": "",
+   "topic": "自由交流",
+   "format": "",
+   "format_detail": [],
+   "intro": "自由交流、合影",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 9,
+   "module": "模型&编程",
+   "course_id": "MODEL101",
+   "topic": "通用模型课：模型分类+速览",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "郑黄杰",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "浅谈2025美国大学生数学建模竞赛",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/Nz4Qw8chjikYGYkmxjVcKOTsnwb"
+    },
+    {
+     "type": "link",
+     "name": "美赛模型汇总",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/AOwhwgdOLixGaQk6YBBcCdC7nIf"
+    }
+   ]
+  },
+  {
+   "row": 10,
+   "module": "模型&编程",
+   "course_id": "MODEL102",
+   "topic": "通用编程课：Python入门",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "Python环境配置",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/Gl7hwAu7Kivjq1kk7JXcUtclnZc"
+    },
+    {
+     "type": "link",
+     "name": "Python学习笔记",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/CRKbddjj5oSfquxesHHclH8RnBc"
+    }
+   ]
+  },
+  {
+   "row": 11,
+   "module": "模型&编程",
+   "course_id": "MODEL201",
+   "topic": "微分方程模型建模和求解",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 MODEL102",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "微分方程模型",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/WjYldZcEdofZQHxqG0cc0kGinXd"
+    }
+   ]
+  },
+  {
+   "row": 12,
+   "module": "模型&编程",
+   "course_id": "MODEL202",
+   "topic": "运筹优化决策模型建模和求解",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 MODEL102",
+   "contact": "王琦瑄、王姿蘅",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "优化（运筹、决策）模型",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/MT5ddQsEUo5WSbx9zKGctfNQnac"
+    },
+    {
+     "type": "link",
+     "name": "启发式算法专题",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/O39mwtA5xi02ebkMx1Qcy7xEnQc"
+    },
+    {
+     "type": "link",
+     "name": "评价模型",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/UIPSdqSXloDxdixCG20cMobGnrt"
+    }
+   ]
+  },
+  {
+   "row": 13,
+   "module": "模型&编程",
+   "course_id": "MODEL203",
+   "topic": "预测分类回归模型建模和求解",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 MODEL102",
+   "contact": "冯渝粲",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "预测分类回归模型建模和求解",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/N32zwF30wisW58kpBwRcrP1YnWg"
+    }
+   ]
+  },
+  {
+   "row": 14,
+   "module": "模型&编程",
+   "course_id": "MODEL204",
+   "topic": "数理统计类模型建模和求解",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 MODEL102",
+   "contact": "刘韫齐",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "统计分析模型综述",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/H2UxwN0Z1iW934kkquNcNeTnntd"
+    }
+   ]
+  },
+  {
+   "row": 15,
+   "module": "模型&编程",
+   "course_id": "MODEL205",
+   "topic": "图论模型建模和求解",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 MODEL102",
+   "contact": "刘津希",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "图与网络模型与算法",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/DbAzw3LfMiCcN3kFjbkcjweknNg"
+    }
+   ]
+  },
+  {
+   "row": 16,
+   "module": "工具课&AI使用",
+   "course_id": "TOOL101",
+   "topic": "绘制流程图和示意图",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "郑黄杰、吴睿曦、王子搏",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "Microsoft Visio 使用文档",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/EiwLwcKPzi4cpQk3vhUcwlIMnbc"
+    },
+    {
+     "type": "link",
+     "name": "AI (Adobe Illustrator)教程",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/WuHVweMaCiUyshkDumKcn0h9nec"
+    }
+   ]
+  },
+  {
+   "row": 17,
+   "module": "工具课&AI使用",
+   "course_id": "TOOL102",
+   "topic": "数据可视化（基于Python-Matplotlib）",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "王姿蘅",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "基于Python-Matplotlib",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/Z0lGwvMYIi3NUdkZCnCcVFU7nCf"
+    }
+   ]
+  },
+  {
+   "row": 18,
+   "module": "工具课&AI使用",
+   "course_id": "TOOL103",
+   "topic": "数据可视化进阶（基于Python-Plotly-Folium+Pyecharts+Seaborn）",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "建议先修 TOOL103",
+   "contact": "于景同、崔轩瑞、胡金磊",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "plotly入门",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/GPImd1OkooAtoPx6ARhct0RPnqn"
+    },
+    {
+     "type": "link",
+     "name": "seaborn可视化简介",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/JRJdweS9KiF3bKk1ufPcGowon3d"
+    },
+    {
+     "type": "link",
+     "name": "pyecharts可视化",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/J3ekwd9cCix3uRkHMzncupFgnRd"
+    }
+   ]
+  },
+  {
+   "row": 19,
+   "module": "工具课&AI使用",
+   "course_id": "TOOL104",
+   "topic": "美赛 AI 政策解读",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "于景同",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "AI政策解读",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/CyrEwS2biiw0dgkb8J0cPAg3nre"
+    }
+   ]
+  },
+  {
+   "row": 20,
+   "module": "工具课&AI使用",
+   "course_id": "TOOL105",
+   "topic": "AI与模块化",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "模块化数学建模与AIGC在数学建模中的应用",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/B6vLdD2kWoGZGdxK9aQcdh6WnOg"
+    }
+   ]
+  },
+  {
+   "row": 21,
+   "module": "工具课&AI使用",
+   "course_id": "TOOL106",
+   "topic": "AIGC 绘图",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "崔轩瑞",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "AIGC",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/JuebwWW5OiNJP3k84DkcoU6Gnhf"
+    }
+   ]
+  },
+  {
+   "row": 22,
+   "module": "写作",
+   "course_id": "WRITING101",
+   "topic": "LaTeX语法基础、MCM/ICM模板使用、texpage工具使用",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "崔轩瑞",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "Latex入门 2026美赛集训队",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/N7FFwKmq9ibrGAk8rigcM3Spnle"
+    }
+   ]
+  },
+  {
+   "row": 23,
+   "module": "写作",
+   "course_id": "WRITING102",
+   "topic": "公式书写与识别软件",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "李晋宇",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "数学公式键入&LaTeX公式和排版",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/IkT0dxu3koq2Zdx5EUwcIK1tn9W"
+    }
+   ]
+  },
+  {
+   "row": 24,
+   "module": "写作",
+   "course_id": "WRITING103",
+   "topic": "飞书文档与latex进行协作",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "集训培养计划介绍&飞书协作",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/W3rQwKQT9iHAaxkoHV6cCdWanBe"
+    }
+   ]
+  },
+  {
+   "row": 25,
+   "module": "写作",
+   "course_id": "WRITING201",
+   "topic": "美赛论文写作规范、O奖论文赏析、judgement's commentary学习",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "任桐鑫",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "attachment",
+     "name": "写作课20250118.pdf",
+     "token": "E6hGbNQq7oSvXlxJQlOcvRaZn0R",
+     "size_kb": 4181
+    }
+   ]
+  },
+  {
+   "row": 26,
+   "module": "写作",
+   "course_id": "WRITING202",
+   "topic": "学术写作大师班",
+   "format": "文档",
+   "format_detail": [],
+   "intro": "",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "Nature大师班-科研论文学习（Masterclass in Scientific Writing and Publishing）",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/NUVadCbsmooK3hxpCn5cfIK2nFe"
+    }
+   ]
+  },
+  {
+   "row": 27,
+   "module": "实战演示",
+   "course_id": "MCMA23-1",
+   "topic": "微分方程-优化模型实战演示：2023年A题",
+   "format": "建模",
+   "format_detail": [],
+   "intro": "题目解读与建立框架",
+   "contact": "阎冠举",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnuq4vwgn967wgb674w15v?from=from_copylink"
+    },
+    {
+     "type": "link",
+     "name": "美赛2023A复现讲解",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/Wu83wmGRziW8OBkLVyOcB7JonMg"
+    }
+   ]
+  },
+  {
+   "row": 28,
+   "module": "实战演示",
+   "course_id": "MCMA23-2",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "文献检索",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnuqst9l1pe5j8rkfys3ks?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 2
+  },
+  {
+   "row": 29,
+   "module": "实战演示",
+   "course_id": "MCMA23-3",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "制定文章框架",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnuqt7gm7glv6g1d458wz4?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 3
+  },
+  {
+   "row": 30,
+   "module": "实战演示",
+   "course_id": "MCMA23-4",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "数学建模",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnuq5984o8hs9l2f999f7i?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 4
+  },
+  {
+   "row": 31,
+   "module": "实战演示",
+   "course_id": "MCMA23-5",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "模块化问题",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnuqbu9j4d1xqwan7grirx?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 5
+  },
+  {
+   "row": 32,
+   "module": "实战演示",
+   "course_id": "MCMA23-6",
+   "topic": "",
+   "format": "求解",
+   "format_detail": [],
+   "intro": "方程参数确定",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnuq7sdd6g2rk8ddc167wn?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 6
+  },
+  {
+   "row": 33,
+   "module": "实战演示",
+   "course_id": "MCMA23-7",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "随机干旱天气",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnuqwe633bz633ie73px7l?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 7
+  },
+  {
+   "row": 34,
+   "module": "实战演示",
+   "course_id": "MCMA23-8",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "方程求解",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnurv41f68a2yot5a77j3x?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 8
+  },
+  {
+   "row": 35,
+   "module": "实战演示",
+   "course_id": "MCMA23-9",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "渐进行为研究",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnurg9jaxx1y5sb44728mp?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 9
+  },
+  {
+   "row": 36,
+   "module": "实战演示",
+   "course_id": "MCMA23-10",
+   "topic": "",
+   "format": "应用",
+   "format_detail": [],
+   "intro": "物种数",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnurckdx9dsqty58365w5b?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 10
+  },
+  {
+   "row": 37,
+   "module": "实战演示",
+   "course_id": "MCMA23-11",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "物种类别",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnurte8f4j445428g777ts?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 11
+  },
+  {
+   "row": 38,
+   "module": "实战演示",
+   "course_id": "MCMA23-12",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "天气频率",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnurdg579ne1898f6t47r3?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 12
+  },
+  {
+   "row": 39,
+   "module": "实战演示",
+   "course_id": "MCMA23-13",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "污染、栖息地",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnur5421m45uq2zy8p2gdl?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 13
+  },
+  {
+   "row": 40,
+   "module": "实战演示",
+   "course_id": "MCMA23-14",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "灵敏性分析",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnurzmn49daj9xwprtq5ez?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 14
+  },
+  {
+   "row": 41,
+   "module": "实战演示",
+   "course_id": "MCMA23-15",
+   "topic": "",
+   "format": "可视化",
+   "format_detail": [],
+   "intro": "图表美化",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnurho6124dc6ug59n62px?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 15
+  },
+  {
+   "row": 42,
+   "module": "实战演示",
+   "course_id": "MCMA23-16",
+   "topic": "",
+   "format": "写作",
+   "format_detail": [],
+   "intro": "摘要",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnurz6a28798v3w42zv148?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 16
+  },
+  {
+   "row": 43,
+   "module": "实战演示",
+   "course_id": "MCMA23-17",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "模型描述",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnur2cv1eo9m5x1mytg17b?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 17
+  },
+  {
+   "row": 44,
+   "module": "实战演示",
+   "course_id": "MCMA23-18",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "图表描述",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnurwp6ebu4raq3756jlde?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 18
+  },
+  {
+   "row": 45,
+   "module": "实战演示",
+   "course_id": "MCMA23-19",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "完篇",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnurl9ewkts69191l8tr4h?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 19
+  },
+  {
+   "row": 46,
+   "module": "实战演示",
+   "course_id": "MCMA23-20",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "最后检查",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://ai.feishu.cn/minutes/obcnur4936ws44b2z5rqm1mz?from=from_copylink"
+    }
+   ],
+   "series": "微分方程-优化模型实战演示：2023年A题",
+   "episode": 20
+  },
+  {
+   "row": 47,
+   "module": "实战演示",
+   "course_id": "MCMC24-1",
+   "topic": "预测分类-数理统计模型实战：2024年C题",
+   "format": "赛题解读",
+   "format_detail": [],
+   "intro": "赛题背景与题目要求",
+   "contact": "任桐鑫",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn97zi5k6u8l455lq4ow5d?from=from_copylink"
+    },
+    {
+     "type": "link",
+     "name": "2024 MCM Problem C: Momentum in Tennis",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/QUzYdjaCAoy4pmxUqMScq8PSnUd"
+    }
+   ]
+  },
+  {
+   "row": 48,
+   "module": "实战演示",
+   "course_id": "MCMC24-2",
+   "topic": "",
+   "format": "赛题解读",
+   "format_detail": [],
+   "intro": "网球比赛计分规则",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn9787vb6w8881pd9vwie7?from=from_copylink"
+    }
+   ],
+   "series": "预测分类-数理统计模型实战：2024年C题",
+   "episode": 2
+  },
+  {
+   "row": 49,
+   "module": "实战演示",
+   "course_id": "MCMC24-3",
+   "topic": "",
+   "format": "赛题解读",
+   "format_detail": [],
+   "intro": "数据解读",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn972xm9r17sd962zvi296?from=from_copylink"
+    }
+   ],
+   "series": "预测分类-数理统计模型实战：2024年C题",
+   "episode": 3
+  },
+  {
+   "row": 50,
+   "module": "实战演示",
+   "course_id": "MCMC24-4",
+   "topic": "",
+   "format": "模块化",
+   "format_detail": [],
+   "intro": "问题切分",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn97g3xga3z2nhq25b6tk8?from=from_copylink"
+    }
+   ],
+   "series": "预测分类-数理统计模型实战：2024年C题",
+   "episode": 4
+  },
+  {
+   "row": 51,
+   "module": "实战演示",
+   "course_id": "MCMC24-5",
+   "topic": "",
+   "format": "建模与求解",
+   "format_detail": [],
+   "intro": "模型1资料搜寻",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn9793rwe1q58qjpas1442?from=from_copylink"
+    }
+   ],
+   "series": "预测分类-数理统计模型实战：2024年C题",
+   "episode": 5
+  },
+  {
+   "row": 52,
+   "module": "实战演示",
+   "course_id": "MCMC24-6",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "常规局胜率建模",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn976s4s7156473l3hs313?from=from_copylink"
+    }
+   ],
+   "series": "预测分类-数理统计模型实战：2024年C题",
+   "episode": 6
+  },
+  {
+   "row": 53,
+   "module": "实战演示",
+   "course_id": "MCMC24-7",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "抢七局胜率建模",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn97zx1hs86xhg28276497?from=from_copylink"
+    }
+   ],
+   "series": "预测分类-数理统计模型实战：2024年C题",
+   "episode": 7
+  },
+  {
+   "row": 54,
+   "module": "实战演示",
+   "course_id": "MCMC24-8",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "盘胜率和赛胜率建模",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn973k343emuz392uz7454?from=from_copylink"
+    }
+   ],
+   "series": "预测分类-数理统计模型实战：2024年C题",
+   "episode": 8
+  },
+  {
+   "row": 55,
+   "module": "实战演示",
+   "course_id": "MCMC24-9",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "动量是否存在-调研方法",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn97x9l6z8t8a52q9d3neh?from=from_copylink"
+    }
+   ],
+   "series": "预测分类-数理统计模型实战：2024年C题",
+   "episode": 9
+  },
+  {
+   "row": 56,
+   "module": "实战演示",
+   "course_id": "MCMC24-10",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "模型2-动量效应的存在性",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn975u13wv9u7cacjrb4qn?from=from_copylink"
+    }
+   ],
+   "series": "预测分类-数理统计模型实战：2024年C题",
+   "episode": 10
+  },
+  {
+   "row": 57,
+   "module": "实战演示",
+   "course_id": "MCMC24-11",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "模型3-动量预测",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn9768615yc3t79svut62b?from=from_copylink"
+    }
+   ],
+   "series": "预测分类-数理统计模型实战：2024年C题",
+   "episode": 11
+  },
+  {
+   "row": 58,
+   "module": "实战演示",
+   "course_id": "MCMC24-12",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "模型推广",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn97yi63epp978z23c742n?from=from_copylink"
+    }
+   ],
+   "series": "预测分类-数理统计模型实战：2024年C题",
+   "episode": 12
+  },
+  {
+   "row": 59,
+   "module": "实战演示",
+   "course_id": "MCMC24-13",
+   "topic": "",
+   "format": "写作",
+   "format_detail": [],
+   "intro": "写作结构+附加材料",
+   "contact": "",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "回放",
+     "url": "https://sixkoiaf82a.feishu.cn/minutes/obcn97c36edttgsk3zn3t419?from=from_copylink"
+    }
+   ],
+   "series": "预测分类-数理统计模型实战：2024年C题",
+   "episode": 13
+  },
+  {
+   "row": 60,
+   "module": "实战演示",
+   "course_id": "MCMD24-1",
+   "topic": "202X年D题",
+   "format": "视频",
+   "format_detail": [],
+   "intro": "详见授课材料",
+   "contact": "张圃源",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "doc",
+     "name": "详见授课材料"
+    },
+    {
+     "type": "link",
+     "name": "2025年D题图论模型",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/XII2wLXNNinYA9kBr2dcrM1Un0c"
+    }
+   ]
+  },
+  {
+   "row": 61,
+   "module": "实战演示",
+   "course_id": "MCME25-1",
+   "topic": "202X年E题",
+   "format": "视频",
+   "format_detail": [],
+   "intro": "详见授课材料",
+   "contact": "张睿志",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "doc",
+     "name": "详见授课材料"
+    },
+    {
+     "type": "attachment",
+     "name": "美赛E题分析.docx",
+     "token": "QpPgbdp9MonROVxynYocmbZTnbf",
+     "size_kb": 3186
+    }
+   ]
+  },
+  {
+   "row": 62,
+   "module": "赛题实战",
+   "course_id": "Mock Competition",
+   "topic": "实战：集训队成员运用所学内容实战",
+   "format": "提交论文",
+   "format_detail": [],
+   "intro": "小组为单位真题复现",
+   "contact": "刘韫齐",
+   "no_playback": false,
+   "resources": [
+    {
+     "type": "link",
+     "name": "实战安排",
+     "url": "https://sixkoiaf82a.feishu.cn/docx/FQUJwyO0XiyyJ0kN4AvcR9Yjn0d"
+    }
+   ]
+  },
+  {
+   "row": 63,
+   "module": "赛题实战",
+   "course_id": "",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "第一轮反馈、反馈后修改",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 64,
+   "module": "赛题实战",
+   "course_id": "",
+   "topic": "",
+   "format": "",
+   "format_detail": [],
+   "intro": "第一轮反馈、反馈后修改",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 65,
+   "module": "正式比赛",
+   "course_id": "Competition",
+   "topic": "比赛截止注册缴费",
+   "format": "提交论文",
+   "format_detail": [],
+   "intro": "美东时间: 3:00 p.m. EST on Thursday, January 29, 2026. 北京时间：2026年1月30日凌晨4:00",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 66,
+   "module": "正式比赛",
+   "course_id": "",
+   "topic": "比赛正式开始",
+   "format": "",
+   "format_detail": [],
+   "intro": "美东时间：5:00 p.m. EST on Thursday, January 29, 2026. 北京时间：2026年1月30日凌晨6:00",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 67,
+   "module": "正式比赛",
+   "course_id": "",
+   "topic": "比赛结束",
+   "format": "",
+   "format_detail": [],
+   "intro": "美东时间：8:00 p.m. EST on Monday, February 2, 2026. 北京时间：2026年2月3日早上9:00",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 68,
+   "module": "正式比赛",
+   "course_id": "",
+   "topic": "比赛作品截止收集",
+   "format": "",
+   "format_detail": [],
+   "intro": "美东时间：9:00 p.m. EST on Monday, February 2, 2026. 北京时间：2026年2月3日早上10:00",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  },
+  {
+   "row": 69,
+   "module": "正式比赛",
+   "course_id": "",
+   "topic": "比赛结果公布",
+   "format": "",
+   "format_detail": [],
+   "intro": "2026年5月8日左右",
+   "contact": "",
+   "no_playback": false,
+   "resources": []
+  }
+ ]
+}
