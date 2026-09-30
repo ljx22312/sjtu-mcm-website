@@ -11,7 +11,16 @@ import {
   type Competition,
 } from "../lib/data";
 
-const news = sortNews(newsData.items as NewsItem[]).slice(0, 3);
+/** 新闻保留口径与 /news 一致：通知近 3 个月、动态近 1 年 */
+function newsWithinDays(n: NewsItem, days: number): boolean {
+  const t = Date.parse(n.date);
+  return Number.isFinite(t) && Date.now() - t <= days * 24 * 3600 * 1000;
+}
+const news = sortNews(
+  (newsData.items as NewsItem[]).filter((n) =>
+    n.category === "notice" ? newsWithinDays(n, 92) : newsWithinDays(n, 366),
+  ),
+).slice(0, 3);
 const upcoming = recentCompetitions(compsData.competitions as Competition[]);
 const nowMonth = new Date().getMonth() + 1;
 
