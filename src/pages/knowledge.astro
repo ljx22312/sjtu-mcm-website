@@ -164,6 +164,7 @@ function searchText(it: CourseItem): string {
                         </td>
                         <td class="c-ct">{it.contact || "—"}</td>
                         <td class="c-res">
+                          <div class="c-res-inner">
                           {it.resources.map((r) => (
                             r.url ? (
                               <a class="res-link" href={r.url} target="_blank" rel="noopener noreferrer" title={r.name}>↗ {r.name}</a>
@@ -176,6 +177,7 @@ function searchText(it: CourseItem): string {
                           {it.resources.length === 0 && (it.no_playback
                             ? <span class="muted noplay">无回放</span>
                             : <span class="muted">—</span>)}
+                          </div>
                         </td>
                       </tr>
                       <tr class="kb-detail" hidden>
@@ -586,6 +588,11 @@ function searchText(it: CourseItem): string {
 
   .c-res {
     max-width: 260px;
+  }
+
+  /* flex 放在内部容器：td 一旦改成 flex 会脱离 table-cell 布局、不再随行高拉伸，
+     悬停/展开行背景涂不满整格，右下露出表格白底（用户实测缺口） */
+  .c-res-inner {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
