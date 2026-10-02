@@ -6,7 +6,7 @@ import { Agent, type AgentMessage } from "@earendil-works/pi-agent-core";
 import { contentText, type Message } from "@earendil-works/pi-ai";
 import { AGENT_CONTEXT_MESSAGES } from "./config";
 import { appendMessage, listSessionMessages } from "./history";
-import { getAgentRuntime } from "./models";
+import { getOfficialRuntime, type AgentRuntime } from "./models";
 import { buildSystemPrompt } from "./prompt";
 import { agentTools } from "./tools";
 
@@ -67,11 +67,13 @@ export async function runAgentTurn(opts: {
   handlers: AgentTurnHandlers;
   /** 续聊的会话；不传则由存储层决定（近期活跃则续，间隔超时则新开） */
   sessionId?: number;
+  /** 本轮使用的运行时；不传则用官方模型（管理员配置的模型/深度） */
+  runtime?: AgentRuntime;
   signal?: AbortSignal;
 }): Promise<AgentTurnResult> {
   const { account, message, handlers, sessionId, signal } = opts;
 
-  const runtime = getAgentRuntime();
+  const runtime = opts.runtime ?? getOfficialRuntime();
   if (runtime.mode === "mock" && runtime.setMockResponse) runtime.setMockResponse(mockReply(message));
 
   const agent = new Agent({
@@ -84,8 +86,11 @@ export async function runAgentTurn(opts: {
     streamFn: (model, context, options) =>
       runtime.models.streamSimple(model, context, {
         ...options,
-        /* 开启思考流：glm-4.6 经 Anthropic 兼容端点返回 thinking 增量 */
-        reasoning: "medium",
+        /* 思考深度：官方用户由管理配置决定，自带 API 用户由自己决定；
+           reasoning 为 undefined 时 pi-ai 不请求思考（更快更省） */
+        ...(runtime.reasoning ? { reasoning: runtime.reasoning } : {}),
+        /* 自带 API：请求级 Key 覆盖（官方运行时为 undefined，走进程环境 Key） */
+        ...(runtime.apiKey ? { apiKey: runtime.apiKey } : {}),
       }),
   });
 

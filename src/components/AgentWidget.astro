@@ -15,6 +15,9 @@
         <h3>数模小助手</h3>
       </div>
       <div class="agent-head-actions">
+        <button type="button" id="agent-settings" title="模型设置（自带 API / 思考深度）" aria-label="模型设置">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
         <button type="button" id="agent-history" title="历史对话（恢复之前的话题）" aria-label="历史对话">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
         </button>
@@ -35,6 +38,63 @@
         <span>历史对话</span>
       </div>
       <div id="agent-sessions-list"></div>
+    </div>
+    <div id="agent-settings-view" hidden aria-label="模型设置">
+      <div class="agent-sessions-head">
+        <button type="button" id="agent-settings-back" aria-label="返回对话">‹ 返回</button>
+        <span>模型设置</span>
+      </div>
+      <div id="agent-settings-body">
+        <section class="agent-set-section">
+          <h4>自带 API（可选）</h4>
+          <p class="agent-set-desc">填写后对话改用你自己的模型额度，协会的 Key 与限额不再适用。配置仅保存在本浏览器（localStorage），不会上传到协会服务器。</p>
+          <div id="agent-custom-form">
+            <label class="agent-set-field">
+              <span>API 地址（https:// 开头，Anthropic 协议）</span>
+              <input type="url" id="agent-custom-baseurl" placeholder="https://open.bigmodel.cn/api/anthropic" autocomplete="off" spellcheck="false">
+            </label>
+            <label class="agent-set-field">
+              <span>API Key</span>
+              <input type="password" id="agent-custom-key" placeholder="sk-…" autocomplete="off">
+            </label>
+            <label class="agent-set-field">
+              <span>模型 ID</span>
+              <input type="text" id="agent-custom-model" placeholder="glm-4.6" autocomplete="off" spellcheck="false">
+            </label>
+            <label class="agent-set-field">
+              <span>思考深度</span>
+              <select id="agent-custom-reasoning">
+                <option value="off">关闭（最快）</option>
+                <option value="minimal">极浅</option>
+                <option value="low">快速</option>
+                <option value="medium" selected>标准</option>
+                <option value="high">深度（最慢最贵）</option>
+              </select>
+            </label>
+            <div class="agent-set-actions">
+              <button type="button" id="agent-custom-save" class="agent-set-btn primary">保存</button>
+              <button type="button" id="agent-custom-clear" class="agent-set-btn">清除自带 API</button>
+            </div>
+            <p class="agent-set-hint" id="agent-custom-status" hidden></p>
+          </div>
+        </section>
+        <section class="agent-set-section" id="agent-admin-section" hidden>
+          <h4>官方模型参数（仅管理员可见）</h4>
+          <p class="agent-set-desc">对所有使用协会官方模型用户的生效配置，保存在服务器 data/agent-admin.json。</p>
+          <label class="agent-set-field">
+            <span>模型 ID</span>
+            <input type="text" id="agent-admin-model" autocomplete="off" spellcheck="false">
+          </label>
+          <label class="agent-set-field">
+            <span>思考深度</span>
+            <select id="agent-admin-reasoning"></select>
+          </label>
+          <div class="agent-set-actions">
+            <button type="button" id="agent-admin-save" class="agent-set-btn primary">保存官方参数</button>
+          </div>
+          <p class="agent-set-hint" id="agent-admin-status" hidden></p>
+        </section>
+      </div>
     </div>
     <footer class="agent-input">
       <textarea id="agent-input" rows="1" placeholder="问问我：国赛集训的论文写作课在哪看回放？"></textarea>
@@ -123,6 +183,10 @@
     margin: 2px 0 0;
     font-size: 0.75rem;
     opacity: 0.85;
+  }
+  .agent-mode-badge {
+    font-size: 0.68rem;
+    line-height: 1.4;
   }
   .agent-head-actions {
     display: flex;
@@ -382,6 +446,95 @@
     padding: 20px;
   }
 
+  /* 设置覆盖层：与历史列表同款结构，可滚动表单 */
+  #agent-settings-view {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg, #fff);
+    z-index: 2;
+  }
+  #agent-settings-view[hidden] {
+    display: none !important;
+  }
+  #agent-settings-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .agent-set-section h4 {
+    margin: 0 0 4px;
+    font-size: 0.88rem;
+    color: var(--text, #333);
+  }
+  .agent-set-desc {
+    margin: 0 0 10px;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--text-light, #666);
+  }
+  .agent-set-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+    font-size: 0.75rem;
+    color: var(--text-light, #666);
+  }
+  .agent-set-field input,
+  .agent-set-field select {
+    padding: 7px 9px;
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 0.8rem;
+    color: var(--text, #333);
+    background: var(--bg, #fafafa);
+  }
+  .agent-set-field input:focus,
+  .agent-set-field select:focus {
+    outline: none;
+    border-color: var(--blue, #1f4e9c);
+  }
+  .agent-set-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+  }
+  .agent-set-btn {
+    padding: 7px 14px;
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 8px;
+    background: var(--card-bg, #fff);
+    color: var(--text, #333);
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .agent-set-btn:hover {
+    border-color: var(--blue, #1f4e9c);
+  }
+  .agent-set-btn.primary {
+    background: var(--red, #cc0000);
+    border-color: var(--red, #cc0000);
+    color: #fff;
+  }
+  .agent-set-btn.primary:hover {
+    background: var(--red-dark, #a30000);
+    border-color: var(--red-dark, #a30000);
+  }
+  .agent-set-hint {
+    margin: 8px 0 0;
+    font-size: 0.72rem;
+    color: var(--text-light, #666);
+  }
+  .agent-set-hint.error {
+    color: #a30000;
+  }
+
   .agent-input {
     display: flex;
     align-items: flex-end;
@@ -464,12 +617,50 @@
   const sessionsView = document.getElementById("agent-sessions") as HTMLElement;
   const sessionsList = document.getElementById("agent-sessions-list") as HTMLElement;
   const sessionsBack = document.getElementById("agent-sessions-back") as HTMLButtonElement;
+  const settingsBtn = document.getElementById("agent-settings") as HTMLButtonElement;
+  const settingsView = document.getElementById("agent-settings-view") as HTMLElement;
+  const settingsBack = document.getElementById("agent-settings-back") as HTMLButtonElement;
   const NOTICE = (document.querySelector("#agent-body .agent-notice") as HTMLElement)?.outerHTML ?? "";
 
   let ready = false; // 已确认可对话（已登录，或服务端开启匿名模式）
   let streaming = false;
   /** 当前对话归属的会话；null = 全新会话（首条消息发送后由服务端分配） */
   let currentSessionId: number | null = null;
+
+  /* ---------- 自带 API（BYOK）：配置只存本浏览器 localStorage，不经过协会服务器存储 ---------- */
+
+  const LS_KEY = "agent-custom-llm";
+
+  interface CustomLlm {
+    baseUrl: string;
+    apiKey: string;
+    model: string;
+    reasoning: string;
+  }
+
+  function loadCustom(): CustomLlm | null {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return null;
+      const c = JSON.parse(raw) as Partial<CustomLlm>;
+      if (!c.baseUrl || !c.apiKey || !c.model) return null;
+      return { baseUrl: c.baseUrl, apiKey: c.apiKey, model: c.model, reasoning: c.reasoning || "medium" };
+    } catch {
+      return null;
+    }
+  }
+
+  function saveCustom(c: CustomLlm | null): void {
+    try {
+      if (c) localStorage.setItem(LS_KEY, JSON.stringify(c));
+      else localStorage.removeItem(LS_KEY);
+    } catch {
+      /* 隐私模式等存储异常：本次会话内仍可用内存态 */
+    }
+  }
+
+  /** 内存态：localStorage 不可用时也能本次会话生效 */
+  let customMem: CustomLlm | null = loadCustom();
 
   /* ---------- 渲染 ---------- */
 
@@ -727,9 +918,150 @@
     input.focus();
   });
 
+  /* ---------- 设置页 ---------- */
+
+  const customBaseUrl = document.getElementById("agent-custom-baseurl") as HTMLInputElement;
+  const customKey = document.getElementById("agent-custom-key") as HTMLInputElement;
+  const customModel = document.getElementById("agent-custom-model") as HTMLInputElement;
+  const customReasoning = document.getElementById("agent-custom-reasoning") as HTMLSelectElement;
+  const customSave = document.getElementById("agent-custom-save") as HTMLButtonElement;
+  const customClear = document.getElementById("agent-custom-clear") as HTMLButtonElement;
+  const customStatus = document.getElementById("agent-custom-status") as HTMLElement;
+  const adminSection = document.getElementById("agent-admin-section") as HTMLElement;
+  const adminModel = document.getElementById("agent-admin-model") as HTMLInputElement;
+  const adminReasoning = document.getElementById("agent-admin-reasoning") as HTMLSelectElement;
+  const adminSave = document.getElementById("agent-admin-save") as HTMLButtonElement;
+  const adminStatus = document.getElementById("agent-admin-status") as HTMLElement;
+
+  /* 顶部标题旁的当前模型角标：自带 API 时提示用户正在消耗自己的额度 */
+  function updateModeBadge(): void {
+    const head = panel.querySelector(".agent-head-info");
+    if (!head) return;
+    let badge = head.querySelector(".agent-mode-badge") as HTMLElement | null;
+    if (customMem) {
+      if (!badge) {
+        badge = document.createElement("p");
+        badge.className = "agent-mode-badge";
+        head.appendChild(badge);
+      }
+      badge.textContent = `自带 API · ${customMem.model}`;
+    } else {
+      badge?.remove();
+    }
+  }
+  updateModeBadge();
+
+  function setHint(el: HTMLElement, text: string, isError = false): void {
+    el.textContent = text;
+    el.hidden = !text;
+    el.classList.toggle("error", isError);
+  }
+
+  async function openSettings(): Promise<void> {
+    if (!ready) {
+      await openPanel();
+      if (!ready) return;
+    }
+    /* 回填自带 API 表单 */
+    const c = customMem;
+    customBaseUrl.value = c?.baseUrl ?? "";
+    customKey.value = c?.apiKey ?? "";
+    customModel.value = c?.model ?? "";
+    customReasoning.value = c?.reasoning ?? "medium";
+    setHint(customStatus, "");
+    /* 拉取官方参数 + 管理员身份；管理员才渲染控制区块 */
+    adminSection.hidden = true;
+    setHint(adminStatus, "");
+    try {
+      const res = await fetch("/api/agent/settings");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.admin) {
+          adminModel.value = data.officialModel ?? "";
+          if (adminReasoning.options.length === 0) {
+            for (const r of data.reasoningLevels ?? []) {
+              const opt = document.createElement("option");
+              opt.value = r.value;
+              opt.textContent = r.label;
+              adminReasoning.appendChild(opt);
+            }
+          }
+          adminReasoning.value = data.officialReasoning ?? "medium";
+          adminSection.hidden = false;
+        }
+      }
+    } catch {
+      /* 网络异常不阻塞设置页打开，仅管理员区块不可用 */
+    }
+    settingsView.hidden = false;
+  }
+
+  function hideSettings(): void {
+    settingsView.hidden = true;
+  }
+
+  settingsBtn.addEventListener("click", () => void openSettings());
+  settingsBack.addEventListener("click", () => {
+    hideSettings();
+    input.focus();
+  });
+
+  customSave.addEventListener("click", () => {
+    const baseUrl = customBaseUrl.value.trim().replace(/\/+$/, "");
+    const apiKey = customKey.value.trim();
+    const model = customModel.value.trim();
+    if (!baseUrl || !apiKey || !model) {
+      setHint(customStatus, "请填写完整：API 地址、Key、模型 ID。", true);
+      return;
+    }
+    if (!/^https:\/\//.test(baseUrl)) {
+      setHint(customStatus, "API 地址必须以 https:// 开头。", true);
+      return;
+    }
+    const c: CustomLlm = { baseUrl, apiKey, model, reasoning: customReasoning.value };
+    customMem = c;
+    saveCustom(c);
+    updateModeBadge();
+    setHint(customStatus, "已保存到本浏览器。之后的对话将使用你的 API。");
+  });
+
+  customClear.addEventListener("click", () => {
+    customMem = null;
+    saveCustom(null);
+    updateModeBadge();
+    customBaseUrl.value = "";
+    customKey.value = "";
+    customModel.value = "";
+    customReasoning.value = "medium";
+    setHint(customStatus, "已清除，恢复使用协会官方模型。");
+  });
+
+  adminSave.addEventListener("click", async () => {
+    try {
+      const res = await fetch("/api/agent/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          officialModel: adminModel.value.trim() || undefined,
+          officialReasoning: adminReasoning.value,
+        }),
+      });
+      if (res.status === 403) {
+        setHint(adminStatus, "没有管理员权限。", true);
+        return;
+      }
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setHint(adminStatus, `已保存：${data.officialModel} / ${data.officialReasoning}`);
+    } catch {
+      setHint(adminStatus, "保存失败，请稍后重试。", true);
+    }
+  });
+
   function closePanel() {
     panel.hidden = true;
     hideSessions();
+    hideSettings();
     fab.setAttribute("aria-label", "打开智能助手");
   }
 
@@ -796,6 +1128,7 @@
     addMsg("user", text);
 
     setStreaming(true);
+    const usingCustom = customMem !== null;
     let bubble: HTMLElement | null = null;
     let status: HTMLElement | null = null;
     let think: ThinkBlock | null = null;
@@ -805,7 +1138,12 @@
       const res = await fetch("/api/agent/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, sessionId: currentSessionId ?? undefined }),
+        body: JSON.stringify({
+          message: text,
+          sessionId: currentSessionId ?? undefined,
+          /* 自带 API 配置随请求携带（仅 HTTPS 端点），服务端不落盘 */
+          ...(usingCustom ? { custom: customMem } : {}),
+        }),
       });
       if (res.status === 401) {
         ready = false;
@@ -814,7 +1152,15 @@
         return;
       }
       if (res.status === 429) {
-        addMsg("error", "提问太频繁啦，请一小时后再试。");
+        addMsg(
+          "error",
+          usingCustom ? "提问太频繁啦，请一小时后再试。" : "协会模型的每小时提问上限到了，可在「模型设置」里配置自己的 API 继续使用。",
+        );
+        return;
+      }
+      if (res.status === 400) {
+        const data = await res.json().catch(() => null as unknown as { error?: string } | null);
+        addMsg("error", data?.error ? `自带 API 配置无效：${data.error}` : "请求无效，请检查「模型设置」。");
         return;
       }
       if (!res.ok || !res.body) {

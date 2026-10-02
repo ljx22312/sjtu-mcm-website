@@ -7,7 +7,10 @@
  *   AGENT_MODEL      模型 id，默认 glm-4.6（可选 glm-4.5-air）
  *   AGENT_ALLOW_MOCK 配置正式 Key 后是否仍允许演示模式（默认否；未配置 Key 时自动演示）
  *   AGENT_ALLOW_ANONYMOUS  设为 1 时未登录也可使用 agent（内测期临时开关；匿名访客共用 "anonymous" 身份与历史）
- *   AGENT_RATE_LIMIT 每用户每小时可发送的消息数，默认 20
+ *   AGENT_RATE_LIMIT 每用户每小时可发送的消息数（官方模型），默认 20
+ *   AGENT_RATE_LIMIT_CUSTOM 自带 API 用户每小时的的消息数上限，默认 100（花自己的额度，只防失控不防正常使用）
+ *   AGENT_ADMIN_ACCOUNTS 管理员 jAccount 账号（逗号分隔；与 data/agent-admin.json 的 admins 合并）
+ *   AGENT_ADMIN_CONFIG  官方模型运行参数文件路径，默认 <项目根>/data/agent-admin.json
  *   AGENT_HISTORY_DB        SQLite 历史库路径，默认 <项目根>/data/agent-history.db
  *   AGENT_HISTORY_RETENTION_DAYS 对话记录保留天数，默认 180
  */
@@ -33,8 +36,15 @@ export const agentConfigured = Boolean(agentApiKey);
 export const agentMockAllowed = !agentConfigured || env("AGENT_ALLOW_MOCK") === "1";
 /** 内测期是否允许未登录使用（匿名共用同一份历史；正式部署保持关闭，回到 jAccount 登录门槛） */
 export const agentAllowAnonymous = env("AGENT_ALLOW_ANONYMOUS") === "1";
-/** 每用户每小时的聊天消息上限 */
+/** 每用户每小时的聊天消息上限（官方模型） */
 export const agentRateLimitPerHour = envInt("AGENT_RATE_LIMIT", 20);
+/** 自带 API 用户每小时的聊天消息上限（花用户自己的额度，仅防失控） */
+export const agentRateLimitCustomPerHour = envInt("AGENT_RATE_LIMIT_CUSTOM", 100);
+/** 管理员账号列表（环境变量部分；与 agent-admin.json 的 admins 合并） */
+export const agentAdminAccounts = env("AGENT_ADMIN_ACCOUNTS")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 /** 单条消息长度上限（字符） */
 export const AGENT_MAX_MESSAGE_CHARS = 2000;
 /** 每次请求携带的历史消息条数上限 */
@@ -51,3 +61,5 @@ function envPath(key: string, fallback: string): string {
 
 /** SQLite 历史库文件路径 */
 export const agentHistoryDbPath = envPath("AGENT_HISTORY_DB", join(process.cwd(), "data", "agent-history.db"));
+/** 官方模型运行参数（模型/思考深度）配置文件路径，仅服务器本地可写 */
+export const agentAdminConfigPath = envPath("AGENT_ADMIN_CONFIG", join(process.cwd(), "data", "agent-admin.json"));
