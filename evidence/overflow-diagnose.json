@@ -1,0 +1,107 @@
+{
+  "/": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  },
+  "/news": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  },
+  "/calendar": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  },
+  "/knowledge": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": [
+      {
+        "sel": "button.chip",
+        "w": 137,
+        "right": 528
+      },
+      {
+        "sel": "span.chip-cnt",
+        "w": 8,
+        "right": 513
+      },
+      {
+        "sel": "button.chip",
+        "w": 70,
+        "right": 606
+      },
+      {
+        "sel": "span.chip-cnt",
+        "w": 8,
+        "right": 591
+      },
+      {
+        "sel": "button.chip",
+        "w": 98,
+        "right": 712
+      },
+      {
+        "sel": "span.chip-cnt",
+        "w": 8,
+        "right": 697
+      },
+      {
+        "sel": "button.chip",
+        "w": 98,
+        "right": 818
+      },
+      {
+        "sel": "span.chip-cnt",
+        "w": 8,
+        "right": 803
+      },
+      {
+        "sel": "button.chip",
+        "w": 98,
+        "right": 924
+      },
+      {
+        "sel": "span.chip-cnt",
+        "w": 8,
+        "right": 909
+      }
+    ]
+  },
+  "/ai-tools": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  },
+  "/about": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  },
+  "/join": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  },
+  "/team-up": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  },
+  "/login": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  }
+}
