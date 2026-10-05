@@ -1188,6 +1188,7 @@ function searchText(it: DisplayItem): string {
   .kb-source {
     margin-top: 12px;
     font-size: 0.8rem;
+    overflow-wrap: anywhere; /* 数据源里的飞书域名长路径可断行 */
   }
 
   @media (max-width: 860px) {
@@ -1254,6 +1255,7 @@ function searchText(it: DisplayItem): string {
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 0 14px;
+      min-width: 0; /* 网格项按轨道宽度收缩，不被内容最小宽度撑宽 */
     }
 
     .kb-card summary {
@@ -1288,6 +1290,9 @@ function searchText(it: DisplayItem): string {
 
     .kb-card-topic {
       font-weight: 600;
+      /* 主题里的长英文串（如 Python-Plotly+Pyecharts+Seaborn，「+」处无断行点）
+         实测 min-content 268px，与 id/形式列相加把卡片轨道撑到 466px */
+      overflow-wrap: anywhere;
     }
 
     .kb-card-links {
@@ -1311,13 +1316,17 @@ function searchText(it: DisplayItem): string {
     .kb-card-fmt {
       font-size: 0.8rem;
       color: var(--text-light);
-      white-space: nowrap;
+      /* 不强制单行：nowrap 时「线下 2026年1月3日 18:00-20:30」min-content 200px，
+         会跟着把 summary 撑出卡片宽度 */
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
 
     .kb-card-body {
       border-top: 1px dashed var(--border);
       padding: 10px 0 14px;
       font-size: 0.9rem;
+      overflow-wrap: anywhere; /* 形式与安排等字段里的长英文串可断行 */
     }
 
     .kb-card-body p {

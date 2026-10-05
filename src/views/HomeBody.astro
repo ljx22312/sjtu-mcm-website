@@ -229,6 +229,8 @@ const to = (path: string) => `${base}${path}`;
 
   .comp-meta dd {
     margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere; /* 报名/比赛窗口里的长日期串可断行 */
   }
 
   .comp-card,
@@ -237,12 +239,16 @@ const to = (path: string) => `${base}${path}`;
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-width: 0; /* 网格项按轨道宽度收缩，不被内容最小宽度撑宽 */
   }
 
   .comp-card h3,
   .news-card h3 {
     text-wrap: balance;
-    word-break: keep-all;
+    /* 不用 keep-all：长中文赛事名（如「“华数杯”大学生数学建模竞赛（国内赛/国际赛）」）
+       整段不可断行，min-content 达 381px+，把 1fr 轨道顶宽后页面横向溢出 */
+    word-break: normal;
+    overflow-wrap: anywhere;
   }
 
   .more-link {

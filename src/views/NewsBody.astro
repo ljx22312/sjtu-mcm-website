@@ -115,6 +115,7 @@ function coverOf(n: NewsItem): string | undefined {
     gap: 20px;
     align-items: flex-start;
     justify-content: space-between;
+    min-width: 0; /* 网格项按轨道宽度收缩，不被内容最小宽度撑宽 */
   }
 
   .news-body {
@@ -134,16 +135,22 @@ function coverOf(n: NewsItem): string | undefined {
   .news-item h3 {
     margin: 8px 0 6px;
     font-size: 1.1rem;
+    /* 覆盖全局 h1–h4 的 keep-all：长中文标题不允许在字间断行，
+       min-content 被撑到整行宽度（实测 540px），把卡片网格撑出横向滚动 */
+    word-break: normal;
+    overflow-wrap: anywhere;
   }
 
   .summary {
     margin: 0 0 8px;
     color: #444;
     font-size: 0.95rem;
+    overflow-wrap: anywhere; /* 超长无空格串（链接/编号）兜底断行 */
   }
 
   .source {
     margin: 0;
+    overflow-wrap: anywhere;
   }
 
   .news-cover {

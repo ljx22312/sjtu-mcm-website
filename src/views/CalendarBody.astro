@@ -159,10 +159,15 @@ function entriesOfMonth(m: number): { abbr: string; comp: Competition }[] {
   .comp-head h3 {
     margin: 0;
     font-size: 1.1rem;
+    /* 覆盖全局 h1–h4 的 keep-all：长中文赛事名整段不可断行（min-content 实测 362px），
+       把 grid-2 的 1fr 轨道顶宽后卡片横向溢出 44px */
+    word-break: normal;
+    overflow-wrap: anywhere;
   }
 
   .name-en {
     margin: 2px 0 0;
+    overflow-wrap: anywhere;
   }
 
   .badges {
@@ -198,6 +203,8 @@ function entriesOfMonth(m: number): { abbr: string; comp: Competition }[] {
 
   .comp-meta dd {
     margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere; /* 校内赛等超长窗口说明里的日期串可断行 */
   }
 
   .notes {
@@ -215,6 +222,7 @@ function entriesOfMonth(m: number): { abbr: string; comp: Competition }[] {
 
   .comp-card {
     scroll-margin-top: 84px; /* 锚点跳转时避开吸顶页头 */
+    min-width: 0; /* 网格项按轨道宽度收缩，不被内容最小宽度撑宽 */
   }
 
   .cal-timeline table.data-table {
