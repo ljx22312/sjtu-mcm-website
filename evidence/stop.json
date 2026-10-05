@@ -1,0 +1,7 @@
+{
+  "case": "stop-button-hung-server",
+  "recoveryMs": 41,
+  "stoppedBubble": "",
+  "inputDisabled": false,
+  "jsErrors": []
+}

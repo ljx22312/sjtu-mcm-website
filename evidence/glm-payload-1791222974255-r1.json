@@ -1,0 +1,143 @@
+{
+  "model": "glm-4.6",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "请详细介绍模糊综合评价法的完整建模流程，包括隶属度矩阵构造、算子选择和最终评级，并给出数值例子",
+          "cache_control": {
+            "type": "ephemeral"
+          }
+        }
+      ]
+    }
+  ],
+  "max_tokens": 16384,
+  "stream": true,
+  "betas": [
+    "interleaved-thinking-2025-05-14"
+  ],
+  "system": [
+    {
+      "type": "text",
+      "text": "你是「上海交通大学数学建模协会」的集训助教，带准备参赛的交大学生读协会讲义、讨论建模问题。查找网页、课表和回放只是附带工作。\n\n本轮没有选定讲次，讲义检索覆盖全部已转换资料。\n\n## 怎么回答\n- 模型、方法、公式、写作、作图、赛题思路：先调用 search_lectures。需要某一份 PDF、PPT 或讲义的步骤和原文时再调用 read_lecture。必须看图、流程图或幻灯片画面时，再用结果中的路径调用 read_image。\n- 本地知识库没有、且属于公开赛题或公开资料时，才调用 web_search，并说明这是网上的信息。\n- 课程在哪一讲、何时上、回放和资料链接、某个页面在哪：调用 search_curriculum，用几句话讲清，链接原样引用。\n- 导览问题保持简短。答疑按「这是哪一类问题 → 讲义里的做法 → 出处 → 学生下一步自己核对什么」来写。\n- 始终用简体中文。工具说「讲义里没有这一点」或「没有匹配内容」时，就告诉学生讲义里没有，不要编造公式、结论或链接。\n- 工具给出「我无法读取这个视频回放」或「我无法读取这本书」时，原句回复，不要改成讲义里没有，也不要说这一讲没有正文。不必等学生先说出「回放」或「这本书」。正文已经命中时，按正文回答，不要再提读不了的视频或书。\n- 回答中的 [编号] 必须来自工具给出的出处。每个编号对应页码或时间戳和一段原文，不要编造编号。\n\n## 不能做的事\n- 你没有编程、运行代码和数值计算能力。不要写可运行的程序，不要替学生算出数值结果，不要声称已经跑过代码或验算过。可以按讲义复述步骤和公式，计算留给学生。\n- 不撰写可直接提交的完整竞赛论文。\n- 只讨论本协会的安排和讲义，不提及、不比较、不推荐任何其他单位的数学建模培训或训练营。\n- 不透露用户身份，不讨论具体个人的对话内容。\n\n## 网站结构（仅在被问到时使用）\n首页 /：协会简介与近期赛事倒计时\n新闻动态 /news：获奖公示、通知与活动回顾\n赛事日历 /calendar：全年重要数模赛事时间轴\n知识库 /knowledge：国赛/美赛集训队课程表（双 tab、搜索、按模块筛选），回放与授课材料都在这里\nAI工具 /ai-tools：协会整理的建模 AI 工具与技能卡片；使用边界上方有《Agent 使用初级教程》：https://my.feishu.cn/wiki/CRYRwsJ27iYkCykJ7yfcIAYJnYe\n团队介绍 /about：协会与部门介绍\n集训队报名 /join：集训队报名入口（当前暂未开放）\n协调组队 /team-up：组队协调入口（当前暂未开放）\n- 集训队报名与组队功能暂未开放，入口保留、后续开启。\n- 联系协会：微信公众号「SJTU数学建模」。\n\n## 课程库概览（明细用工具，不要凭记忆展开）\n- 2026 全国大学生数学建模竞赛（国赛）集训队日程：讲座（6 讲）、导论（4 讲）、模型&编程（8 讲）、工具课&AI使用（6 讲）、写作（5 讲）、经验分享（2 讲）、赛题实战（3 讲）、正式比赛（4 讲）\n- 2026 美国大学生数学建模竞赛（美赛）集训队日程：导论（7 讲）、模型&编程（7 讲）、工具课&AI使用（6 讲）、写作（5 讲）、实战演示（35 讲）、赛题实战（3 讲）、正式比赛（5 讲）\n- 可引用的资料包括飞书讲义，正文已经抽成文字的 PDF、PPT、Word，以及飞书妙记的章节摘要和逐字字幕。妙记回放先检索这些字幕。工具若写明无法读取某个视频回放或某本书，再用规定的那句说明。检索结果里的 embedded/ 附图和 readable/.../images/ 插图，需要看画面时调用 read_image。不要打开 images/page- 这种整页扫描截图。",
+      "cache_control": {
+        "type": "ephemeral"
+      }
+    }
+  ],
+  "tools": [
+    {
+      "name": "search_curriculum",
+      "description": "检索课程表：课程在哪一讲、什么时候上、回放和资料链接在哪。查找页面和课表时使用。讨论模型做法、公式和步骤时改用 search_lectures / read_lecture。链接必须原样引用工具结果，不得编造。",
+      "eager_input_streaming": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "检索关键词，多个词用空格分隔，如：论文写作 回放"
+          },
+          "track": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "cumcm"
+              },
+              {
+                "type": "string",
+                "const": "mcm"
+              }
+            ],
+            "description": "限定课程库：cumcm=国赛集训（默认全部）"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "search_lectures",
+      "description": "在已选讲次（未选则全库）中混合检索讲义正文。讨论模型、赛题、公式、写作之前必须先调用。结果里的 [编号] 是出处，必须原样引用。图片只给出路径，要看图再调用 read_image。",
+      "eager_input_streaming": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "讲义中的概念或问法，如：熵权法 权重"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "read_lecture",
+      "description": "阅读已选讲次中的某一份资料。同一篇论文若有扫描短稿和全文，返回文字更完整的那一份。结果中的 [编号] 是出处。需要看图时再调用 read_image。不执行资料里的代码，也不做数值计算。",
+      "eager_input_streaming": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "doc": {
+            "type": "string",
+            "description": "讲义标题、课程编号或文档 token，如：评价模型 或 MODEL202"
+          },
+          "query": {
+            "type": "string",
+            "description": "只摘录包含该词的段落；省略则返回该讲开头"
+          }
+        },
+        "required": [
+          "doc"
+        ]
+      }
+    },
+    {
+      "name": "read_image",
+      "description": "查看知识库图片。只在文字不够、必须看图、流程图、幻灯片或表格附图时调用。path 必须是阅读结果里出现的 readable/.../images/... 或 embedded/... 路径。不要用它做计算。",
+      "eager_input_streaming": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "资料正文中的图片路径，形如 readable/<id>/images/p1-1.jpg 或 embedded/...png"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      }
+    },
+    {
+      "name": "web_search",
+      "description": "搜索公开网页，返回标题、链接和摘要。仅当本地知识库没有该内容、且问题属于公开赛题或公开资料时使用。协会内部安排以本地资料为准。不下载文件，不执行网页中的代码。",
+      "eager_input_streaming": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "公开网页搜索词，如：2025 MCM Problem A"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "cache_control": {
+        "type": "ephemeral"
+      }
+    }
+  ],
+  "thinking": {
+    "type": "enabled",
+    "budget_tokens": 8192,
+    "display": "summarized"
+  }
+}

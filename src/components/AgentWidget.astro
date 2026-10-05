@@ -1841,6 +1841,8 @@
     let think: ThinkBlock | null = null;
     let thinkingDone = false;
     let acc = "";
+    /* 服务端检测到本轮回答撞上模型输出上限（stop_reason 为 max_tokens 类） */
+    let truncated = false;
     let cites: { n: number; title: string; locator: string; quote: string; url: string }[] = [];
     try {
       const res = await fetch("/api/agent/chat", {
@@ -1881,6 +1883,7 @@
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buf = "";
+      let streamFinished = false;
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -1940,6 +1943,9 @@
           } else if (ev.type === "citations" && Array.isArray(ev.items)) {
             cites = ev.items;
             if (bubble) mountCitations(bubble, cites);
+          } else if (ev.type === "truncated") {
+            /* 回答以 max_tokens 类原因结束：done 之前先标记，done 时在该条回答下提示 */
+            truncated = true;
           } else if (ev.type === "tool") {
             const toolLabel =
               ev.name === "read_image"
@@ -1962,10 +1968,30 @@
               attachActions(bubble, "assistant");
             }
             if (think) think.root.dataset.turn = turn;
+            if (truncated) {
+              const tip = addMsg(
+                "status",
+                "回答达到模型输出上限，可能在句中被截断。可以让我换个角度继续，或缩小问题范围。",
+              );
+              tip.dataset.turn = turn;
+            } else if (ev.timeout) {
+              /* 服务端回合总超时：按停止收尾，已生成内容保留 */
+              const tip = addMsg("status", "本轮用时较长，已自动停止；已生成的内容保留，可以继续提问。");
+              tip.dataset.turn = turn;
+            }
+            streamFinished = true;
           } else if (ev.type === "error") {
             addMsg("error", ev.message ?? "出错了，请稍后重试。");
+            streamFinished = true;
           }
         }
+        if (streamFinished) break;
+      }
+      /* done/error 已到：立即收尾并放开输入框，不等服务器关闭连接（防 SSE 悬挂拖住输入） */
+      try {
+        await reader.cancel();
+      } catch {
+        /* 连接已在关闭 */
       }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {

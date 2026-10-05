@@ -1,0 +1,43 @@
+{
+  "model": "glm-4.6",
+  "reasoningLevel": "medium",
+  "question": "请详细介绍模糊综合评价法的完整建模流程，包括隶属度矩阵构造、算子选择和最终评级，并给出数值例子",
+  "payloadFiles": [
+    "/tmp/glm-payload-1791222974255-r1.json",
+    "/tmp/glm-payload-1791222974255-r2.json",
+    "/tmp/glm-payload-1791222974255-r3.json"
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "stopReason": "toolUse",
+      "rawStopReason": "tool_use",
+      "outputTokens": 81,
+      "textChars": 0,
+      "toolCalls": [
+        "search_lectures",
+        "search_lectures"
+      ]
+    },
+    {
+      "round": 2,
+      "stopReason": "toolUse",
+      "rawStopReason": "tool_use",
+      "outputTokens": 1023,
+      "textChars": 0,
+      "toolCalls": [
+        "search_lectures",
+        "read_lecture"
+      ]
+    },
+    {
+      "round": 3,
+      "stopReason": "stop",
+      "rawStopReason": "end_turn",
+      "outputTokens": 3842,
+      "textChars": 2487,
+      "toolCalls": []
+    }
+  ],
+  "finalStopReason": "stop"
+}
