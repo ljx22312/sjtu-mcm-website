@@ -37,7 +37,7 @@ const CATALOG: Model<"anthropic-messages">[] = [
     baseUrl: agentBaseUrl,
     reasoning: true,
     contextWindow: 200_000,
-    maxTokens: 8192,
+    maxTokens: 16384,
     input: ["text"],
     cost: { input: 1, output: 1, cacheRead: 0.1, cacheWrite: 1 },
   },
@@ -48,7 +48,7 @@ const CATALOG: Model<"anthropic-messages">[] = [
     baseUrl: agentBaseUrl,
     reasoning: true,
     contextWindow: 128_000,
-    maxTokens: 8192,
+    maxTokens: 16384,
     input: ["text"],
     cost: { input: 0.5, output: 0.5, cacheRead: 0.05, cacheWrite: 0.5 },
   },
@@ -131,7 +131,7 @@ export function getCustomRuntime(cfg: CustomLlmConfig): AgentRuntime {
     reasoning: true,
     /* 未知模型按保守默认；深度思考预算由 pi-ai 在该上限内自动腾挪 */
     contextWindow: 128_000,
-    maxTokens: 8192,
+    maxTokens: 16384,
     input: ["text"],
     /* pi-ai 收到 usage 后会读 model.cost 计费，缺失会抛错；未知价格全记 0 */
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },

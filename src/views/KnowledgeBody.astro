@@ -284,7 +284,7 @@ function searchText(it: DisplayItem): string {
 
                   {/* 正式比赛：时间线渲染，日期全文可见（原先放介绍列会被两行截断） */}
                   {g.name === "正式比赛" ? (
-                    <tr class="kb-timeline kb-filter" data-group={gi} data-module={g.name} data-search={g.items.map(searchText).join(" ")}>
+                    <tr class="kb-timeline kb-filter" data-group={gi} data-module={g.name} data-count={g.items.length} data-search={g.items.map(searchText).join(" ")}>
                       <td colspan={6}>
                         <ul class="tl">
                           {g.items.map((m) => (
@@ -420,7 +420,7 @@ function searchText(it: DisplayItem): string {
                 {g.name} <span>{g.items.length} 条</span>
               </p>
               {g.name === "正式比赛" ? (
-                <details class="kb-card kb-filter-card" data-module={g.name} data-group={gi} data-search={g.items.map(searchText).join(" ")}>
+                <details class="kb-card kb-filter-card" data-module={g.name} data-group={gi} data-count={g.items.length} data-search={g.items.map(searchText).join(" ")}>
                   <summary>
                     <span class="kb-card-topic">正式比赛 · 赛程时间线</span>
                   </summary>
@@ -551,13 +551,17 @@ function searchText(it: DisplayItem): string {
           (!module || el.dataset.module === module) &&
           (ts.length === 0 || ts.every((t) => (el.dataset.search ?? "").includes(t)));
 
+        const itemCount = (el: HTMLElement) => {
+          const n = Number(el.dataset.count);
+          return Number.isFinite(n) && n > 0 ? n : 1;
+        };
         let tableVisible = 0;
         const groupVisible = new Map<number, number>();
         for (const el of filterEls) {
           const ok = match(el);
           el.style.display = ok ? "" : "none";
           if (ok) {
-            tableVisible++;
+            tableVisible += itemCount(el);
             const gi = Number(el.dataset.group ?? -1);
             if (gi >= 0) groupVisible.set(gi, (groupVisible.get(gi) ?? 0) + 1);
           }
@@ -575,7 +579,7 @@ function searchText(it: DisplayItem): string {
           const ok = match(el);
           el.style.display = ok ? "" : "none";
           if (ok) {
-            cardVisible++;
+            cardVisible += itemCount(el);
             const gi = Number(el.dataset.group ?? -1);
             if (gi >= 0) cardGroupVisible.set(gi, (cardGroupVisible.get(gi) ?? 0) + 1);
           }
