@@ -41,6 +41,10 @@ const SNIPPET = 480;
 
 let cache: LectureChunk[] | null = null;
 let cacheStamp = "";
+/** 验戳上次实跑时刻。readableStamp() 是 1 次 readdir + 360 次 exists，
+ *  调用方可能在循环里反复触发 loadChunks()，TTL 内直接用缓存，不再验戳。 */
+let stampCheckedAt = 0;
+const STAMP_TTL_MS = 30_000;
 
 function knowledgeRoot(): string {
   return join(process.cwd(), "data", "knowledge");
@@ -227,7 +231,10 @@ function loadReadable(chunks: LectureChunk[]) {
 }
 
 function loadChunks(): LectureChunk[] {
+  const now = Date.now();
+  if (cache && now - stampCheckedAt < STAMP_TTL_MS) return cache;
   const stamp = readableStamp();
+  stampCheckedAt = now;
   if (cache && cacheStamp === stamp) return cache;
   const manifestPath = join(knowledgeRoot(), "manifest.json");
   const chunks: LectureChunk[] = [];
@@ -302,12 +309,6 @@ function allowedDocIds(): Set<string> | null {
   const ids = new Set<string>();
   for (const id of docsForLectures(keys)) ids.add(canonical(id));
   return ids;
-}
-
-function inScope(token: string): boolean {
-  const allowed = allowedDocIds();
-  if (!allowed) return true;
-  return allowed.has(canonical(token));
 }
 
 function scopeNote(): string {
@@ -406,7 +407,16 @@ function withScope(body: string): string {
 
 export function searchLectures(query: string, limit = 6): string {
   const chunks = loadChunks();
-  const hits = hybridRank(chunks, cacheStamp, query, limit, (chunk) => inScope(chunk.token));
+  /* 白名单只算一次：allow 回调会在排序循环里对候选反复调用，
+     inScope() 每次都重算 allowedDocIds() 的老写法在 chunk 多时是 O(n) 次目录扫描。 */
+  const allowed = allowedDocIds();
+  const hits = hybridRank(
+    chunks,
+    cacheStamp,
+    query,
+    limit,
+    allowed ? (chunk) => allowed.has(canonical(chunk.token)) : undefined,
+  );
   if (hits.length === 0) {
     const unread = unreadSentences();
     if (unread.length > 0) {
@@ -455,7 +465,11 @@ function scoreDoc(list: LectureChunk[], key: string): number {
 export function readLecture(doc: string, query?: string): string {
   const key = doc.trim().toLowerCase();
   if (!key) return "请提供讲义标题、课程编号或文档 token。";
-  const chunks = loadChunks().filter((chunk) => inScope(chunk.token));
+  /* 白名单只算一次；旧的逐 chunk inScope() 每次都重跑 loadChunks() 验戳，
+     全库 1.3 万 chunk 时单次 readLecture 同步阻塞约 30 秒（见 DIAG-REPORT.md）。 */
+  const allChunks = loadChunks();
+  const allowed = allowedDocIds();
+  const chunks = allowed ? allChunks.filter((chunk) => allowed.has(canonical(chunk.token))) : allChunks;
   const docs = new Map<string, LectureChunk[]>();
   for (const chunk of chunks) {
     if (!docMatches(chunk, key)) continue;
@@ -464,7 +478,7 @@ export function readLecture(doc: string, query?: string): string {
     docs.set(chunk.token, list);
   }
   if (docs.size === 0) {
-    const outside = loadChunks().some((chunk) => docMatches(chunk, key));
+    const outside = allChunks.some((chunk) => docMatches(chunk, key));
     if (outside && scopedLectures()?.length) {
       return withScope("这份资料不在已选的讲次里。");
     }
