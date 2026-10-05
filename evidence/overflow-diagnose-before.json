@@ -1,0 +1,585 @@
+{
+  "/": {
+    "viewport": 390,
+    "scrollWidth": 580,
+    "bodyScrollWidth": 580,
+    "offenders": [
+      {
+        "sel": "article.card.comp-card",
+        "w": 381,
+        "right": 405
+      },
+      {
+        "sel": "article.card.comp-card",
+        "w": 381,
+        "right": 405
+      },
+      {
+        "sel": "article.card.comp-card",
+        "w": 381,
+        "right": 405
+      },
+      {
+        "sel": "article.card.comp-card",
+        "w": 381,
+        "right": 405
+      },
+      {
+        "sel": "article.card.comp-card",
+        "w": 381,
+        "right": 405
+      },
+      {
+        "sel": "article.card.comp-card",
+        "w": 381,
+        "right": 405
+      },
+      {
+        "sel": "article.card.comp-card",
+        "w": 381,
+        "right": 405
+      },
+      {
+        "sel": "article.card.comp-card",
+        "w": 381,
+        "right": 405
+      },
+      {
+        "sel": "article.card.news-card",
+        "w": 556,
+        "right": 580
+      },
+      {
+        "sel": "div.news-meta",
+        "w": 510,
+        "right": 557
+      },
+      {
+        "sel": "h3",
+        "w": 510,
+        "right": 557
+      },
+      {
+        "sel": "p.muted",
+        "w": 510,
+        "right": 557
+      },
+      {
+        "sel": "article.card.news-card",
+        "w": 556,
+        "right": 580
+      },
+      {
+        "sel": "div.news-meta",
+        "w": 510,
+        "right": 557
+      },
+      {
+        "sel": "h3",
+        "w": 510,
+        "right": 557
+      },
+      {
+        "sel": "p.muted",
+        "w": 510,
+        "right": 557
+      },
+      {
+        "sel": "article.card.news-card",
+        "w": 556,
+        "right": 580
+      },
+      {
+        "sel": "div.news-meta",
+        "w": 510,
+        "right": 557
+      },
+      {
+        "sel": "h3",
+        "w": 510,
+        "right": 557
+      },
+      {
+        "sel": "p.muted",
+        "w": 510,
+        "right": 557
+      }
+    ]
+  },
+  "/news": {
+    "viewport": 390,
+    "scrollWidth": 610,
+    "bodyScrollWidth": 610,
+    "offenders": [
+      {
+        "sel": "article.card.news-item",
+        "w": 586,
+        "right": 610
+      },
+      {
+        "sel": "div.news-body",
+        "w": 540,
+        "right": 587
+      },
+      {
+        "sel": "div.news-meta",
+        "w": 540,
+        "right": 587
+      },
+      {
+        "sel": "h3",
+        "w": 540,
+        "right": 587
+      },
+      {
+        "sel": "p.summary",
+        "w": 540,
+        "right": 587
+      }
+    ]
+  },
+  "/calendar": {
+    "viewport": 390,
+    "scrollWidth": 434,
+    "bodyScrollWidth": 434,
+    "offenders": [
+      {
+        "sel": "article.card.comp-card.core#mcm-icm",
+        "w": 410,
+        "right": 434
+      },
+      {
+        "sel": "div.comp-head",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div.badges",
+        "w": 70,
+        "right": 410
+      },
+      {
+        "sel": "span.badge.badge-red",
+        "w": 70,
+        "right": 410
+      },
+      {
+        "sel": "dl.comp-meta",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "dd",
+        "w": 288,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "dd",
+        "w": 279,
+        "right": 410
+      },
+      {
+        "sel": "p.notes.muted",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "p.links",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "article.card.comp-card.core#cumcm",
+        "w": 410,
+        "right": 434
+      },
+      {
+        "sel": "div.comp-head",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div.badges",
+        "w": 70,
+        "right": 410
+      },
+      {
+        "sel": "span.badge.badge-red",
+        "w": 70,
+        "right": 410
+      },
+      {
+        "sel": "dl.comp-meta",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "dd",
+        "w": 279,
+        "right": 410
+      },
+      {
+        "sel": "p.notes.muted",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "p.links",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "article.card.comp-card.core#cpmcm",
+        "w": 410,
+        "right": 434
+      },
+      {
+        "sel": "div.comp-head",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div.badges",
+        "w": 70,
+        "right": 410
+      },
+      {
+        "sel": "span.badge.badge-red",
+        "w": 70,
+        "right": 410
+      },
+      {
+        "sel": "dl.comp-meta",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "dd",
+        "w": 288,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      },
+      {
+        "sel": "div",
+        "w": 362,
+        "right": 410
+      }
+    ]
+  },
+  "/knowledge": {
+    "viewport": 390,
+    "scrollWidth": 490,
+    "bodyScrollWidth": 490,
+    "offenders": [
+      {
+        "sel": "button.chip",
+        "w": 137,
+        "right": 528
+      },
+      {
+        "sel": "span.chip-cnt",
+        "w": 8,
+        "right": 513
+      },
+      {
+        "sel": "button.chip",
+        "w": 70,
+        "right": 606
+      },
+      {
+        "sel": "span.chip-cnt",
+        "w": 8,
+        "right": 591
+      },
+      {
+        "sel": "button.chip",
+        "w": 98,
+        "right": 712
+      },
+      {
+        "sel": "span.chip-cnt",
+        "w": 8,
+        "right": 697
+      },
+      {
+        "sel": "button.chip",
+        "w": 98,
+        "right": 818
+      },
+      {
+        "sel": "span.chip-cnt",
+        "w": 8,
+        "right": 803
+      },
+      {
+        "sel": "button.chip",
+        "w": 98,
+        "right": 924
+      },
+      {
+        "sel": "span.chip-cnt",
+        "w": 8,
+        "right": 909
+      },
+      {
+        "sel": "p.kb-group-label",
+        "w": 466,
+        "right": 490
+      },
+      {
+        "sel": "details.kb-card.kb-filter-card",
+        "w": 466,
+        "right": 490
+      },
+      {
+        "sel": "summary",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "div.kb-card-body",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p.muted",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p.muted",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p.kb-card-res",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p.muted",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "details.kb-card.kb-filter-card",
+        "w": 466,
+        "right": 490
+      },
+      {
+        "sel": "summary",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "div.kb-card-body",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p.muted",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p.kb-card-res",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p.muted",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "details.kb-card.kb-filter-card",
+        "w": 466,
+        "right": 490
+      },
+      {
+        "sel": "summary",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "span.kb-card-fmt",
+        "w": 52,
+        "right": 452
+      },
+      {
+        "sel": "div.kb-card-body",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p.muted",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p.kb-card-res",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "span",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p.muted",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "details.kb-card.kb-filter-card",
+        "w": 466,
+        "right": 490
+      },
+      {
+        "sel": "summary",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "div.kb-card-body",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p.muted",
+        "w": 436,
+        "right": 475
+      },
+      {
+        "sel": "p",
+        "w": 436,
+        "right": 475
+      }
+    ]
+  },
+  "/ai-tools": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  },
+  "/about": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  },
+  "/join": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  },
+  "/team-up": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  },
+  "/login": {
+    "viewport": 390,
+    "scrollWidth": 390,
+    "bodyScrollWidth": 390,
+    "offenders": []
+  }
+}

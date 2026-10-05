@@ -1,0 +1,80 @@
+{
+  "tag": "after",
+  "timestamp": "2026-10-05T17:42:15.225Z",
+  "mobile390": {
+    "/": {
+      "scrollWidth": 390,
+      "clientWidth": 390
+    },
+    "/news": {
+      "scrollWidth": 390,
+      "clientWidth": 390
+    },
+    "/calendar": {
+      "scrollWidth": 390,
+      "clientWidth": 390
+    },
+    "/knowledge": {
+      "scrollWidth": 390,
+      "clientWidth": 390
+    },
+    "/ai-tools": {
+      "scrollWidth": 390,
+      "clientWidth": 390
+    },
+    "/about": {
+      "scrollWidth": 390,
+      "clientWidth": 390
+    },
+    "/join": {
+      "scrollWidth": 390,
+      "clientWidth": 390
+    },
+    "/team-up": {
+      "scrollWidth": 390,
+      "clientWidth": 390
+    },
+    "/login": {
+      "scrollWidth": 390,
+      "clientWidth": 390
+    }
+  },
+  "desktop1280": {
+    "/": {
+      "scrollWidth": 1280,
+      "clientWidth": 1280
+    },
+    "/news": {
+      "scrollWidth": 1280,
+      "clientWidth": 1280
+    },
+    "/calendar": {
+      "scrollWidth": 1280,
+      "clientWidth": 1280
+    },
+    "/knowledge": {
+      "scrollWidth": 1280,
+      "clientWidth": 1280
+    },
+    "/ai-tools": {
+      "scrollWidth": 1280,
+      "clientWidth": 1280
+    },
+    "/about": {
+      "scrollWidth": 1280,
+      "clientWidth": 1280
+    },
+    "/join": {
+      "scrollWidth": 1280,
+      "clientWidth": 1280
+    },
+    "/team-up": {
+      "scrollWidth": 1280,
+      "clientWidth": 1280
+    },
+    "/login": {
+      "scrollWidth": 1280,
+      "clientWidth": 1280
+    }
+  }
+}
