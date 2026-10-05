@@ -52,12 +52,19 @@ img {
 
 .page-main {
   min-height: 60vh;
-  padding: 40px 0 64px;
+  padding: 40px 0 88px;
+}
+
+@media (max-width: 1360px) {
+  .page-main > .container {
+    padding-right: 48px;
+  }
 }
 
 h1, h2, h3, h4 {
   line-height: 1.35;
   color: #222;
+  word-break: keep-all;
 }
 
 .page-title {

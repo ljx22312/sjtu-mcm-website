@@ -21,6 +21,13 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           </p>
           <a class="btn-ghost" id="btn-mock" href="/api/auth/login?mock=1">演示登录（demo）</a>
         </div>
+        <form id="root-box" class="root-box">
+          <p class="muted">主管理员用口令确认身份。确认后的对话与其他访客分开，并拥有网站管理员权限。</p>
+          <label class="sr-only" for="root-password">主管理员密码</label>
+          <input id="root-password" type="password" autocomplete="current-password" placeholder="主管理员密码" />
+          <button type="submit" class="btn-primary" id="root-submit">确认主管理员</button>
+          <p id="root-msg" class="muted" hidden></p>
+        </form>
       </div>
 
       <!-- 已登录 -->
@@ -37,7 +44,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       <ul class="login-faq muted">
         <li>登录后可用于：<strong>集训队报名、协调组队、成员专属资料</strong>（后续功能开放时）。</li>
         <li>本站仅读取你的 <strong>jAccount 账号、姓名、学工号与身份类型</strong>（OIDC 标准 id_token），不获取密码，不读取其他校内信息。</li>
-        <li>遇到「授权确认」页面属交大统一认证的正常流程；登录异常请联系协会邮箱。</li>
+        <li>遇到「授权确认」页面属交大统一认证的正常流程；登录异常请通过协会公众号「SJTU数学建模」联系。</li>
       </ul>
     </div>
   </section>
@@ -93,6 +100,32 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       }
     })
     .catch(() => {});
+
+  document.getElementById("root-box")?.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const msg = document.getElementById("root-msg");
+    const password = (document.getElementById("root-password") as HTMLInputElement).value;
+    if (msg) {
+      msg.hidden = false;
+      msg.textContent = "正在确认…";
+    }
+    try {
+      const res = await fetch("/api/auth/root", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (msg) msg.textContent = data.error || "确认失败。";
+        return;
+      }
+      const redirect = new URLSearchParams(location.search).get("redirect");
+      location.href = redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : "/";
+    } catch {
+      if (msg) msg.textContent = "网络异常，请稍后重试。";
+    }
+  });
 </script>
 
 <style>
@@ -148,6 +181,22 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   .login-welcome .badge {
     margin-left: 6px;
     vertical-align: 1px;
+  }
+
+  .root-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .root-box input {
+    width: min(100%, 280px);
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font: inherit;
   }
 
   .login-faq {

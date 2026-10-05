@@ -1,0 +1,206 @@
+---
+export const prerender = false;
+
+import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
+import { denyPrivilegedRequest } from "../../lib/site-gate";
+import { listSiteAdmins } from "../../lib/site-admin";
+import { SESSION_COOKIE, verifySessionToken } from "../../lib/auth";
+
+const blocked = denyPrivilegedRequest(Astro);
+if (blocked) return blocked;
+
+const session = verifySessionToken(Astro.cookies.get(SESSION_COOKIE)?.value);
+const me = session?.user.account ?? "";
+const mock = Boolean(session?.user.mock);
+const admins = listSiteAdmins();
+---
+
+<PrivilegedLayout view="staff" title="管理员名单" description="网站管理员账号，仅管理员可查看。">
+  <h1 class="page-title">管理员名单</h1>
+  <p class="page-subtitle">
+    当前登录：<b>{session?.user.name || me}</b>
+    {me && <span class="muted">（账号 {me}）</span>}
+    {mock && <span class="badge badge-gold">演示身份</span>}
+  </p>
+
+  <section class="section">
+    <h2 class="section-title">谁能看到内部视角</h2>
+    <p class="muted">
+      jAccount 开通后，把对方的 jAccount 账号加到下面（登录页括号里的那串，不是姓名）。对方下次打开网站就能看到页顶的视角切换。
+      名单文件是服务器上的 <code>data/site-admins.json</code>，不进 git。环境变量 <code>SITE_ADMIN_ACCOUNTS</code> 里的账号也会生效，但只能在服务器上修改。
+      这和助手「模型设置」里的管理员不是同一份名单。
+    </p>
+    {
+      mock && (
+        <p class="muted">
+          现在登录的是演示账号 demo，用来在 jAccount 批下来之前看这套页面。先添加真实账号，再移除 demo。正式凭据配上之后，演示登录会自动关闭。
+        </p>
+      )
+    }
+
+    <form id="add-admin" class="admin-add">
+      <label class="sr-only" for="admin-account">jAccount 账号</label>
+      <input id="admin-account" name="account" type="text" inputmode="text" maxlength="64" autocomplete="off" spellcheck="false" placeholder="jAccount 账号" pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,63}" required />
+      <button class="btn btn-primary" type="submit">添加</button>
+    </form>
+    <p id="admin-msg" class="muted" aria-live="polite"></p>
+
+    <ul class="admin-list" id="admin-list">
+      {
+        admins.map((admin) => (
+          <li class="admin-row">
+            <span class="admin-who">
+              <b>{admin.account}</b>
+              {admin.account === me && <span class="badge badge-blue">当前登录</span>}
+              {admin.inEnv && <span class="badge badge-gold">环境变量</span>}
+            </span>
+            {admin.inFile ? (
+              <button type="button" class="btn btn-outline btn-small" data-remove={admin.account}>
+                移除
+              </button>
+            ) : (
+              <span class="muted">写在环境变量里，页面上不能删除</span>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+    {admins.length === 0 && <p class="muted">名单是空的。把账号写入 data/site-admins.json 或 SITE_ADMIN_ACCOUNTS 后刷新。</p>}
+  </section>
+</PrivilegedLayout>
+
+<script>
+  const msg = document.getElementById("admin-msg");
+  const say = (text: string) => {
+    if (msg) msg.textContent = text;
+  };
+
+  document.getElementById("add-admin")?.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const form = ev.currentTarget;
+    if (!(form instanceof HTMLFormElement)) return;
+    const input = form.querySelector("input");
+    const button = form.querySelector("button");
+    const account = input?.value.trim() ?? "";
+    if (!account || !button) return;
+    button.disabled = true;
+    try {
+      const res = await fetch("/api/admin/accounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ account }),
+      });
+      const data = (await res.json().catch(() => null)) as { message?: string } | null;
+      if (!res.ok) {
+        say(data?.message || "没有添加成功。");
+        button.disabled = false;
+        return;
+      }
+      location.reload();
+    } catch {
+      say("没有添加成功，请重试。");
+      button.disabled = false;
+    }
+  });
+
+  let pending = "";
+  document.getElementById("admin-list")?.addEventListener("click", async (ev) => {
+    const target = ev.target;
+    if (!(target instanceof HTMLButtonElement)) return;
+    const account = target.dataset.remove;
+    if (!account) return;
+    if (pending !== account) {
+      pending = account;
+      say(`再点一次「移除」，确认去掉 ${account}。`);
+      return;
+    }
+    pending = "";
+    target.disabled = true;
+    try {
+      const res = await fetch("/api/admin/accounts", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ account }),
+      });
+      const data = (await res.json().catch(() => null)) as { message?: string } | null;
+      if (!res.ok) {
+        say(data?.message || "没有移除成功。");
+        target.disabled = false;
+        return;
+      }
+      location.reload();
+    } catch {
+      say("没有移除成功，请重试。");
+      target.disabled = false;
+    }
+  });
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+
+  .admin-add {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 8px;
+  }
+
+  .admin-add input {
+    flex: 1;
+    min-width: 220px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font: inherit;
+  }
+
+  .admin-add button,
+  .btn-small {
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .btn-small {
+    padding: 4px 14px;
+    background: #fff;
+  }
+
+  .admin-list {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .admin-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .admin-row:last-child {
+    border-bottom: 0;
+  }
+
+  .admin-who {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+</style>

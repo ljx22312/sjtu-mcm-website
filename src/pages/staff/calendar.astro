@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+
+import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
+import CalendarBody from "../../views/CalendarBody.astro";
+import { denyPrivilegedRequest } from "../../lib/site-gate";
+
+const blocked = denyPrivilegedRequest(Astro);
+if (blocked) return blocked;
+---
+
+<PrivilegedLayout view="staff" title="赛事日历" description="全年数学建模赛事日历：美赛、国赛、研赛、校内赛及各练兵赛事时间一览。">
+  <CalendarBody />
+</PrivilegedLayout>

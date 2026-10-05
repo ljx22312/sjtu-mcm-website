@@ -1,15 +1,8 @@
 import type { APIRoute } from "astro";
-import { SESSION_COOKIE, verifySessionToken } from "../../../lib/auth";
-import { deleteSession, listSessionMessages, listSessions } from "../../../lib/agent/history";
-import { agentAllowAnonymous } from "../../../lib/agent/config";
+import { identityLabel, resolveAgentAccount } from "../../../lib/agent/account";
+import { beginSession, deleteSession, listSessionMessages, listSessions } from "../../../lib/agent/history";
 
 export const prerender = false;
-
-/** 登录用户返回其账号；未登录且开启匿名模式时返回 "anonymous"，否则 null（401） */
-function resolveAccount(cookies: { get(name: string): { value?: string } | undefined }): string | null {
-  const session = verifySessionToken(cookies.get(SESSION_COOKIE)?.value);
-  return session?.user.account ?? (agentAllowAnonymous ? "anonymous" : null);
-}
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -18,12 +11,13 @@ const json = (body: unknown, status = 200) =>
   });
 
 /**
- * GET /api/agent/sessions            → 该用户全部会话（最近活跃倒序，含标题/条数/时间）
- * GET /api/agent/sessions?id=123     → 该会话完整消息（时间正序，含思考）
- * DELETE /api/agent/sessions?id=123  → 删除单个会话
+ * GET /api/agent/sessions            → 该身份的会话（最近活跃倒序）
+ * GET /api/agent/sessions?id=123     → 该会话未撤回的消息
+ * POST /api/agent/sessions           → 新开一场空会话，返回 session_id
+ * DELETE /api/agent/sessions?id=123  → 从界面拿掉该场，记录仍留在库里
  */
 export const GET: APIRoute = async ({ url, cookies }) => {
-  const account = resolveAccount(cookies);
+  const account = resolveAgentAccount(cookies);
   if (!account) return json({ error: "unauthorized" }, 401);
 
   const idRaw = url.searchParams.get("id");
@@ -34,14 +28,20 @@ export const GET: APIRoute = async ({ url, cookies }) => {
     if (messages.length === 0) return json({ error: "not_found" }, 404);
     return json({ session_id: id, messages });
   }
-  return json({ sessions: listSessions(account) });
+  return json({ identity: identityLabel(account), account, sessions: listSessions(account) });
+};
+
+export const POST: APIRoute = async ({ cookies }) => {
+  const account = resolveAgentAccount(cookies);
+  if (!account) return json({ error: "unauthorized" }, 401);
+  return json({ session_id: beginSession(account), identity: identityLabel(account) });
 };
 
 export const DELETE: APIRoute = async ({ url, cookies }) => {
-  const account = resolveAccount(cookies);
+  const account = resolveAgentAccount(cookies);
   if (!account) return json({ error: "unauthorized" }, 401);
   const id = Number.parseInt(url.searchParams.get("id") ?? "", 10);
   if (!Number.isFinite(id) || id <= 0) return json({ error: "bad_request" }, 400);
-  const deleted = deleteSession(account, id);
-  return json({ deleted });
+  const hidden = deleteSession(account, id);
+  return json({ hidden });
 };

@@ -5,9 +5,11 @@
 import { Agent, type AgentMessage } from "@earendil-works/pi-agent-core";
 import { contentText, type Message } from "@earendil-works/pi-ai";
 import { AGENT_CONTEXT_MESSAGES } from "./config";
-import { appendMessage, listSessionMessages } from "./history";
+import { appendMessage, listSessionMessages, type HistoryMessage } from "./history";
 import { getOfficialRuntime, type AgentRuntime } from "./models";
 import { buildSystemPrompt } from "./prompt";
+import { lookupLectures } from "./lectures";
+import { citationSnapshot, runWithScope } from "./scope";
 import { agentTools } from "./tools";
 
 export interface AgentTurnHandlers {
@@ -19,12 +21,20 @@ export interface AgentTurnHandlers {
   onTool: (name: string) => void;
   /** 用户消息落库后立刻回调本场会话 id（前端据此把消息归场） */
   onSession?: (sessionId: number) => void;
+  /** 工具给出的可点击出处 */
+  onCitations?: (items: { n: number; title: string; locator: string; quote: string; url: string }[]) => void;
+  /** 本轮用户消息的库内编号，供撤回 */
+  onUserMessage?: (messageId: number) => void;
 }
 
 export interface AgentTurnResult {
   reply: string;
   /** 本轮消息归入的会话 id（前端恢复/续聊时使用） */
   sessionId: number;
+  userMessageId?: number;
+  assistantMessageId?: number;
+  /** 用户中止了生成。已写出的文字仍入库。 */
+  stopped?: boolean;
   error?: string;
 }
 
@@ -33,9 +43,32 @@ export interface AgentTurnResult {
  * 重建的 assistant 消息必须带零值 usage —— pi-ai 的上下文估算会读取
  * assistant.usage.totalTokens，缺字段会抛 TypeError。
  */
-/** 模型上下文取自当前会话（恢复的那场对话），跨会话内容不带入 */
+/** 只保留「用户提问 + 紧随的助手回复」。半截、已撤回的不进上下文。 */
+function completePairs(rows: HistoryMessage[]): HistoryMessage[] {
+  const pairs: HistoryMessage[] = [];
+  for (let i = 0; i < rows.length; i++) {
+    const cur = rows[i];
+    const next = rows[i + 1];
+    if (cur.role === "user" && next?.role === "assistant") {
+      pairs.push(cur, next);
+      i += 1;
+    }
+  }
+  return pairs.slice(-AGENT_CONTEXT_MESSAGES);
+}
+
+/** 同一身份同时只跑一轮。新的一轮会先停掉上一轮，再读上下文。 */
+const turnChain = new Map<string, Promise<void>>();
+const turnStop = new Map<string, AbortController>();
+
+function combineSignals(a?: AbortSignal, b?: AbortSignal): AbortSignal | undefined {
+  if (a && b && typeof AbortSignal.any === "function") return AbortSignal.any([a, b]);
+  return b ?? a;
+}
+
+/** 模型上下文取自当前会话里已完成的回合，跨会话内容不带入 */
 function toContextMessages(account: string, sessionId?: number): Message[] {
-  const rows = sessionId ? listSessionMessages(account, sessionId) : [];
+  const rows = sessionId ? completePairs(listSessionMessages(account, sessionId)) : [];
   const merged: Message[] = [];
   for (const r of rows) {
     const last = merged[merged.length - 1];
@@ -65,9 +98,41 @@ export async function runAgentTurn(opts: {
   account: string;
   message: string;
   handlers: AgentTurnHandlers;
-  /** 续聊的会话；不传则由存储层决定（近期活跃则续，间隔超时则新开） */
+  /** 续聊的会话。不传则新开一场，不并入上一场。 */
   sessionId?: number;
+  /** 学生在知识库勾选的讲次，形如 cumcm:12。空则检索全库。 */
+  lectures?: string[];
   /** 本轮使用的运行时；不传则用官方模型（管理员配置的模型/深度） */
+  runtime?: AgentRuntime;
+  signal?: AbortSignal;
+}): Promise<AgentTurnResult> {
+  turnStop.get(opts.account)?.abort();
+  const stop = new AbortController();
+  turnStop.set(opts.account, stop);
+  const prev = turnChain.get(opts.account) ?? Promise.resolve();
+  let release = () => {};
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  turnChain.set(
+    opts.account,
+    prev.then(() => gate, () => gate),
+  );
+  await prev.catch(() => undefined);
+  try {
+    return await runAgentTurnBody({ ...opts, signal: combineSignals(opts.signal, stop.signal) });
+  } finally {
+    if (turnStop.get(opts.account) === stop) turnStop.delete(opts.account);
+    release();
+  }
+}
+
+async function runAgentTurnBody(opts: {
+  account: string;
+  message: string;
+  handlers: AgentTurnHandlers;
+  sessionId?: number;
+  lectures?: string[];
   runtime?: AgentRuntime;
   signal?: AbortSignal;
 }): Promise<AgentTurnResult> {
@@ -75,10 +140,11 @@ export async function runAgentTurn(opts: {
 
   const runtime = opts.runtime ?? getOfficialRuntime();
   if (runtime.mode === "mock" && runtime.setMockResponse) runtime.setMockResponse(mockReply(message));
+  const lectureLabels = lookupLectures(opts.lectures ?? []).map((item) => item.label);
 
   const agent = new Agent({
     initialState: {
-      systemPrompt: buildSystemPrompt(),
+      systemPrompt: buildSystemPrompt(lectureLabels),
       model: runtime.model,
       tools: agentTools,
       messages: toContextMessages(account, sessionId) as AgentMessage[],
@@ -103,6 +169,9 @@ export async function runAgentTurn(opts: {
       handlers.onThinking(event.assistantMessageEvent.delta);
     } else if (event.type === "tool_execution_start") {
       handlers.onTool(event.toolName);
+    } else if (event.type === "tool_execution_end") {
+      const cites = citationSnapshot();
+      if (cites.length > 0) handlers.onCitations?.(cites);
     }
   });
 
@@ -116,30 +185,50 @@ export async function runAgentTurn(opts: {
     );
   }
 
-  // 用户消息先落库（即使本轮失败，用户的提问也保留在历史里），并确定本场会话 id
-  const sid = appendMessage(account, "user", message, undefined, sessionId);
+  // 用户消息先落库（撤回后仍保留），并确定本场会话 id
+  let streamed = "";
+  const userRow = appendMessage(account, "user", message, undefined, sessionId);
+  const sid = userRow.sessionId;
   handlers.onSession?.(sid);
+  handlers.onUserMessage?.(userRow.messageId);
 
+  const originalOnDelta = handlers.onDelta;
+  handlers.onDelta = (text) => {
+    streamed += text;
+    originalOnDelta(text);
+  };
+
+  let stopped = false;
   try {
-    await agent.prompt(message);
+    await runWithScope(opts.lectures?.length ? opts.lectures : null, () => agent.prompt(message));
   } catch (err) {
-    return { reply: "", sessionId: sid, error: err instanceof Error ? err.message : "agent 执行异常" };
+    if (signal?.aborted) stopped = true;
+    else return { reply: "", sessionId: sid, userMessageId: userRow.messageId, error: err instanceof Error ? err.message : "agent 执行异常" };
   }
+  if (signal?.aborted) stopped = true;
 
   const msgs = agent.state.messages;
   const lastAssistant = [...msgs].reverse().find((m) => (m as Message).role === "assistant") as Message | undefined;
+  const modelText = lastAssistant ? contentText(lastAssistant.content) : "";
 
-  if (agent.state.errorMessage) {
-    return { reply: "", sessionId: sid, error: agent.state.errorMessage };
+  if (!stopped && agent.state.errorMessage) {
+    return { reply: "", sessionId: sid, userMessageId: userRow.messageId, error: agent.state.errorMessage };
   }
-  const reply = lastAssistant ? contentText(lastAssistant.content) : "";
-  if (lastAssistant?.stopReason === "error") {
-    return { reply: "", sessionId: sid, error: "模型调用失败，请稍后重试" };
+  const reply = (stopped ? streamed || modelText : modelText || streamed).trim();
+  if (!stopped && lastAssistant?.stopReason === "error") {
+    return { reply: "", sessionId: sid, userMessageId: userRow.messageId, error: "模型调用失败，请稍后重试" };
   }
-  if (!reply.trim()) {
-    return { reply: "", sessionId: sid, error: "模型返回为空，请稍后重试" };
+  if (!reply) {
+    if (!stopped) return { reply: "", sessionId: sid, userMessageId: userRow.messageId, error: "模型返回为空，请稍后重试" };
   }
 
-  appendMessage(account, "assistant", reply, thinking, sid);
-  return { reply, sessionId: sid };
+  const stored = reply || "（已停止）";
+  const assistantRow = appendMessage(account, "assistant", stored, thinking, sid);
+  return {
+    reply: stored,
+    sessionId: sid,
+    userMessageId: userRow.messageId,
+    assistantMessageId: assistantRow.messageId,
+    stopped,
+  };
 }

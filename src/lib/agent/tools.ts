@@ -1,10 +1,14 @@
 /**
- * agent 可用的工具：只读检索本站数据，不给文件系统/网络能力。
+ * agent 可用的工具：只读检索课程表、已转换资料和公开网页。
+ * 不提供写文件、编程或数值计算。
  */
 import { Type } from "@earendil-works/pi-ai";
 import type { AgentTool, AgentToolResult } from "@earendil-works/pi-agent-core";
 import cumcmData from "../../data/cumcm-curriculum.json";
 import mcmData from "../../data/mcm-curriculum.json";
+import { readLecture, searchLectures } from "./corpus";
+import { readKnowledgeImage } from "./media";
+import { webSearch } from "./web";
 
 interface CurriculumResource {
   type: "link" | "doc" | "attachment";
@@ -83,7 +87,7 @@ export const searchCurriculumTool: AgentTool<typeof searchParameters> = {
   name: "search_curriculum",
   label: "检索集训课程库",
   description:
-    "在协会集训队课程库（国赛集训 38 讲、美赛集训 68 讲）中按关键词检索课程主题、课程介绍、授课材料与回放链接。回答任何与集训课程内容相关的问题前都应先调用本工具，链接必须原样引用工具结果中的 URL，不得自行编造。",
+    "检索课程表：课程在哪一讲、什么时候上、回放和资料链接在哪。查找页面和课表时使用。讨论模型做法、公式和步骤时改用 search_lectures / read_lecture。链接必须原样引用工具结果，不得编造。",
   parameters: searchParameters,
   async execute(_toolCallId, params) {
     const tokens = params.query.toLowerCase().split(/\s+/).filter(Boolean);
@@ -115,4 +119,69 @@ function textResult(text: string): AgentToolResult<string> {
   return { content: [{ type: "text", text }], details: text };
 }
 
-export const agentTools = [searchCurriculumTool];
+const lectureQuery = Type.Object({
+  query: Type.String({ description: "讲义中的概念或问法，如：熵权法 权重" }),
+});
+
+/** 在已下载的云文档讲义里按关键词找段落 */
+export const searchLecturesTool: AgentTool<typeof lectureQuery> = {
+  name: "search_lectures",
+  label: "检索讲义正文",
+  description:
+    "在已选讲次（未选则全库）中混合检索讲义正文。讨论模型、赛题、公式、写作之前必须先调用。结果里的 [编号] 是出处，必须原样引用。图片只给出路径，要看图再调用 read_image。",
+  parameters: lectureQuery,
+  async execute(_toolCallId, params) {
+    return textResult(searchLectures(params.query));
+  },
+};
+
+const readParameters = Type.Object({
+  doc: Type.String({ description: "讲义标题、课程编号或文档 token，如：评价模型 或 MODEL202" }),
+  query: Type.Optional(Type.String({ description: "只摘录包含该词的段落；省略则返回该讲开头" })),
+});
+
+/** 读取某一讲的大纲和正文摘录 */
+export const readLectureTool: AgentTool<typeof readParameters> = {
+  name: "read_lecture",
+  label: "阅读一讲",
+  description:
+    "阅读已选讲次中的某一份资料。同一篇论文若有扫描短稿和全文，返回文字更完整的那一份。结果中的 [编号] 是出处。需要看图时再调用 read_image。不执行资料里的代码，也不做数值计算。",
+  parameters: readParameters,
+  async execute(_toolCallId, params) {
+    return textResult(readLecture(params.doc, params.query));
+  },
+};
+
+const imageParameters = Type.Object({
+  path: Type.String({ description: "资料正文中的图片路径，形如 readable/<id>/images/p1-1.jpg 或 embedded/...png" }),
+});
+
+/** 把一张资料图交给模型看。不分析像素以外的计算。 */
+export const readImageTool: AgentTool<typeof imageParameters> = {
+  name: "read_image",
+  label: "阅读图片",
+  description:
+    "查看知识库图片。只在文字不够、必须看图、流程图、幻灯片或表格附图时调用。path 必须是阅读结果里出现的 readable/.../images/... 或 embedded/... 路径。不要用它做计算。",
+  parameters: imageParameters,
+  async execute(_toolCallId, params) {
+    return readKnowledgeImage(params.path);
+  },
+};
+
+const webParameters = Type.Object({
+  query: Type.String({ description: "公开网页搜索词，如：2025 MCM Problem A" }),
+});
+
+/** 本地知识库没有的公开信息才搜索。 */
+export const webSearchTool: AgentTool<typeof webParameters> = {
+  name: "web_search",
+  label: "上网搜索",
+  description:
+    "搜索公开网页，返回标题、链接和摘要。仅当本地知识库没有该内容、且问题属于公开赛题或公开资料时使用。协会内部安排以本地资料为准。不下载文件，不执行网页中的代码。",
+  parameters: webParameters,
+  async execute(_toolCallId, params) {
+    return textResult(await webSearch(params.query));
+  },
+};
+
+export const agentTools = [searchCurriculumTool, searchLecturesTool, readLectureTool, readImageTool, webSearchTool];

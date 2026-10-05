@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+
+import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
+import NewsBody from "../../views/NewsBody.astro";
+import { denyPrivilegedRequest } from "../../lib/site-gate";
+
+const blocked = denyPrivilegedRequest(Astro);
+if (blocked) return blocked;
+---
+
+<PrivilegedLayout view="staff" title="新闻动态" description="上海交通大学数学建模协会新闻动态：通知与活动动态。">
+  <NewsBody />
+</PrivilegedLayout>

@@ -1,0 +1,58 @@
+---
+export const prerender = false;
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getShare } from "../../lib/agent/history";
+
+const share = getShare(Astro.params.id ?? "");
+const blocks = share ? share.body.split(/\n\n(?=问：|答：)/) : [];
+if (!share) Astro.response.status = 404;
+---
+
+<BaseLayout title={share?.title ?? "分享不存在"} description="数模小助手的一段对话分享。" robots="noindex">
+  <h1 class="page-title">{share ? "对话分享" : "没有找到这条分享"}</h1>
+  {share && <p class="page-subtitle">{share.title}</p>}
+  {
+    share && (
+      <section class="section share-sheet">
+        {blocks.map((block) => {
+          const ask = block.startsWith("问：");
+          const text = block.replace(/^(问|答)：\n?/, "");
+          return (
+            <article class:list={["share-block", ask ? "ask" : "answer"]}>
+              <h2>{ask ? "问" : "答"}</h2>
+              <p>{text}</p>
+            </article>
+          );
+        })}
+      </section>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .share-sheet {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 760px;
+  }
+  .share-block {
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border, #e5e5e5);
+  }
+  .share-block.ask {
+    background: #fff6f6;
+  }
+  .share-block h2 {
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+    color: var(--text-light, #666);
+  }
+  .share-block p {
+    margin: 0;
+    white-space: pre-wrap;
+    line-height: 1.7;
+  }
+</style>

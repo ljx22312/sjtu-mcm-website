@@ -1,0 +1,100 @@
+---
+import { features, wechat } from "../config";
+
+const modules = [
+  { name: "讲座", desc: "校内外专家专题讲座：论文写作、常微分方程、赛题解析、最优化建模、AI4MCM 工作流、数据分析经验等" },
+  { name: "导论", desc: "赛事介绍、组队分工建议与常见误区、飞书集训材料介绍、集训培养计划" },
+  { name: "模型 & 编程", desc: "常用数学模型体系与编程实现（美赛批次）" },
+  { name: "工具课 & AI 使用", desc: "排版、绘图、检索等工具链与 AI 辅助规范" },
+  { name: "写作", desc: "数学建模竞赛论文结构、表达与 AI 写作规范" },
+  { name: "经验分享", desc: "获奖团队（含美赛 O 奖/F 奖、国赛国一成员）经验分享" },
+  { name: "赛题实战 / 实战演示", desc: "真题实战演练、作业提交与多轮反馈、模拟赛" },
+];
+
+interface Props {
+  /** 站内链接前缀：用户视角为空，下一版本 /next，管理员视角 /staff */
+  base?: string;
+}
+const { base = "" } = Astro.props;
+const to = (path: string) => `${base}${path}`;
+---
+
+  <h1 class="page-title">集训队报名</h1>
+  <p class="page-subtitle">美赛 / 国赛赛前，协会组织集训队招募与成体系培训。</p>
+
+  <section class="section">
+    <h2 class="section-title">集训队是什么</h2>
+    <div class="card">
+      <p>
+        集训队是协会在美赛、国赛赛前组织的集中培训体系，面向全校同学开放招募。
+        课程涵盖<strong>讲座、导论、模型 &amp; 编程、工具课 &amp; AI 使用、论文写作、经验分享、赛题实战</strong>等模块
+        （国赛、美赛两张集训大表共 106 条课程记录，完整课表见<a href={to("/knowledge")}>知识库</a>），并配套作业实战、多轮反馈与模拟赛。
+      </p>
+      <ul class="module-list">
+        {modules.map((m) => (
+          <li><strong>{m.name}</strong>：{m.desc}</li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">往届时间线</h2>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>批次</th><th>招募时间</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>美赛集训队</td>
+            <td>赛前一年 11–12 月</td>
+            <td>秋季学期招募，寒假导论课开讲（如 2026 美赛集训队 2026 年 1 月 3 日导论课）</td>
+          </tr>
+          <tr>
+            <td>国赛集训队</td>
+            <td>当年 5–6 月</td>
+            <td>暑期集训；2026 国赛集训于 7 月 6–8 日以系列讲座启动，随后进入模型/工具/写作课程与模拟赛</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">如何获知开放通知</h2>
+    <div class="card">
+      <p>
+        关注协会公众号「{wechat}」，集训队开放招募时会发布推送。
+      </p>
+    </div>
+  </section>
+
+  <section class="section cta-section">
+    {features.registrationOpen ? (
+      <a class="btn btn-primary btn-lg" href={to("/knowledge")}>立即报名</a>
+    ) : (
+      <button class="btn btn-disabled btn-lg" disabled>暂未开放 · 请关注公众号通知</button>
+    )}
+  </section>
+
+<style>
+  .module-list {
+    margin: 12px 0 0;
+    padding-left: 20px;
+  }
+
+  .module-list li {
+    margin: 6px 0;
+    font-size: 0.95rem;
+  }
+
+  .cta-section {
+    text-align: center;
+  }
+
+  .btn-lg {
+    padding: 14px 40px;
+    font-size: 1.1rem;
+  }
+</style>

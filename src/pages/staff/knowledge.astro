@@ -1,0 +1,19 @@
+---
+export const prerender = false;
+
+import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
+import KnowledgeBody from "../../views/KnowledgeBody.astro";
+import { denyPrivilegedRequest } from "../../lib/site-gate";
+import mcm2027 from "../../data/mcm-2027-curriculum.json";
+
+const blocked = denyPrivilegedRequest(Astro);
+if (blocked) return blocked;
+
+const extraTracks = [
+  { key: "mcm2027", label: "2027 美赛集训", doc: mcm2027 },
+];
+---
+
+<PrivilegedLayout view="staff" title="知识库" description="协会集训队课程资料。管理员视角另含尚未公开的 2027 美赛集训板块。">
+  <KnowledgeBody extraTracks={extraTracks} />
+</PrivilegedLayout>

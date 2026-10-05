@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+
+import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
+import JoinBody from "../../views/JoinBody.astro";
+import { denyPrivilegedRequest } from "../../lib/site-gate";
+
+const blocked = denyPrivilegedRequest(Astro);
+if (blocked) return blocked;
+---
+
+<PrivilegedLayout view="staff" title="集训队报名" description="上海交通大学数学建模协会集训队介绍与报名入口。">
+  <JoinBody base="/staff" />
+</PrivilegedLayout>

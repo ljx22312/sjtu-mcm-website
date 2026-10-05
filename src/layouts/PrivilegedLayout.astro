@@ -1,0 +1,18 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  view: "next" | "staff";
+}
+
+const { title, description, view } = Astro.props;
+const label = view === "next" ? "下一版本" : "管理员视角";
+const other = view === "next" ? "管理员视角" : "下一版本";
+---
+
+<BaseLayout title={title} description={description} robots="noindex, nofollow">
+  <p class="notice-bar">当前打开的是「{label}」，只发给管理员账号。页顶可以换到用户视角或{other}。</p>
+  <slot />
+</BaseLayout>

@@ -1,0 +1,19 @@
+{
+  "schema": "curriculum-v2",
+  "source": {
+    "title": "2027 美国大学生数学建模竞赛（美赛）集训",
+    "feishu": "",
+    "sheet": "",
+    "fetched_at": ""
+  },
+  "modules": [
+    { "name": "导论", "count": 0 },
+    { "name": "模型&编程", "count": 0 },
+    { "name": "工具课&AI使用", "count": 0 },
+    { "name": "写作", "count": 0 },
+    { "name": "实战演示", "count": 0 },
+    { "name": "赛题实战", "count": 0 },
+    { "name": "正式比赛", "count": 0 }
+  ],
+  "items": []
+}

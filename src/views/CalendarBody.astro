@@ -1,0 +1,313 @@
+---
+import compsData from "../data/competitions.json";
+import { tierLabels, statusLabels, type Competition } from "../lib/data";
+
+const comps = compsData.competitions as Competition[];
+
+const months = Array.from({ length: 12 }, (_, i) => i + 1);
+const tierBadge: Record<string, string> = {
+  core: "badge-red",
+  practice: "badge-blue",
+  research: "badge-gold",
+};
+
+/** 该月赛事及其所处阶段（根据报名/比赛窗口文本粗判） */
+function entriesOfMonth(m: number): { abbr: string; comp: Competition }[] {
+  return comps
+    .filter((c) => c.months.includes(m))
+    .map((c) => ({ abbr: c.abbr, comp: c }));
+}
+---
+
+  <h1 class="page-title">赛事日历</h1>
+  <p class="page-subtitle">全年 16 项数学建模赛事的报名与比赛时间一览。</p>
+
+  <div class="notice-bar">
+    以下时间以最近一届（主要为 2026 年）实际安排整理，<strong>所有赛事具体日期均以当年官方通知为准</strong>。
+  </div>
+
+  <!-- 1–12 月时间轴 -->
+  <section class="section">
+    <h2 class="section-title">全年时间轴</h2>
+    <div class="table-wrap cal-timeline">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 80px;">月份</th>
+            <th>赛事</th>
+            <th>报名窗口</th>
+            <th>比赛窗口</th>
+          </tr>
+        </thead>
+        <tbody>
+          {months.map((m) => {
+            const entries = entriesOfMonth(m);
+            if (entries.length === 0) {
+              return (
+                <tr>
+                  <td><strong>{m} 月</strong></td>
+                  <td colspan="3" class="muted">—</td>
+                </tr>
+              );
+            }
+            return entries.map(({ comp }, idx) => (
+              <tr>
+                {idx === 0 && <td rowspan={entries.length}><strong>{m} 月</strong></td>}
+                <td>
+                  {comp.abbr}
+                  {comp.status === "paused" && <span class="badge badge-gray" style="margin-left:6px;">2026 暂停</span>}
+                </td>
+                <td>{comp.reg_window}</td>
+                <td>{comp.contest_window}</td>
+              </tr>
+            ));
+          })}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 手机端：月份速览（点缩写跳到下方对应详情卡） -->
+    <div class="cal-months">
+      {months.map((m) => {
+        const entries = entriesOfMonth(m);
+        return (
+          <div class:list={["month-block", { empty: entries.length === 0 }]}>
+            <h3>{m} 月</h3>
+            {entries.length === 0 ? (
+              <span class="muted month-empty">—</span>
+            ) : (
+              <div class="month-chips">
+                {entries.map(({ comp }) => (
+                  <a
+                    href={`#${comp.id}`}
+                    title={comp.name}
+                    class:list={["month-chip", `tier-${comp.tier}`, { paused: comp.status === "paused" }]}
+                  >
+                    {comp.abbr}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      <p class="cal-months-hint muted">点击赛事缩写查看下方详情卡；完整报名/比赛窗口以详情卡为准。</p>
+    </div>
+  </section>
+
+  <!-- 赛事详情卡 -->
+  <section class="section">
+    <h2 class="section-title">赛事详情</h2>
+    <div class="grid grid-2">
+      {comps.map((c) => (
+        <article id={c.id} class:list={["card", "comp-card", { core: c.tier === "core", paused: c.status === "paused" }]}>
+          <div class="comp-head">
+            <div>
+              <h3>{c.name}</h3>
+              {c.name_en && <p class="muted name-en">{c.name_en}</p>}
+            </div>
+            <div class="badges">
+              <span class={`badge ${tierBadge[c.tier] ?? "badge-gray"}`}>{tierLabels[c.tier] ?? c.tier}</span>
+              {c.status !== "normal" && (
+                <span class={`badge ${c.status === "paused" ? "badge-gray" : "badge-gold"}`}>
+                  {statusLabels[c.status]}
+                </span>
+              )}
+            </div>
+          </div>
+          <dl class="comp-meta">
+            <div><dt>级别定位</dt><dd>{c.level}</dd></div>
+            <div><dt>主办方</dt><dd>{c.organizer}</dd></div>
+            <div><dt>队形</dt><dd>{c.team_size}</dd></div>
+            <div><dt>赛程时长</dt><dd>{c.duration}</dd></div>
+            <div><dt>报名窗口</dt><dd>{c.reg_window}</dd></div>
+            <div><dt>比赛窗口</dt><dd>{c.contest_window}</dd></div>
+          </dl>
+          {c.notes && <p class="notes muted">{c.notes}</p>}
+          {(c.url || c.url_reg) && (
+            <p class="links">
+              {c.url && (
+                <a href={c.url} target="_blank" rel="noopener noreferrer">官网 →</a>
+              )}
+              {c.url_reg && (
+                <a href={c.url_reg} target="_blank" rel="noopener noreferrer">报名入口 →</a>
+              )}
+            </p>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
+
+<style>
+  .comp-card.core {
+    border: 2px solid var(--red);
+  }
+
+  .comp-card.paused {
+    opacity: 0.6;
+    background: #f3f3f3;
+  }
+
+  .comp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .comp-head h3 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .name-en {
+    margin: 2px 0 0;
+  }
+
+  .badges {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+
+  .comp-meta {
+    margin: 14px 0 8px;
+    display: grid;
+    gap: 6px;
+    font-size: 0.92rem;
+  }
+
+  .comp-meta div {
+    display: flex;
+    gap: 8px;
+  }
+
+  .comp-meta dt {
+    color: var(--text-light);
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 4.5em;
+  }
+
+  .comp-meta dt::after {
+    content: "：";
+  }
+
+  .comp-meta dd {
+    margin: 0;
+  }
+
+  .notes {
+    border-top: 1px dashed var(--border);
+    padding-top: 8px;
+    margin: 8px 0;
+  }
+
+  .links {
+    margin: 8px 0 0;
+    display: flex;
+    gap: 16px;
+    font-size: 0.92rem;
+  }
+
+  .comp-card {
+    scroll-margin-top: 84px; /* 锚点跳转时避开吸顶页头 */
+  }
+
+  .cal-timeline table.data-table {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .cal-timeline td,
+  .cal-timeline th {
+    word-break: keep-all;
+  }
+
+  /* ---------- 手机端月份速览 ---------- */
+  .cal-months {
+    display: none;
+  }
+
+  .month-block h3 {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    color: var(--blue-dark);
+  }
+
+  .month-block.empty h3 {
+    color: var(--text-light);
+    font-weight: 500;
+  }
+
+  .month-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .month-chip {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    border: 1px solid var(--border);
+    color: var(--text);
+    background: #fff;
+  }
+
+  .month-chip.tier-core {
+    border-color: #f3c1c1;
+    color: var(--red);
+    background: #fdecec;
+  }
+
+  .month-chip.tier-practice {
+    border-color: #c4d6ef;
+    color: var(--blue);
+    background: #eaf1fb;
+  }
+
+  .month-chip.tier-research {
+    border-color: #ecd9a0;
+    color: #8a6d1a;
+    background: #fff8e6;
+  }
+
+  .month-chip.paused {
+    text-decoration: line-through;
+    opacity: 0.55;
+  }
+
+  .month-empty {
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 640px) {
+    .cal-timeline {
+      display: none;
+    }
+
+    .cal-months {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .month-block {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+
+    .cal-months-hint {
+      grid-column: 1 / -1;
+      margin: 4px 0 0;
+      font-size: 0.8rem;
+    }
+  }
+</style>

@@ -8,9 +8,10 @@ import { siteName } from "../config";
 interface Props {
   title: string;
   description?: string;
+  robots?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, robots } = Astro.props;
 const fullTitle = title === "首页" ? siteName : `${title} · ${siteName}`;
 ---
 
@@ -20,8 +21,40 @@ const fullTitle = title === "首页" ? siteName : `${title} · ${siteName}`;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description ?? "上海交通大学数学建模协会官方网站——服务全体交大学生的数学建模学习、训练与参赛平台。"} />
+    {robots && <meta name="robots" content={robots} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{fullTitle}</title>
+    <script is:inline>
+      /* 前端错误采集：JS 异常 / Promise 拒绝 / UI 错误提示 → sendBeacon /api/log/client。
+         同一错误每页只报一次；上报本身出任何问题都必须静默，不能引发二次错误。 */
+      (function () {
+        var seen = {};
+        function report(kind, msg, stack) {
+          try {
+            var key = kind + ":" + String(msg).slice(0, 160);
+            if (seen[key]) return;
+            seen[key] = 1;
+            navigator.sendBeacon(
+              "/api/log/client",
+              new Blob(
+                [JSON.stringify({ kind: kind, msg: String(msg).slice(0, 500), stack: stack ? String(stack).slice(0, 2000) : "", page: location.pathname + location.search, ua: navigator.userAgent, ts: Date.now() })],
+                { type: "application/json" }
+              )
+            );
+          } catch (e) {}
+        }
+        window.__reportClientError = function (o) {
+          report(o && o.kind, o && o.msg, o && o.stack);
+        };
+        window.addEventListener("error", function (ev) {
+          if (ev.error || ev.message) report("js", ev.message, (ev.error && ev.error.stack) || "");
+        });
+        window.addEventListener("unhandledrejection", function (ev) {
+          var r = ev.reason;
+          report("promise", (r && (r.message || r)) || "unhandled rejection", (r && r.stack) || "");
+        });
+      })();
+    </script>
   </head>
   <body>
     <Header />

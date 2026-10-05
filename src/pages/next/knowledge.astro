@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+
+import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
+import KnowledgeBody from "../../views/KnowledgeBody.astro";
+import { denyPrivilegedRequest } from "../../lib/site-gate";
+
+const blocked = denyPrivilegedRequest(Astro);
+if (blocked) return blocked;
+---
+
+<PrivilegedLayout view="next" title="知识库" description="协会集训队成体系课程资料：国赛、美赛集训大表，按模块分组的课程、回放与课件索引。">
+  <KnowledgeBody />
+</PrivilegedLayout>

@@ -1,15 +1,9 @@
 import type { APIRoute } from "astro";
-import { SESSION_COOKIE, verifySessionToken } from "../../../lib/auth";
-import { agentAllowAnonymous, agentConfigured } from "../../../lib/agent/config";
+import { resolveAgentAccount } from "../../../lib/agent/account";
+import { agentConfigured } from "../../../lib/agent/config";
 import { getAdminConfig, isAdminAccount, saveAdminConfig, REASONING_LEVELS, type ReasoningLevel } from "../../../lib/agent/admin";
 
 export const prerender = false;
-
-/** 登录用户返回其账号；未登录且开启匿名模式时返回 "anonymous"，否则 null（401） */
-function resolveAccount(cookies: { get(name: string): { value?: string } | undefined }): string | null {
-  const session = verifySessionToken(cookies.get(SESSION_COOKIE)?.value);
-  return session?.user.account ?? (agentAllowAnonymous ? "anonymous" : null);
-}
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -24,7 +18,7 @@ const json = (body: unknown, status = 200) =>
  * admin 表示当前用户是否管理员（可看到并修改官方参数）。
  */
 export const GET: APIRoute = async ({ cookies }) => {
-  const account = resolveAccount(cookies);
+  const account = resolveAgentAccount(cookies);
   if (!account) return json({ error: "unauthorized" }, 401);
   const cfg = getAdminConfig();
   return json({
@@ -38,7 +32,7 @@ export const GET: APIRoute = async ({ cookies }) => {
 
 /** POST /api/agent/settings body: {officialModel?, officialReasoning?} → 仅管理员，写回 data/agent-admin.json */
 export const POST: APIRoute = async ({ request, cookies }) => {
-  const account = resolveAccount(cookies);
+  const account = resolveAgentAccount(cookies);
   if (!account) return json({ error: "unauthorized" }, 401);
   if (!isAdminAccount(account)) return json({ error: "forbidden" }, 403);
 

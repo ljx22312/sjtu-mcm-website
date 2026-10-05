@@ -1,0 +1,113 @@
+---
+import { wechat } from "../config";
+
+const activities = [
+  {
+    title: "竞赛集训队（核心活动）",
+    desc: "美赛/国赛前组织集训队招募与系统培训，课程按飞书集训大表体系组织（讲座、导论、模型与编程、工具与 AI、写作、经验分享、实战演示等模块，国赛、美赛共 106 条课程记录），并组织模拟赛。",
+  },
+  {
+    title: "研讨班",
+    desc: "面向协会成员定期开展数学模型与算法研讨班，成员相互交流，共同学习数学模型、编程、论文写作与排版，以老带新。",
+  },
+  {
+    title: "校内赛协办",
+    desc: "上海交通大学数学建模校内赛由教务处指导，学生创新中心与数学科学学院主办，协会协办。2021 年首届以来已办六届，2026 年报名 1283 人，是国赛选拔与练兵的重要平台。",
+  },
+  {
+    title: "社团招新与校园活动",
+    desc: "春季/秋季招新、“百团大战”摊位活动（数模知识拼拼图等趣味挑战）、“春日雅集”集赞抽奖等。",
+  },
+  {
+    title: "交大荣昶杯数学建模挑战赛",
+    desc: "面向中学生的数学建模赛事，协会参与组织与公示，2023 年 95 支赛队参赛。",
+  },
+];
+---
+
+  <h1 class="page-title">团队介绍</h1>
+  <p class="page-subtitle">数学科学学院 + 学生创新中心共同组织的科创类协会。</p>
+
+  <!-- 协会简介 -->
+  <section class="section">
+    <h2 class="section-title">协会简介</h2>
+    <div class="card intro-card">
+      <img src="/images/img06.jpg" alt="协会会徽" class="intro-logo" />
+      <div>
+        <p>
+          上海交通大学数学建模协会成立于 2018 年，是由<strong>数学科学学院</strong>和<strong>学生创新中心</strong>
+          共同组织的科创类协会（挂靠学生创新中心数学科学学院分中心），专注于数学建模竞赛与数模知识科普。
+          协会旨在服务全体交大学生，集聚了大量建模竞赛获奖选手，开发了一套成体系的建模培训资料，
+          为各学科领域对数学建模感兴趣的同学提供基础学习、技能提高和组队参赛的平台。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 指导老师 -->
+  <section class="section">
+    <h2 class="section-title">指导老师</h2>
+    <div class="card">
+      <h3 style="margin-top: 0;">任桐鑫 <span class="badge badge-blue">学生创新中心实验师 · 协会指导老师</span></h3>
+      <p>
+        负责校内赛组织与赛前集训。2019 校学生年度人物；个人曾获 2018 美赛特等奖及 INFORMS 冠名奖、
+        2019 深圳杯唯一特等奖；指导协会集训队学生获 2023 国赛全国一等奖、2024/2025 美赛 F 奖（特等奖提名）多项；
+        2025 全国数模微课程教学竞赛上海赛区一等奖。
+      </p>
+    </div>
+  </section>
+
+  <!-- 主要活动 -->
+  <section class="section">
+    <h2 class="section-title">主要活动</h2>
+    <div class="grid grid-2">
+      {activities.map((a) => (
+        <article class="card">
+          <h3 style="margin-top: 0;">{a.title}</h3>
+          <p class="muted" style="margin-bottom: 0;">{a.desc}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- 公众号 -->
+  <section class="section">
+    <h2 class="section-title">公众号</h2>
+    <div class="card contact-card">
+      <p>微信搜索「{wechat}」（ID: sjtumcm）</p>
+    </div>
+  </section>
+
+<style>
+  .intro-card {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .intro-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .intro-card p {
+    margin-top: 0;
+  }
+
+  .contact-card p {
+    margin: 8px 0;
+  }
+
+  @media (max-width: 640px) {
+    .intro-card {
+      flex-direction: column;
+    }
+
+    .intro-logo {
+      width: 88px;
+      height: 88px;
+    }
+  }
+</style>

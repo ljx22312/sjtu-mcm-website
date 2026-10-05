@@ -9,6 +9,7 @@ import {
   signSession,
   verifyIdToken,
 } from "../../../lib/auth";
+import { logEvent } from "../../../lib/logger";
 
 export const prerender = false;
 
@@ -38,7 +39,8 @@ export const GET: APIRoute = async ({ url, request, cookies, redirect }) => {
     cookies.set(SESSION_COOKIE, signSession(user), cookieOptions(secure, 7 * 24 * 3600));
     return redirect(sanitizeRedirect(stateCookie.n), 302);
   } catch (e) {
-    console.error("[auth] callback 失败:", e);
+    const err = e as Error & { stack?: string };
+    logEvent("error", "auth_callback_failed", { message: err?.message ?? String(e), stack: err?.stack ?? "" });
     return fail("登录处理失败，请稍后重试");
   }
 };

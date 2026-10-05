@@ -21,8 +21,12 @@
         <button type="button" id="agent-history" title="历史对话（恢复之前的话题）" aria-label="历史对话">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
         </button>
-        <button type="button" id="agent-clear" title="重新开始（清除我的对话记录）" aria-label="重新开始">
+        <button type="button" id="agent-clear" title="重新开始一段新对话" aria-label="重新开始">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"/></svg>
+        </button>
+        <button type="button" id="agent-expand" title="全屏交流" aria-label="全屏交流" aria-pressed="false">
+          <svg class="icon-expand" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+          <svg class="icon-collapse" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
         </button>
         <button type="button" id="agent-close" title="收起面板" aria-label="收起面板">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -30,7 +34,7 @@
       </div>
     </header>
     <div id="agent-body">
-      <p class="agent-notice">对话记录仅保存在协会服务器，用于保留你的对话上下文，可随时清除。</p>
+      <p class="agent-notice">每个人的对话分开保存。撤回后不再进入上下文，原文仍留在服务器。</p>
     </div>
     <div id="agent-sessions" hidden aria-label="历史对话列表">
       <div class="agent-sessions-head">
@@ -44,6 +48,20 @@
         <button type="button" id="agent-settings-back" aria-label="返回对话">‹ 返回</button>
         <span>模型设置</span>
       </div>
+      <section class="agent-set-section" id="agent-root-section">
+        <h4>主管理员</h4>
+        <p class="agent-set-desc" id="agent-root-desc">用口令确认后，这个浏览器上的助手使用主管理员身份，与其他访客分开。</p>
+        <form id="agent-root-form">
+          <label class="agent-set-field">
+            <span>密码</span>
+            <input type="password" id="agent-root-password" autocomplete="current-password" />
+          </label>
+          <div class="agent-set-actions">
+            <button type="submit" class="agent-set-btn primary">确认身份</button>
+          </div>
+        </form>
+        <p class="agent-set-hint" id="agent-root-status" hidden></p>
+      </section>
       <div id="agent-settings-body">
         <section class="agent-set-section">
           <h4>自带 API（可选）</h4>
@@ -96,6 +114,7 @@
         </section>
       </div>
     </div>
+    <div id="agent-scope" hidden></div>
     <footer class="agent-input">
       <textarea id="agent-input" rows="1" placeholder="问问我：国赛集训的论文写作课在哪看回放？"></textarea>
       <button type="button" id="agent-send" aria-label="发送">
@@ -164,6 +183,52 @@
      否则面板初始即打开、点 × 也关不掉 */
   #agent-panel[hidden] {
     display: none !important;
+  }
+
+  /* 全屏：铺满视口，对话列居中，方便长问答 */
+  #agent-expand .icon-collapse {
+    display: none;
+  }
+  #agent-widget.is-fullscreen #agent-expand .icon-expand {
+    display: none;
+  }
+  #agent-widget.is-fullscreen #agent-expand .icon-collapse {
+    display: block;
+  }
+  #agent-widget.is-fullscreen #agent-fab {
+    display: none;
+  }
+  #agent-widget.is-fullscreen #agent-panel {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  #agent-widget.is-fullscreen #agent-body,
+  #agent-widget.is-fullscreen .agent-input {
+    padding-left: max(16px, calc((100% - 880px) / 2));
+    padding-right: max(16px, calc((100% - 880px) / 2));
+  }
+  #agent-widget.is-fullscreen #agent-body {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    gap: 14px;
+  }
+  #agent-widget.is-fullscreen .agent-msg {
+    max-width: min(78%, 680px);
+    font-size: 1rem;
+  }
+  #agent-widget.is-fullscreen #agent-input {
+    max-height: 220px;
+    font-size: 1rem;
+  }
+  html.agent-fullscreen-lock,
+  html.agent-fullscreen-lock body {
+    overflow: hidden;
   }
 
   .agent-head {
@@ -535,6 +600,63 @@
     color: #a30000;
   }
 
+  #agent-scope {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 10px 0;
+    background: var(--card-bg, #fff);
+  }
+  #agent-scope[hidden] {
+    display: none;
+  }
+  .agent-scope-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+    border: 0;
+    border-radius: 999px;
+    padding: 3px 8px;
+    background: #f4e4e4;
+    color: #1f1f1f;
+    font: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+  .agent-cites {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .agent-cite {
+    border: 0;
+    border-radius: 8px;
+    padding: 4px 8px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.7);
+    font: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+  .agent-cite-quote {
+    margin: 0;
+    padding: 6px 8px;
+    border-left: 3px solid var(--agent-accent, #cc0000);
+    font-size: 0.75rem;
+    line-height: 1.45;
+    white-space: pre-wrap;
+  }
+  .cite-ref {
+    border: 0;
+    padding: 0 2px;
+    background: transparent;
+    color: var(--blue, #1f4e9c);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
   .agent-input {
     display: flex;
     align-items: flex-end;
@@ -580,6 +702,103 @@
     opacity: 0.45;
     cursor: not-allowed;
   }
+  #agent-send.is-stop {
+    background: #333;
+  }
+  .agent-identity {
+    margin: 2px 0 0;
+    font-size: 0.72rem;
+    color: var(--text-light, #666);
+  }
+  .agent-msg-actions {
+    position: relative;
+    display: flex;
+    gap: 2px;
+    margin: -6px 0 8px;
+  }
+  .agent-msg.user + .agent-msg-actions {
+    align-self: flex-end;
+  }
+  .agent-msg-actions button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-light, #888);
+    cursor: pointer;
+    padding: 0;
+  }
+  .agent-msg-actions button:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--text, #333);
+  }
+  .agent-msg-actions button.is-on {
+    color: var(--red, #cc0000);
+  }
+  .agent-msg-actions button[hidden] {
+    display: none;
+  }
+  .agent-edit {
+    align-self: flex-end;
+    width: min(100%, 420px);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .agent-edit textarea {
+    width: 100%;
+    min-height: 72px;
+    resize: vertical;
+    padding: 8px 10px;
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 10px;
+    font: inherit;
+    line-height: 1.5;
+  }
+  .agent-edit-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .agent-edit-row button {
+    border: 1px solid var(--border, #e5e5e5);
+    background: #fff;
+    border-radius: 8px;
+    padding: 4px 12px;
+    font: inherit;
+    cursor: pointer;
+  }
+  .agent-edit-row button.primary {
+    background: var(--red, #cc0000);
+    border-color: var(--red, #cc0000);
+    color: #fff;
+  }
+  .agent-share-menu {
+    position: absolute;
+    right: 0;
+    top: 30px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    min-width: 132px;
+    padding: 4px;
+    border: 1px solid var(--border, #e5e5e5);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+  .agent-share-menu button {
+    width: 100%;
+    height: auto;
+    justify-content: flex-start;
+    padding: 6px 8px;
+    font: inherit;
+    font-size: 0.8rem;
+  }
 
   @media (max-width: 640px) {
     #agent-widget {
@@ -606,8 +825,10 @@
 </style>
 
 <script>
+  const widget = document.getElementById("agent-widget") as HTMLElement;
   const panel = document.getElementById("agent-panel") as HTMLElement;
   const fab = document.getElementById("agent-fab") as HTMLButtonElement;
+  const expandBtn = document.getElementById("agent-expand") as HTMLButtonElement;
   const body = document.getElementById("agent-body") as HTMLElement;
   const input = document.getElementById("agent-input") as HTMLTextAreaElement;
   const sendBtn = document.getElementById("agent-send") as HTMLButtonElement;
@@ -624,8 +845,15 @@
 
   let ready = false; // 已确认可对话（已登录，或服务端开启匿名模式）
   let streaming = false;
-  /** 当前对话归属的会话；null = 全新会话（首条消息发送后由服务端分配） */
+  /** 当前对话归属的会话；null = 下一条消息由服务端新开一场 */
   let currentSessionId: number | null = null;
+  /** 进行中的生成。重新开始或停止时作废，避免旧流把会话编号写回来。 */
+  let turnGen = 0;
+  let abortCtrl: AbortController | null = null;
+  let localTurn = 0;
+  const SEND_ICON = (document.getElementById("agent-send") as HTMLButtonElement).innerHTML;
+  const STOP_ICON =
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>';
 
   /* ---------- 自带 API（BYOK）：配置只存本浏览器 localStorage，不经过协会服务器存储 ---------- */
 
@@ -668,11 +896,12 @@
     return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
   }
 
-  /** 轻量渲染：转义后做链接化 / 换行 / 粗体 */
+  /** 轻量渲染：转义后做链接化 / 换行 / 粗体 / 出处编号 */
   function renderRich(s: string): string {
     let html = escapeHtml(s);
     html = html.replace(/(https?:\/\/[^\s<)"']+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
     html = html.replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>");
+    html = html.replace(/\[(\d+)\]/g, '<button type="button" class="cite-ref" data-n="$1">[$1]</button>');
     return html.replace(/\n/g, "<br>");
   }
 
@@ -683,6 +912,10 @@
   }
 
   function addMsg(role: "user" | "assistant" | "status" | "error", text: string): HTMLElement {
+    /* 用户看到错误提示即上报（BaseLayout 定义的全局采集钩子），运营侧能第一时间知道用户踩了 bug */
+    if (role === "error" && typeof window.__reportClientError === "function") {
+      window.__reportClientError({ kind: "ui", msg: text });
+    }
     const div = document.createElement("div");
     div.className = `agent-msg ${role}`;
     if (role === "status") {
@@ -695,6 +928,235 @@
     body.appendChild(div);
     scrollBottom();
     return div;
+  }
+
+  const ICON = {
+    edit: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+    copy: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    share: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>',
+    undo: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>',
+    up: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>',
+    down: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/></svg>',
+  };
+
+  function iconButton(title: string, svg: string): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.title = title;
+    button.setAttribute("aria-label", title);
+    button.innerHTML = svg;
+    return button;
+  }
+
+  async function copyText(text: string, button: HTMLButtonElement) {
+    const icon = button.innerHTML;
+    try {
+      await navigator.clipboard.writeText(text);
+      button.title = "已复制";
+    } catch {
+      button.title = "复制失败";
+    }
+    setTimeout(() => {
+      button.title = "复制";
+      button.innerHTML = icon;
+    }, 1200);
+  }
+
+  function closeShareMenus() {
+    body.querySelectorAll(".agent-share-menu").forEach((node) => node.remove());
+  }
+
+  async function shareConversation(scope: "turn" | "all", retractId: string) {
+    if (!currentSessionId) {
+      addMsg("error", "这场对话还没有保存，稍后再分享。");
+      return;
+    }
+    try {
+      const res = await fetch("/api/agent/share", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: currentSessionId,
+          ...(scope === "turn" ? { messageId: Number(retractId) } : {}),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.url) {
+        addMsg("error", "分享没有生成，请稍后重试。");
+        return;
+      }
+      await navigator.clipboard.writeText(data.url);
+      addMsg("status", "分享链接已复制，可以发给别人打开。");
+    } catch {
+      addMsg("error", "分享没有生成，请稍后重试。");
+    }
+  }
+
+  function openShareMenu(anchor: HTMLElement, retractId: string) {
+    closeShareMenus();
+    const menu = document.createElement("div");
+    menu.className = "agent-share-menu";
+    const one = document.createElement("button");
+    one.type = "button";
+    one.textContent = "分享这一轮";
+    one.addEventListener("click", () => {
+      menu.remove();
+      void shareConversation("turn", retractId);
+    });
+    const all = document.createElement("button");
+    all.type = "button";
+    all.textContent = "分享整个对话";
+    all.addEventListener("click", () => {
+      menu.remove();
+      void shareConversation("all", retractId);
+    });
+    menu.append(one, all);
+    anchor.appendChild(menu);
+  }
+
+  async function voteMessage(el: HTMLElement, button: HTMLButtonElement, vote: 1 | -1) {
+    const messageId = Number(el.dataset.messageId || "");
+    if (!messageId) return;
+    const current = Number(el.dataset.vote || "0");
+    const next = current === vote ? 0 : vote;
+    try {
+      const res = await fetch("/api/agent/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId, vote: next }),
+      });
+      if (!res.ok) return;
+      el.dataset.vote = String(next);
+      const bar = button.parentElement;
+      bar?.querySelectorAll("[data-vote]").forEach((node) => {
+        node.classList.toggle("is-on", Number((node as HTMLElement).dataset.vote) === next && next !== 0);
+      });
+    } catch {
+      /* 表态失败时保持原图标 */
+    }
+  }
+
+  function beginEdit(el: HTMLElement) {
+    if (streaming) return;
+    const original = el.dataset.plain || "";
+    const box = document.createElement("div");
+    box.className = "agent-edit";
+    box.dataset.turn = el.dataset.turn || "";
+    const area = document.createElement("textarea");
+    area.value = original;
+    const row = document.createElement("div");
+    row.className = "agent-edit-row";
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.textContent = "取消";
+    const ok = document.createElement("button");
+    ok.type = "button";
+    ok.className = "primary";
+    ok.textContent = "发送";
+    cancel.addEventListener("click", () => {
+      box.replaceWith(el);
+      refreshEditButtons();
+    });
+    ok.addEventListener("click", async () => {
+      const next = area.value.trim();
+      if (!next) return;
+      const id = Number(el.dataset.retractId || "");
+      const turn = el.dataset.turn || "";
+      if (id) {
+        const removed = await retractTurn(id, turn);
+        if (!removed) return;
+      } else {
+        body.querySelectorAll(`[data-turn="${CSS.escape(turn)}"]`).forEach((node) => node.remove());
+      }
+      input.value = next;
+      void send();
+    });
+    row.append(cancel, ok);
+    box.append(area, row);
+    el.replaceWith(box);
+    area.focus();
+  }
+
+  function refreshEditButtons() {
+    body.querySelectorAll(".agent-edit-btn").forEach((node) => {
+      (node as HTMLButtonElement).hidden = true;
+    });
+    const users = body.querySelectorAll(".agent-msg.user");
+    const last = users[users.length - 1] as HTMLElement | undefined;
+    const edit = last?.nextElementSibling?.querySelector(".agent-edit-btn") as HTMLButtonElement | null;
+    if (edit) edit.hidden = false;
+  }
+
+  function attachActions(el: HTMLElement, role: "user" | "assistant") {
+    if (el.nextElementSibling?.classList.contains("agent-msg-actions")) return;
+    const bar = document.createElement("div");
+    bar.className = "agent-msg-actions";
+    bar.dataset.turn = el.dataset.turn || "";
+    const retractId = () => el.dataset.retractId || el.dataset.messageId || "";
+    if (role === "user") {
+      const edit = iconButton("编辑", ICON.edit);
+      edit.classList.add("agent-edit-btn");
+      edit.hidden = true;
+      edit.addEventListener("click", () => beginEdit(el));
+      bar.appendChild(edit);
+    }
+    const copy = iconButton("复制", ICON.copy);
+    copy.addEventListener("click", () => void copyText(el.dataset.plain || "", copy));
+    bar.appendChild(copy);
+    const share = iconButton("分享", ICON.share);
+    share.addEventListener("click", (event) => {
+      event.stopPropagation();
+      openShareMenu(bar, retractId());
+    });
+    bar.appendChild(share);
+    if (role === "user") {
+      const undo = iconButton("撤回", ICON.undo);
+      undo.addEventListener("click", () => {
+        const id = Number(retractId());
+        if (id) void retractTurn(id, el.dataset.turn || "");
+      });
+      bar.appendChild(undo);
+    }
+    if (role === "assistant") {
+      const up = iconButton("有用", ICON.up);
+      up.dataset.vote = "1";
+      const down = iconButton("没用", ICON.down);
+      down.dataset.vote = "-1";
+      const current = Number(el.dataset.vote || "0");
+      if (current === 1) up.classList.add("is-on");
+      if (current === -1) down.classList.add("is-on");
+      up.addEventListener("click", () => void voteMessage(el, up, 1));
+      down.addEventListener("click", () => void voteMessage(el, down, -1));
+      bar.append(up, down);
+    }
+    el.insertAdjacentElement("afterend", bar);
+    refreshEditButtons();
+  }
+
+  async function retractTurn(messageId: number, turn: string): Promise<boolean> {
+    if (streaming) stopStreaming();
+    try {
+      const res = await fetch("/api/agent/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId }),
+      });
+      if (!res.ok) {
+        addMsg("error", "撤回失败，请稍后重试。");
+        return false;
+      }
+      body.querySelectorAll(`[data-turn="${CSS.escape(turn)}"]`).forEach((node) => node.remove());
+      refreshEditButtons();
+      return true;
+    } catch {
+      addMsg("error", "撤回失败，请稍后重试。");
+      return false;
+    }
+  }
+
+  function stopStreaming() {
+    abortCtrl?.abort();
+    abortCtrl = null;
   }
 
   interface ThinkBlock {
@@ -752,12 +1214,13 @@
   }
 
   /** 恢复历史时：直接渲染为收起态的思考块（点开可看全程） */
-  function addHistoryThink(text: string) {
+  function addHistoryThink(text: string): ThinkBlock {
     const tb = makeThinkBlock(false);
     tb.bodyEl.textContent = text;
     tb.bodyEl.scrollTop = 0; /* 展开时从头可读 */
     const label = tb.toggle.querySelector(".agent-think-label") as HTMLElement;
     label.textContent = "已深度思考 · 点击查看";
+    return tb;
   }
 
   function resetBody() {
@@ -765,10 +1228,24 @@
   }
 
   /** 把一段消息序列渲染成红/蓝气泡（历史恢复与刷新载入共用） */
-  function renderMessages(msgs: { role: string; content: string; thinking?: string | null }[]) {
-    for (const m of msgs) {
-      if (m.role === "assistant" && m.thinking) addHistoryThink(m.thinking);
-      addMsg(m.role as "user" | "assistant", m.content);
+  function renderMessages(msgs: { id?: number; role: string; content: string; thinking?: string | null; vote?: number | null }[]) {
+    for (let i = 0; i < msgs.length; i++) {
+      const m = msgs[i];
+      const prev = msgs[i - 1];
+      const retractId = m.role === "user" ? m.id : prev?.role === "user" ? prev.id : m.id;
+      const turn = String(retractId || `h${i}`);
+      if (m.role === "assistant" && m.thinking) {
+        const tb = addHistoryThink(m.thinking);
+        tb.root.dataset.turn = turn;
+      }
+      if (m.role !== "user" && m.role !== "assistant") continue;
+      const el = addMsg(m.role, m.content);
+      el.dataset.turn = turn;
+      el.dataset.plain = m.content;
+      if (m.id) el.dataset.messageId = String(m.id);
+      if (retractId) el.dataset.retractId = String(retractId);
+      if (m.role === "assistant" && (m.vote === 1 || m.vote === -1)) el.dataset.vote = String(m.vote);
+      attachActions(el, m.role);
     }
     scrollBottom();
   }
@@ -789,8 +1266,49 @@
 
   /* ---------- 打开 / 关闭 ---------- */
 
+  const FS_KEY = "agent-panel-fullscreen";
+  let wantFullscreen = false;
+  try {
+    wantFullscreen = localStorage.getItem(FS_KEY) === "1";
+  } catch {
+    /* 无痕模式写不了 localStorage，只在本次打开期间记住 */
+  }
+
+  function syncFullscreenButton() {
+    expandBtn.setAttribute("aria-pressed", String(wantFullscreen));
+    const label = wantFullscreen ? "退出全屏" : "全屏交流";
+    expandBtn.title = label;
+    expandBtn.setAttribute("aria-label", label);
+  }
+
+  /** 全屏类只在面板打开时挂上，避免隐藏面板时挡住整页点击 */
+  function applyFullscreen() {
+    const on = wantFullscreen && !panel.hidden;
+    widget.classList.toggle("is-fullscreen", on);
+    document.documentElement.classList.toggle("agent-fullscreen-lock", on);
+    syncFullscreenButton();
+    autoGrow();
+  }
+
+  function setWantFullscreen(on: boolean) {
+    wantFullscreen = on;
+    try {
+      localStorage.setItem(FS_KEY, on ? "1" : "0");
+    } catch {
+      /* 忽略 */
+    }
+    applyFullscreen();
+    if (!panel.hidden) input.focus();
+  }
+
+  function setLecturePicking(on: boolean) {
+    document.documentElement.classList.toggle("agent-picking", on);
+  }
+
   async function openPanel() {
     panel.hidden = false;
+    setLecturePicking(true);
+    applyFullscreen();
     fab.setAttribute("aria-label", "收起智能助手");
     if (!ready) {
       /* 直接探测历史接口：200 = 已登录或服务端开了匿名模式；401 = 需要登录 */
@@ -801,13 +1319,68 @@
           return;
         }
         ready = true;
-        /* 打开面板默认接续最近一场对话（若有）；想换话题走「历史对话」按钮 */
-        if (currentSessionId === null) await loadLatestSession();
+        await refreshIdentity();
+        if (currentSessionId === null) await restoreRememberedSession();
       } catch {
         ready = true; /* 网络抖动不拦着，发消息时再报错 */
       }
     }
     input.focus();
+  }
+
+  async function refreshIdentity() {
+    try {
+      const res = await fetch("/api/agent/sessions");
+      if (!res.ok) return;
+      const data = await res.json();
+      const head = panel.querySelector(".agent-head-info");
+      if (!head) return;
+      let badge = head.querySelector(".agent-identity") as HTMLElement | null;
+      if (!badge) {
+        badge = document.createElement("p");
+        badge.className = "agent-identity";
+        head.appendChild(badge);
+      }
+      badge.textContent = data.identity || "";
+      const form = document.getElementById("agent-root-form");
+      const desc = document.getElementById("agent-root-desc");
+      if (data.account === "root") {
+        form?.setAttribute("hidden", "");
+        if (desc) desc.textContent = "当前已是主管理员。这个身份的对话不与其他访客混用。";
+      }
+    } catch {
+      /* 身份角标失败不影响对话 */
+    }
+  }
+
+  function rememberSession(id: number | null) {
+    try {
+      if (id) sessionStorage.setItem("agent-session", String(id));
+      else sessionStorage.removeItem("agent-session");
+    } catch {
+      /* 隐私模式不影响当前页里的会话 */
+    }
+  }
+
+  /** 刷新后回到这一页正在进行的那场；没有记录才接最近一场。 */
+  async function restoreRememberedSession() {
+    let saved = 0;
+    try {
+      saved = Number(sessionStorage.getItem("agent-session") || "");
+    } catch {
+      saved = 0;
+    }
+    if (saved > 0) {
+      const res = await fetch(`/api/agent/sessions?id=${saved}`);
+      if (res.ok) {
+        await loadSession(saved, false);
+        return;
+      }
+      currentSessionId = saved;
+      rememberSession(saved);
+      return;
+    }
+    await loadLatestSession();
   }
 
   /** 载入最近一场对话（打开面板时自动续上） */
@@ -833,6 +1406,7 @@
       const msgs = data.messages ?? [];
       if (msgs.length === 0) return;
       currentSessionId = sessionId;
+      rememberSession(sessionId);
       resetBody();
       if (announce) {
         const sep = document.createElement("div");
@@ -1000,6 +1574,31 @@
     settingsView.hidden = true;
   }
 
+  document.getElementById("agent-root-form")?.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const statusEl = document.getElementById("agent-root-status") as HTMLElement;
+    const password = (document.getElementById("agent-root-password") as HTMLInputElement).value;
+    setHint(statusEl, "正在确认…");
+    try {
+      const res = await fetch("/api/auth/root", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setHint(statusEl, data.error || "确认失败。", true);
+        return;
+      }
+      (document.getElementById("agent-root-password") as HTMLInputElement).value = "";
+      setHint(statusEl, "已确认主管理员。之后的对话使用这个身份。");
+      currentSessionId = null;
+      await refreshIdentity();
+    } catch {
+      setHint(statusEl, "网络异常，请稍后重试。", true);
+    }
+  });
+
   settingsBtn.addEventListener("click", () => void openSettings());
   settingsBack.addEventListener("click", () => {
     hideSettings();
@@ -1060,46 +1659,57 @@
 
   function closePanel() {
     panel.hidden = true;
+    setLecturePicking(false);
     hideSessions();
     hideSettings();
+    applyFullscreen();
     fab.setAttribute("aria-label", "打开智能助手");
   }
 
   fab.addEventListener("click", () => (panel.hidden ? openPanel() : closePanel()));
   closeBtn.addEventListener("click", closePanel);
+  expandBtn.addEventListener("click", () => setWantFullscreen(!wantFullscreen));
+  document.addEventListener("click", () => closeShareMenus());
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !panel.hidden) closePanel();
+    if (e.key !== "Escape" || panel.hidden) return;
+    if (wantFullscreen) {
+      setWantFullscreen(false);
+      return;
+    }
+    closePanel();
   });
 
   /* ---------- 重新开始 ---------- */
 
   clearBtn.addEventListener("click", async () => {
     if (!ready) return;
-    if (currentSessionId !== null) {
-      /* 正在某场对话中：回到全新会话（原对话保留，可从「历史对话」再进入） */
-      if (!confirm("开始一段新对话吗？当前对话会保留在「历史对话」里。")) return;
-      currentSessionId = null;
-      resetBody();
-      addMsg("status", "已开始新对话。");
-    } else {
-      /* 已在新会话：二次确认后清空全部历史记录 */
-      if (!confirm("当前是新对话。要清除你在这个助手中的全部历史记录吗？")) return;
-      try {
-        await fetch("/api/agent/history", { method: "DELETE", headers: { "Content-Type": "application/json" } });
-        currentSessionId = null;
-        resetBody();
-        addMsg("status", "全部对话记录已清除。");
-      } catch {
-        addMsg("error", "清除失败，请稍后重试。");
+    if (!confirm("开始一段新对话吗？当前对话会留在「历史对话」里。")) return;
+    turnGen += 1;
+    stopStreaming();
+    setStreaming(false);
+    currentSessionId = null;
+    resetBody();
+    try {
+      const res = await fetch("/api/agent/sessions", { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof data.session_id === "number") {
+          currentSessionId = data.session_id;
+          rememberSession(currentSessionId);
+        }
       }
+      addMsg("status", "已开始新对话。");
+    } catch {
+      addMsg("error", "新对话没有分配成功，下一条消息仍会单独成一场。");
     }
   });
 
   /* ---------- 输入 ---------- */
 
   function autoGrow() {
+    const cap = widget.classList.contains("is-fullscreen") ? 220 : 110;
     input.style.height = "auto";
-    input.style.height = `${Math.min(input.scrollHeight, 110)}px`;
+    input.style.height = `${Math.min(input.scrollHeight, cap)}px`;
   }
   input.addEventListener("input", autoGrow);
   input.addEventListener("keydown", (e) => {
@@ -1108,13 +1718,104 @@
       send();
     }
   });
-  sendBtn.addEventListener("click", send);
+  sendBtn.addEventListener("click", () => {
+    if (streaming) stopStreaming();
+    else void send();
+  });
 
   function setStreaming(on: boolean) {
     streaming = on;
-    sendBtn.disabled = on;
     input.disabled = on;
+    sendBtn.classList.toggle("is-stop", on);
+    sendBtn.setAttribute("aria-label", on ? "停止生成" : "发送");
+    sendBtn.innerHTML = on ? STOP_ICON : SEND_ICON;
   }
+
+  const SCOPE_KEY = "sjtumcm-lecture-scope";
+  const scopeBar = document.getElementById("agent-scope");
+
+  function lecturePicks(): { key: string; label: string }[] {
+    try {
+      const raw = JSON.parse(localStorage.getItem(SCOPE_KEY) || "[]");
+      if (!Array.isArray(raw)) return [];
+      return raw.filter((item) => item && typeof item.key === "string" && /^(cumcm|mcm):\d+$/.test(item.key));
+    } catch {
+      return [];
+    }
+  }
+
+  function lectureKeys(): string[] {
+    return lecturePicks().map((item) => item.key);
+  }
+
+  function renderScope(picks = lecturePicks()) {
+    if (!scopeBar) return;
+    scopeBar.innerHTML = "";
+    if (picks.length === 0) {
+      scopeBar.hidden = !document.getElementById("kb-ask-bar");
+      if (!scopeBar.hidden) scopeBar.textContent = "在课程表里勾选要提问的讲";
+      return;
+    }
+    scopeBar.hidden = false;
+    for (const pick of picks) {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "agent-scope-chip";
+      chip.textContent = `${pick.label} ×`;
+      chip.title = "移出这一讲";
+      chip.addEventListener("click", () => {
+        const next = lecturePicks().filter((item) => item.key !== pick.key);
+        localStorage.setItem(SCOPE_KEY, JSON.stringify(next));
+        renderScope(next);
+        window.dispatchEvent(new CustomEvent("agent-lectures", { detail: next }));
+      });
+      scopeBar.appendChild(chip);
+    }
+  }
+
+  function mountCitations(
+    bubble: HTMLElement,
+    items: { n: number; title: string; locator: string; quote: string; url: string }[],
+  ) {
+    bubble.querySelector(".agent-cites")?.remove();
+    if (items.length === 0) return;
+    const box = document.createElement("div");
+    box.className = "agent-cites";
+    for (const item of items) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "agent-cite";
+      button.dataset.n = String(item.n);
+      const where = item.locator ? ` · ${item.locator}` : "";
+      button.textContent = `[${item.n}] ${item.title}${where}`;
+      const quote = document.createElement("blockquote");
+      quote.className = "agent-cite-quote";
+      quote.dataset.n = String(item.n);
+      quote.hidden = true;
+      quote.textContent = item.quote;
+      if (item.url) {
+        const link = document.createElement("a");
+        link.href = item.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "打开原链接";
+        quote.appendChild(document.createElement("br"));
+        quote.appendChild(link);
+      }
+      button.addEventListener("click", () => {
+        quote.hidden = !quote.hidden;
+      });
+      box.appendChild(button);
+      box.appendChild(quote);
+    }
+    bubble.appendChild(box);
+  }
+
+  renderScope();
+  window.addEventListener("agent-lectures", () => renderScope());
+  window.addEventListener("agent-open", () => {
+    void openPanel();
+  });
 
   async function send() {
     const text = input.value.trim();
@@ -1125,8 +1826,14 @@
     }
     input.value = "";
     autoGrow();
-    addMsg("user", text);
+    const gen = ++turnGen;
+    const turn = `t${++localTurn}`;
+    const userEl = addMsg("user", text);
+    userEl.dataset.turn = turn;
+    userEl.dataset.plain = text;
+    attachActions(userEl, "user");
 
+    abortCtrl = new AbortController();
     setStreaming(true);
     const usingCustom = customMem !== null;
     let bubble: HTMLElement | null = null;
@@ -1134,6 +1841,7 @@
     let think: ThinkBlock | null = null;
     let thinkingDone = false;
     let acc = "";
+    let cites: { n: number; title: string; locator: string; quote: string; url: string }[] = [];
     try {
       const res = await fetch("/api/agent/chat", {
         method: "POST",
@@ -1143,7 +1851,9 @@
           sessionId: currentSessionId ?? undefined,
           /* 自带 API 配置随请求携带（仅 HTTPS 端点），服务端不落盘 */
           ...(usingCustom ? { custom: customMem } : {}),
+          lectures: lectureKeys(),
         }),
+        signal: abortCtrl.signal,
       });
       if (res.status === 401) {
         ready = false;
@@ -1186,9 +1896,18 @@
           } catch {
             continue;
           }
+          if (gen !== turnGen) continue;
           if (ev.type === "session") {
-            /* 服务端分配/确认本场会话 id，后续刷新或恢复时按此归场 */
-            if (typeof ev.sessionId === "number") currentSessionId = ev.sessionId;
+            /* 服务端分配/确认本场会话 id。过期的生成不能把编号写回来。 */
+            if (typeof ev.sessionId === "number") {
+              currentSessionId = ev.sessionId;
+              rememberSession(currentSessionId);
+            }
+          } else if (ev.type === "user") {
+            if (typeof ev.messageId === "number") {
+              userEl.dataset.messageId = String(ev.messageId);
+              userEl.dataset.retractId = String(ev.messageId);
+            }
           } else if (ev.type === "thinking") {
             /* 思考流：懒建折叠块，正文出现前保持展开滚动 */
             if (!think) think = makeThinkBlock(true);
@@ -1204,22 +1923,68 @@
               status.remove();
               status = null;
             }
-            if (!bubble) bubble = addMsg("assistant", "");
+            if (!bubble) {
+              bubble = addMsg("assistant", "");
+              bubble.dataset.turn = turn;
+              bubble.addEventListener("click", (e) => {
+                const ref = (e.target as HTMLElement).closest(".cite-ref") as HTMLElement | null;
+                if (!ref) return;
+                const quote = bubble?.querySelector(`.agent-cite-quote[data-n="${ref.dataset.n}"]`) as HTMLElement | null;
+                if (quote) quote.hidden = !quote.hidden;
+              });
+            }
+            bubble.dataset.plain = acc;
             bubble.innerHTML = renderRich(acc);
+            mountCitations(bubble, cites);
             scrollBottom();
+          } else if (ev.type === "citations" && Array.isArray(ev.items)) {
+            cites = ev.items;
+            if (bubble) mountCitations(bubble, cites);
           } else if (ev.type === "tool") {
-            if (!status) status = addMsg("status", "正在检索课程库…");
+            const toolLabel =
+              ev.name === "read_image"
+                ? "正在查看图片…"
+                : ev.name === "web_search"
+                  ? "正在搜索公开网页…"
+                  : ev.name === "read_lecture"
+                    ? "正在阅读资料…"
+                    : ev.name === "search_lectures"
+                      ? "正在查阅知识库…"
+                      : "正在检索课程表…";
+            if (!status) status = addMsg("status", toolLabel);
+            else status.textContent = toolLabel;
+          } else if (ev.type === "done") {
+            if (bubble) {
+              bubble.dataset.plain = acc || bubble.dataset.plain || "";
+              bubble.dataset.retractId = userEl.dataset.retractId || "";
+              if (typeof ev.messageId === "number") bubble.dataset.messageId = String(ev.messageId);
+              mountCitations(bubble, cites);
+              attachActions(bubble, "assistant");
+            }
+            if (think) think.root.dataset.turn = turn;
           } else if (ev.type === "error") {
             addMsg("error", ev.message ?? "出错了，请稍后重试。");
           }
         }
       }
-    } catch {
-      addMsg("error", "网络异常，请稍后重试。");
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        if (bubble && !acc) {
+          bubble.textContent = "（已停止）";
+          bubble.dataset.plain = "（已停止）";
+        }
+        if (bubble) {
+          bubble.dataset.retractId = userEl.dataset.retractId || "";
+          attachActions(bubble, "assistant");
+        }
+        if (think) think.root.dataset.turn = turn;
+      } else if (gen === turnGen) {
+        addMsg("error", "网络异常，请稍后重试。");
+      }
     } finally {
       if (think && !thinkingDone) collapseThinking(think); /* 无正文（异常）也收起 */
       if (status) status.remove();
-      setStreaming(false);
+      if (gen === turnGen) setStreaming(false);
       input.focus();
     }
   }

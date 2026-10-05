@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+
+import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
+import AboutBody from "../../views/AboutBody.astro";
+import { denyPrivilegedRequest } from "../../lib/site-gate";
+
+const blocked = denyPrivilegedRequest(Astro);
+if (blocked) return blocked;
+---
+
+<PrivilegedLayout view="staff" title="团队介绍" description="上海交通大学数学建模协会介绍：协会简介、指导老师与主要活动。">
+  <AboutBody />
+</PrivilegedLayout>

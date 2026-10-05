@@ -1,0 +1,198 @@
+---
+const skills = [
+  {
+    name: "cumcm-literature-research",
+    role: "文献调研",
+    source: "协会成员文献调研项目",
+    highlights: [
+      "逐小问拆解赛题，生成中英文检索词",
+      "筛选最多 50 篇高相关论文，不为凑数加入低相关文献",
+      "产出论文 PDF、未下载名录、逐篇导读与赛题调研/初步建模指南",
+    ],
+    links: [
+      { label: "使用手册（飞书）", url: "https://pcnj6uurbnee.feishu.cn/wiki/Uum1wsArRiL2yJkUoTAcuHZPndf" },
+    ],
+  },
+  {
+    name: "cumcm-visual-skill",
+    role: "论文配图",
+    source: "开源项目 v1.3.1",
+    highlights: [
+      "制作流程图、思维导图、技术路线图、模型关系图和数据图",
+      "输出 HTML / SVG / PNG / JSON，支持浏览器拖拽与 PowerPoint 修改",
+      "近白背景、低饱和学术配色，节点文字箭头均可编辑",
+    ],
+    links: [
+      { label: "GitHub 仓库", url: "https://github.com/Xrrr-Ray/cumcm-visual-skill" },
+      { label: "在线介绍与安装", url: "https://xrrr-ray.github.io/cumcm-visual-skill/" },
+      { label: "真实示例库 Showcase", url: "https://xrrr-ray.github.io/cumcm-visual-skill/showcase-v2/index.html" },
+    ],
+  },
+  {
+    name: "cumcm-figure-skill",
+    role: "数据图（成员版）",
+    source: "协会成员可视化项目",
+    highlights: [
+      "按成员版流程制作论文图表，与 Visual Skill 功能部分重叠",
+      "两套配图可分别开任务对比效果（使用不同输出目录）",
+      "以成员版专题手册为准",
+    ],
+    links: [
+      { label: "成员版专题手册（飞书）", url: "https://dcnmgz5aw717.feishu.cn/wiki/OnmfwmqkQiCrVpkAtdycFACUnXe" },
+    ],
+  },
+  {
+    name: "cumcm-paper-writing",
+    role: "论文写作",
+    source: "协会成员论文写作项目",
+    highlights: [
+      "基于现有证据写作：CREATE / SECTION / AUDIT / RELEASE 四种模式",
+      "逐问闭环、LaTeX 排版、支撑材料检查和评分",
+      "所有数字、公式、图表结论和引用必须可追溯到项目证据，缺失时列出 BLOCKED 项",
+    ],
+    links: [
+      { label: "GitHub 仓库", url: "https://github.com/kevin624-yjt/CUMCM" },
+    ],
+  },
+];
+
+const boundaries = [
+  "AI 工具不能替队伍编造数据、实验、文献、公式推导或最优解。",
+  "题意、假设、模型和结论必须由队伍确认；AI 生成内容按当年赛事规则记录和披露。",
+  "未经明确授权，不要把未公开赛题、数据或论文草稿发送到外部 API。",
+  "只有完成真实编译、格式检查和人工复核后，才能标记“PASS”或“可提交”。",
+];
+---
+
+  <h1 class="page-title">数模 AI 工具</h1>
+  <p class="page-subtitle">
+    协会自研的四个 CUMCM Skill，统一在 Codex 中安装使用：安装后输入 <code>/skills</code> 查看，执行任务时直接写 <code>$skill-name</code>。
+    推荐流程：文献调研 → 确认模型后配图 → 论文写作 → 编译发布检查。
+  </p>
+
+  <div class="grid grid-2">
+    {skills.map((s) => (
+      <article class="card skill-card">
+        <div class="skill-head">
+          <h2>{s.role}</h2>
+          <code class="skill-name">{s.name}</code>
+        </div>
+        <p class="muted">{s.source}</p>
+        <ul class="highlights">
+          {s.highlights.map((h) => <li>{h}</li>)}
+        </ul>
+        <p class="skill-links">
+          {s.links.map((l) => (
+            <a href={l.url} target="_blank" rel="noopener noreferrer">{l.label} →</a>
+          ))}
+        </p>
+      </article>
+    ))}
+  </div>
+
+  <article class="card guide-card">
+    <h2>Agent 使用初级教程</h2>
+    <p>
+      第一次配置能自己读写文件、执行步骤的 Agent：harness 怎么选，订阅和 API 怎么比价，额度能在哪些工具里用。
+    </p>
+    <p class="skill-links">
+      <a href="https://my.feishu.cn/wiki/CRYRwsJ27iYkCykJ7yfcIAYJnYe" target="_blank" rel="noopener noreferrer">阅读教程（飞书） →</a>
+    </p>
+  </article>
+
+  <section class="section">
+    <h2 class="section-title">使用边界</h2>
+    <div class="card boundary">
+      <ul>
+        {boundaries.map((b) => <li>{b}</li>)}
+      </ul>
+    </div>
+  </section>
+
+<style>
+  .guide-card {
+    margin-top: 20px;
+  }
+
+  .guide-card h2 {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+    color: var(--blue-dark);
+  }
+
+  .guide-card p {
+    margin: 0;
+  }
+
+  .guide-card .skill-links {
+    margin-top: 12px;
+  }
+
+  .skill-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .skill-card .skill-links {
+    margin-top: auto;
+  }
+
+  .skill-card h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--blue-dark);
+  }
+
+  .skill-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .skill-name {
+    font-size: 0.8rem;
+    color: var(--blue-dark);
+    background: #e7eef8;
+    border: 1px solid #d3e0f2;
+    padding: 2px 8px;
+    border-radius: 6px;
+    color: var(--blue-dark);
+  }
+
+  .highlights {
+    margin: 10px 0;
+    padding-left: 20px;
+    font-size: 0.94rem;
+  }
+
+  .highlights li {
+    margin: 4px 0;
+  }
+
+  .skill-links {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 12px 0 0;
+    font-size: 0.92rem;
+  }
+
+  .boundary ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  .boundary li {
+    margin: 6px 0;
+  }
+
+  code {
+    background: #f2f5fa;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+  }
+</style>

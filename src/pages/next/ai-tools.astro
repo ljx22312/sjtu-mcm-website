@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+
+import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
+import AiToolsBody from "../../views/AiToolsBody.astro";
+import { denyPrivilegedRequest } from "../../lib/site-gate";
+
+const blocked = denyPrivilegedRequest(Astro);
+if (blocked) return blocked;
+---
+
+<PrivilegedLayout view="next" title="数模AI工具" description="协会自研数模 AI 工具：文献调研、论文配图、数据图与论文写作四个 Skill。">
+  <AiToolsBody />
+</PrivilegedLayout>

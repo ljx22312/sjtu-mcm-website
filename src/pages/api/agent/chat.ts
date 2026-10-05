@@ -1,11 +1,12 @@
 import type { APIRoute } from "astro";
-import { SESSION_COOKIE, verifySessionToken } from "../../../lib/auth";
+import { logEvent } from "../../../lib/logger";
 import {
   AGENT_MAX_MESSAGE_CHARS,
-  agentAllowAnonymous,
   agentRateLimitCustomPerHour,
   agentRateLimitPerHour,
 } from "../../../lib/agent/config";
+import { resolveAgentAccount } from "../../../lib/agent/account";
+import { sessionOwnedBy } from "../../../lib/agent/history";
 import { runAgentTurn } from "../../../lib/agent/runner";
 import { getCustomRuntime, type CustomLlmConfig } from "../../../lib/agent/models";
 import { REASONING_LEVELS, type ReasoningLevel } from "../../../lib/agent/admin";
@@ -59,9 +60,8 @@ function parseCustomConfig(raw: unknown): CustomLlmConfig | { error: string } {
  * 官方 Key 未配置（演示模式）时忽略 custom。
  */
 export const POST: APIRoute = async ({ request, cookies }) => {
-  /* 登录用户按账号隔离；未登录且开启匿名模式时共用匿名身份（内测期临时开关） */
-  const session = verifySessionToken(cookies.get(SESSION_COOKIE)?.value);
-  const account = session?.user.account ?? (agentAllowAnonymous ? "anonymous" : null);
+  /* 已登录用自己的账号；未登录的匿名访客每人一份身份，不再共用 anonymous */
+  const account = resolveAgentAccount(cookies);
   if (!account) {
     return new Response(JSON.stringify({ error: "unauthorized" }), {
       status: 401,
@@ -72,12 +72,18 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   let message = "";
   let sessionId: number | undefined;
   let customRaw: unknown = undefined;
+  let lectures: string[] | undefined;
   try {
-    const body = (await request.json()) as { message?: unknown; sessionId?: unknown; custom?: unknown };
+    const body = (await request.json()) as { message?: unknown; sessionId?: unknown; custom?: unknown; lectures?: unknown };
     message = typeof body.message === "string" ? body.message.trim() : "";
     const sid = Number(body.sessionId);
     sessionId = Number.isFinite(sid) && sid > 0 ? sid : undefined;
     customRaw = body.custom;
+    if (Array.isArray(body.lectures)) {
+      lectures = body.lectures
+        .filter((key): key is string => typeof key === "string" && /^(cumcm|mcm):\d+$/.test(key))
+        .slice(0, 24);
+    }
   } catch {
     message = "";
   }
@@ -90,6 +96,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   if (message.length > AGENT_MAX_MESSAGE_CHARS) {
     message = message.slice(0, AGENT_MAX_MESSAGE_CHARS);
   }
+  if (sessionId && !sessionOwnedBy(account, sessionId)) {
+    return new Response(JSON.stringify({ error: "forbidden" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
+    });
+  }
 
   /* 自带 API 的用户走独立限流（默认 100 条/小时，花自己的额度） */
   const custom = customRaw === undefined ? null : parseCustomConfig(customRaw);
@@ -101,6 +113,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
   const rateKey = custom ? `${account}|custom` : account;
   if (!allowMessage(rateKey, custom ? agentRateLimitCustomPerHour : agentRateLimitPerHour)) {
+    logEvent("warn", "agent_rate_limited", { account, custom: Boolean(custom) });
     return new Response(JSON.stringify({ error: "rate_limited" }), {
       status: 429,
       headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
@@ -121,21 +134,31 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         account,
         message,
         sessionId,
+        lectures,
         ...(custom ? { runtime: getCustomRuntime(custom) } : {}),
         handlers: {
           onDelta: (text) => send({ type: "delta", text }),
           onThinking: (text) => send({ type: "thinking", text }),
           onTool: (name) => send({ type: "tool", name }),
+          onCitations: (items) => send({ type: "citations", items }),
           onSession: (sessionId) => send({ type: "session", sessionId }),
+          onUserMessage: (messageId) => send({ type: "user", messageId }),
         },
         signal: request.signal,
       });
-      if (result.error) {
+      if (result.stopped) {
+        send({ type: "done", stopped: true, messageId: result.assistantMessageId });
+      } else if (result.error) {
         const err = result.error as Error & { stack?: string };
-        console.error(`[agent] account=${account}${custom ? "(custom)" : ""} 回复失败:`, err.stack ?? err);
+        logEvent("error", "agent_turn_failed", {
+          account,
+          custom: Boolean(custom),
+          message: err.message,
+          stack: err.stack ?? "",
+        });
         send({ type: "error", message: "出错了，请稍后重试。" });
       } else {
-        send({ type: "done" });
+        send({ type: "done", messageId: result.assistantMessageId });
       }
       controller.close();
     },

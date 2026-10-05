@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+
+import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
+import TeamUpBody from "../../views/TeamUpBody.astro";
+import { denyPrivilegedRequest } from "../../lib/site-gate";
+
+const blocked = denyPrivilegedRequest(Astro);
+if (blocked) return blocked;
+---
+
+<PrivilegedLayout view="staff" title="协调组队" description="协会协调组队服务介绍：组队规则与找队友流程。">
+  <TeamUpBody base="/staff" />
+</PrivilegedLayout>

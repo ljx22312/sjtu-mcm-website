@@ -2,11 +2,27 @@
 import { siteName, navItems } from "../config";
 
 const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const base =
+  currentPath === "/next" || currentPath.startsWith("/next/")
+    ? "/next"
+    : currentPath === "/staff" || currentPath.startsWith("/staff/")
+      ? "/staff"
+      : "";
+const items = navItems.map((item) => ({
+  label: item.label,
+  href: base ? (item.href === "/" ? base : `${base}${item.href}`) : item.href,
+}));
+if (base === "/staff") items.push({ href: "/staff/admins", label: "管理员名单" });
+
+function isCurrent(href: string): boolean {
+  if (href === "/" || href === "/next" || href === "/staff") return currentPath === href;
+  return currentPath === href || currentPath.startsWith(`${href}/`);
+}
 ---
 
 <header class="site-header">
   <div class="container header-inner">
-    <a href="/" class="brand">
+    <a href={base || "/"} class="brand">
       <img src="/images/img06.jpg" alt="协会会徽" class="brand-logo" />
       <span class="brand-name">{siteName}</span>
     </a>
@@ -15,12 +31,12 @@ const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
     </button>
     <nav class="site-nav" id="site-nav">
       <ul>
-        {navItems.map((item) => (
+        {items.map((item) => (
           <li>
             <a
               href={item.href}
-              class:list={[{ active: item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href) }]}
-              aria-current={item.href === "/" ? (currentPath === "/" ? "page" : undefined) : (currentPath.startsWith(item.href) ? "page" : undefined)}
+              class:list={[{ active: isCurrent(item.href) }]}
+              aria-current={isCurrent(item.href) ? "page" : undefined}
             >
               {item.label}
             </a>
@@ -31,6 +47,14 @@ const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
         </li>
       </ul>
     </nav>
+  </div>
+  <div class="view-switch" id="view-switch" hidden>
+    <div class="container view-switch-inner">
+      <span class="view-switch-label">视角</span>
+      <a href="/" data-view="public">用户视角</a>
+      <a href="/next" data-view="next">下一版本</a>
+      <a href="/staff" data-view="staff">管理员视角</a>
+    </div>
   </div>
 </header>
 
@@ -52,6 +76,23 @@ const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
           authEntry.textContent = d.user?.mock ? "演示身份 · 退出" : `${d.user?.name || d.user?.account} · 退出`;
           authEntry.href = "/api/auth/logout";
           authEntry.classList.add("logged-in");
+        }
+        if (d?.admin) {
+          const path = location.pathname.replace(/\/+$/, "") || "/";
+          const view = path === "/next" || path.startsWith("/next/") ? "next" : path === "/staff" || path.startsWith("/staff/") ? "staff" : "public";
+          let rest = path;
+          if (view === "next") rest = path.slice("/next".length) || "/";
+          else if (view === "staff") rest = path.slice("/staff".length) || "/";
+          if (rest === "/admins" || rest.startsWith("/admins/")) rest = "/";
+          const bar = document.getElementById("view-switch");
+          bar?.querySelectorAll("a[data-view]").forEach((link) => {
+            const id = link.getAttribute("data-view");
+            const prefix = id === "next" ? "/next" : id === "staff" ? "/staff" : "";
+            link.setAttribute("href", prefix ? (rest === "/" ? prefix : prefix + rest) : rest);
+            if (id === view) link.setAttribute("aria-current", "page");
+            else link.removeAttribute("aria-current");
+          });
+          bar?.removeAttribute("hidden");
         }
       })
       .catch(() => {});
@@ -177,6 +218,49 @@ const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
     background: var(--text);
   }
 
+  .view-switch {
+    background: #fff8e6;
+    border-top: 1px solid #ecd9a0;
+  }
+
+  .view-switch-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .view-switch-label {
+    color: #7a6413;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  .view-switch a {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    color: var(--text);
+    font-size: 0.9rem;
+    border: 1px solid #ecd9a0;
+    background: #fff;
+  }
+
+  .view-switch a:hover {
+    text-decoration: none;
+    color: var(--blue-dark);
+  }
+
+  .view-switch a[aria-current="page"] {
+    background: var(--blue);
+    color: #fff;
+    border-color: var(--blue);
+  }
+
   @media (max-width: 900px) {
     .nav-toggle {
       display: flex;
@@ -185,7 +269,7 @@ const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
     .site-nav {
       display: none;
       position: absolute;
-      top: 64px;
+      top: 100%;
       left: 0;
       right: 0;
       background: #fff;
