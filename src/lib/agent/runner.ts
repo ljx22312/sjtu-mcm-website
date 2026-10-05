@@ -35,7 +35,24 @@ export interface AgentTurnResult {
   assistantMessageId?: number;
   /** 用户中止了生成。已写出的文字仍入库。 */
   stopped?: boolean;
+  /** 回答因模型输出上限被截断（最终 assistant 消息 stop_reason 为 max_tokens 类） */
+  truncated?: boolean;
+  /** 本轮触发了总超时（按“停止”收尾，已写出的文字仍入库） */
+  timedOut?: boolean;
   error?: string;
+}
+
+/**
+ * 回合总超时（毫秒），默认 180 秒，可用环境变量 AGENT_TURN_TIMEOUT_MS 覆盖。
+ * 整场 agent.prompt（含思考、工具调用、多轮续写）超过该时长即复用现有停止机制
+ * 中止本轮，保证 SSE 一定会以 done(stopped) 收尾、前端输入框恢复可用。
+ * 注意：与 pi-ai 请求级 timeoutMs 不同，这里管的是“整轮”而不是单次模型请求。
+ */
+export const AGENT_TURN_DEFAULT_TIMEOUT_MS = 180_000;
+
+export function agentTurnTimeoutMs(): number {
+  const raw = Number.parseInt(process.env.AGENT_TURN_TIMEOUT_MS ?? "", 10);
+  return Number.isFinite(raw) && raw > 0 ? raw : AGENT_TURN_DEFAULT_TIMEOUT_MS;
 }
 
 /**
@@ -119,9 +136,19 @@ export async function runAgentTurn(opts: {
     prev.then(() => gate, () => gate),
   );
   await prev.catch(() => undefined);
+  /* 回合总超时：到点 abort，走与用户手动停止完全相同的通路（signal → agent.abort） */
+  const timeoutMs = agentTurnTimeoutMs();
+  const timeoutCtrl = new AbortController();
+  const timer = setTimeout(() => timeoutCtrl.abort(new Error("agent turn timeout")), timeoutMs);
   try {
-    return await runAgentTurnBody({ ...opts, signal: combineSignals(opts.signal, stop.signal) });
+    const result = await runAgentTurnBody({
+      ...opts,
+      signal: combineSignals(combineSignals(opts.signal, stop.signal), timeoutCtrl.signal),
+    });
+    if (timeoutCtrl.signal.aborted) result.timedOut = true;
+    return result;
   } finally {
+    clearTimeout(timer);
     if (turnStop.get(opts.account) === stop) turnStop.delete(opts.account);
     release();
   }
@@ -222,6 +249,14 @@ async function runAgentTurnBody(opts: {
     if (!stopped) return { reply: "", sessionId: sid, userMessageId: userRow.messageId, error: "模型返回为空，请稍后重试" };
   }
 
+  /* 截断感知：pi-ai（api/anthropic-messages.js）把响应里的 stop_reason:"max_tokens"
+     映射成 stopReason:"length"，原始值留在 rawStopReason。最终一条 assistant 消息
+     以该原因结束时，说明回答撞上了模型输出上限、可能在句中被截断——不猜别的。 */
+  const truncated =
+    !stopped &&
+    reply.length > 0 &&
+    (lastAssistant?.stopReason === "length" || lastAssistant?.rawStopReason === "max_tokens");
+
   const stored = reply || "（已停止）";
   const assistantRow = appendMessage(account, "assistant", stored, thinking, sid);
   return {
@@ -230,5 +265,6 @@ async function runAgentTurnBody(opts: {
     userMessageId: userRow.messageId,
     assistantMessageId: assistantRow.messageId,
     stopped,
+    ...(truncated ? { truncated: true } : {}),
   };
 }

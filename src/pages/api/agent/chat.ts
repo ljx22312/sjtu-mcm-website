@@ -7,7 +7,7 @@ import {
 } from "../../../lib/agent/config";
 import { resolveAgentAccount } from "../../../lib/agent/account";
 import { sessionOwnedBy } from "../../../lib/agent/history";
-import { runAgentTurn } from "../../../lib/agent/runner";
+import { agentTurnTimeoutMs, runAgentTurn } from "../../../lib/agent/runner";
 import { getCustomRuntime, type CustomLlmConfig } from "../../../lib/agent/models";
 import { REASONING_LEVELS, type ReasoningLevel } from "../../../lib/agent/admin";
 
@@ -54,7 +54,10 @@ function parseCustomConfig(raw: unknown): CustomLlmConfig | { error: string } {
  *   {"type":"thinking","text":"..."}             思考增量（正文出现前）
  *   {"type":"tool","name":"search_curriculum"}   工具执行提示
  *   {"type":"delta","text":"..."}                回复增量
- *   {"type":"done"}                              结束（回复已入库）
+ *   {"type":"truncated"}                         回答达到模型输出上限被截断（在 done 之前发）
+ *   {"type":"done","stopped":true?,"timeout":true?,"messageId":123}  结束（回复已入库）
+ *       stopped=true：本轮被中止（用户手动停止或回合总超时），已生成文字保留；
+ *       timeout=true：本次中止由总超时（AGENT_TURN_TIMEOUT_MS，默认 180s）触发
  *   {"type":"error","message":"..."}             失败
  * custom 为用户自带 API（Anthropic 协议）配置：存于用户浏览器，随请求携带，服务端不落盘；
  * 官方 Key 未配置（演示模式）时忽略 custom。
@@ -130,7 +133,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           /* 客户端已断开 */
         }
       };
-      const result = await runAgentTurn({
+      /* 兜底护栏：runner 内部已按 AGENT_TURN_TIMEOUT_MS 给整轮加超时并在到点 abort；
+         若超时后仍极端悬挂（abort 未生效等），再宽限 15 秒后强制按 stopped 收尾，
+         保证 SSE 一定关闭、前端输入框一定能恢复。 */
+      let result: Awaited<ReturnType<typeof runAgentTurn>> | null = null;
+      let failure: unknown = null;
+      const turn = runAgentTurn({
         account,
         message,
         sessionId,
@@ -145,22 +153,57 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           onUserMessage: (messageId) => send({ type: "user", messageId }),
         },
         signal: request.signal,
-      });
-      if (result.stopped) {
-        send({ type: "done", stopped: true, messageId: result.assistantMessageId });
-      } else if (result.error) {
-        const err = result.error as Error & { stack?: string };
-        logEvent("error", "agent_turn_failed", {
-          account,
-          custom: Boolean(custom),
-          message: err.message,
-          stack: err.stack ?? "",
-        });
-        send({ type: "error", message: "出错了，请稍后重试。" });
-      } else {
-        send({ type: "done", messageId: result.assistantMessageId });
+      }).then(
+        (r) => {
+          result = r;
+        },
+        (err) => {
+          failure = err;
+        },
+      );
+      await Promise.race([turn, new Promise((resolve) => setTimeout(resolve, agentTurnTimeoutMs() + 15_000))]);
+      try {
+        if (failure) {
+          const err = failure as Error & { stack?: string };
+          logEvent("error", "agent_turn_failed", {
+            account,
+            custom: Boolean(custom),
+            message: err.message,
+            stack: err.stack ?? "",
+          });
+          send({ type: "error", message: "出错了，请稍后重试。" });
+        } else if (result) {
+          if (result.error) {
+            const err = result.error as Error & { stack?: string };
+            logEvent("error", "agent_turn_failed", {
+              account,
+              custom: Boolean(custom),
+              message: err.message,
+              stack: err.stack ?? "",
+            });
+            send({ type: "error", message: "出错了，请稍后重试。" });
+          } else {
+            /* 截断提示：最终 assistant 消息以 max_tokens 类原因结束时先发 truncated，再 done */
+            if (result.truncated) send({ type: "truncated" });
+            if (result.stopped) {
+              send({
+                type: "done",
+                stopped: true,
+                ...(result.timedOut ? { timeout: true } : {}),
+                messageId: result.assistantMessageId,
+              });
+            } else {
+              send({ type: "done", messageId: result.assistantMessageId });
+            }
+          }
+        } else {
+          /* 极端悬挂：runner 超时 + 宽限期后仍未返回，按超时停止收尾并关闭连接 */
+          logEvent("error", "agent_turn_hard_close", { account, custom: Boolean(custom) });
+          send({ type: "done", stopped: true, timeout: true });
+        }
+      } finally {
+        controller.close();
       }
-      controller.close();
     },
   });
 

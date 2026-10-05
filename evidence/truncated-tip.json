@@ -1,0 +1,19 @@
+{
+  "case": "truncated-tip-route-injected",
+  "recoveryMs": 577,
+  "bodyDump": [
+    "agent-notice: 每个人的对话分开保存。撤回后不再进入上下文，原文仍留在服务器。",
+    "agent-msg user: 介绍模糊综合评价法",
+    "agent-msg-actions: ",
+    "agent-think: ▶已深度思考 · 点击查看（模拟思考增量）正在检索评价模型讲义…",
+    "agent-msg assistant: 模糊综合评价法的基本步骤：1. 确定因素集 U={u1,u2,…,un} 与评语集 V={v1,…,vm}；2. 构造隶",
+    "agent-msg-actions: ",
+    "agent-msg status: 回答达到模型输出上限，可能在句中被截断。可以让我换个角度继续，或缩小问题范围。"
+  ],
+  "answerRendered": true,
+  "answerCutVisible": true,
+  "truncationTip": "回答达到模型输出上限，可能在句中被截断。可以让我换个角度继续，或缩小问题范围。",
+  "tipFollowsAnswerBubble": true,
+  "inputDisabled": false,
+  "jsErrors": []
+}
