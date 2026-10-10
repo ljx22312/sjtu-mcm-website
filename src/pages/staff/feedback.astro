@@ -1,0 +1,135 @@
+---
+export const prerender = false;
+
+import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
+import { denyPrivilegedRequest } from "../../lib/site-gate";
+import { feedbackStats, listFeedback, type FeedbackRow } from "../../lib/agent/history";
+import { getProfiles } from "../../lib/profiles";
+
+const blocked = denyPrivilegedRequest(Astro);
+if (blocked) return blocked;
+
+const stats = feedbackStats();
+const rows = listFeedback(200);
+const profiles = getProfiles();
+const nameOf = (a: string | null) => (a ? profiles[a]?.name || "未登记用户" : "—");
+
+const fmtTime = (ms: number) => new Date(ms).toLocaleString("zh-CN", { hour12: false });
+const voteBadge = (v: number) => (v === 1 ? "👍 赞" : v === -1 ? "👎 踩" : "撤销");
+const brief = (s: string | null) =>
+  s ? (s.length > 80 ? `${s.replace(/\s+/g, " ").slice(0, 80)}…` : s.replace(/\s+/g, " ")) : "（消息已撤回或清理）";
+---
+
+<PrivilegedLayout view="staff" title="助手反馈" description="AI 助手回答的赞踩记录与定位，仅管理员可见。">
+  <h1 class="page-title">助手反馈</h1>
+  <p class="page-subtitle">用户对助手回答的 👍 / 👎 记录；「查看对话」直达该回答所在的完整会话（AI 助手管理页内打开）。</p>
+
+  <section class="section">
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-value">{stats.up}</div>
+        <div class="stat-label">👍 赞</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{stats.down}</div>
+        <div class="stat-label">👎 踩</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{stats.cancel}</div>
+        <div class="stat-label">撤销评价</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{stats.up + stats.down > 0 ? Math.round((stats.up / (stats.up + stats.down)) * 100) : "—"}{stats.up + stats.down > 0 ? "%" : ""}</div>
+        <div class="stat-label">好评率</div>
+      </div>
+    </div>
+    <p class="muted">
+      被踩的回答优先排查：可能是答非所问、讲义内容过时或引用错误。调整回答质量的方向在助手
+      system prompt（src/lib/agent/prompt.ts）与知识库数据。
+    </p>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">反馈明细（最近 {rows.length} 条）</h2>
+    {rows.length === 0 && <p class="muted">还没有任何反馈。用户在对话里点 👍/👎 后，这里会出现记录——质量监控从有数据开始。</p>}
+    <div class="table-wrap">
+      <table class="fb-table">
+        <thead>
+          <tr><th>时间</th><th>评价</th><th>被评的回答</th><th>回答者</th><th>操作</th></tr>
+        </thead>
+        <tbody>
+          {rows.map((r: FeedbackRow) => (
+            <tr>
+              <td>{fmtTime(r.createdAt)}</td>
+              <td class={r.vote === -1 ? "vote-down" : r.vote === 1 ? "vote-up" : "muted"}>{voteBadge(r.vote)}</td>
+              <td class="fb-content">{brief(r.content)}{r.retracted && <span class="muted">（该消息已被撤回）</span>}</td>
+              <td>{nameOf(r.owner)}</td>
+              <td>
+                {r.sessionId && r.owner ? (
+                  <a class="btn-link" href={`/staff/agent?account=${encodeURIComponent(r.owner)}&session=${r.sessionId}`}>查看对话</a>
+                ) : (
+                  <span class="muted">—</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</PrivilegedLayout>
+
+<style>
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+  .stat-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    background: #fff;
+  }
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--blue-dark);
+  }
+  .stat-label {
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  .fb-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+  .fb-table th,
+  .fb-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  .fb-table th {
+    background: #fafafa;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .fb-content {
+    max-width: 480px;
+    white-space: normal;
+    min-width: 200px;
+  }
+  .vote-up { color: #1a7f37; font-weight: 600; white-space: nowrap; }
+  .vote-down { color: var(--red); font-weight: 600; white-space: nowrap; }
+  .btn-link {
+    color: var(--blue);
+    white-space: nowrap;
+  }
+</style>

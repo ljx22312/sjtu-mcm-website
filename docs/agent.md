@@ -22,7 +22,7 @@ AgentWidget.astro                     /api/agent/chat（prerender=false）
 
 要点：
 
-- **登录门槛**：所有 agent 接口校验 `sjtumcm_session`，未登录返回 401，前端展示登录引导。内测期可设 `AGENT_ALLOW_ANONYMOUS=1` 临时免登录（匿名访客共用 `"anonymous"` 身份与同一份历史），正式部署保持关闭。
+- **登录门槛**：所有 agent 接口校验 `sjtumcm_session`，未登录返回 401，前端展示登录引导（直达 jAccount 并回跳当前页）。
 - **无状态 agent**：每次请求从 SQLite 取最近 24 条历史喂给模型，回复落库；不使用 pi 的持久会话设施，清库/保留期就是一句 SQL。
 - **只读工具**：agent 只有 `search_curriculum` 一个工具（关键词检索两张课程表），没有文件系统、shell 或网络能力；链接由数据原样返回，模型被要求不得编造 URL。
 - **红线**：system prompt 明确“只介绍本协会官网内容，不提及任何外部培训/训练营项目”。
@@ -36,7 +36,7 @@ AgentWidget.astro                     /api/agent/chat（prerender=false）
 | 模型 | `officialModel`（如 glm-4.6） | 用户自填（Anthropic 协议端点任意模型） |
 | 思考深度 | `officialReasoning`（off→high 五档） | 用户自选五档，即时生效 |
 | 谁能改 | 仅管理员 | 用户自己（面板「模型设置」） |
-| 限流 | `AGENT_RATE_LIMIT`（默认 20/时） | `AGENT_RATE_LIMIT_CUSTOM`（默认 100/时） |
+| 限流 | 窗口制：`AGENT_WINDOW_MESSAGES`（默认 60）/ `AGENT_WINDOW_MINUTES`（默认 300），首条提问开窗、到期整窗恢复；历史库持久计数，管理页可按账号覆盖 | `AGENT_RATE_LIMIT_CUSTOM`（默认 100/时，内存突发限流） |
 | API Key | 进程环境 `AGENT_API_KEY` | 仅存用户浏览器，随聊天请求携带，**服务器不落盘** |
 
 - **思考深度档位**（pi-ai `ThinkingLevel`）：`off` 不请求思考（最快最省）；`minimal/low/medium/high` 对应思考预算 1024/2048/8192/16384 tokens（Anthropic 端点按 `thinking` 参数下发）。
@@ -60,7 +60,10 @@ AgentWidget.astro                     /api/agent/chat（prerender=false）
 | `src/lib/agent/config.ts` | 环境变量解析（对齐 auth.ts 风格） |
 | `src/lib/agent/models.ts` | pi-ai provider 装配：官方运行时（管理配置选模型/深度）与 BYOK 运行时（请求级 Key） |
 | `src/lib/agent/admin.ts` | 管理控制台：data/agent-admin.json 读写（mtime 缓存热更新）+ 管理员判定 |
-| `src/lib/agent/history.ts` | SQLite 历史层（追加/最近 N 条/清除/过期清理） |
+| `src/lib/agent/history.ts` | SQLite 历史层（追加/最近 N 条/清除/过期清理/用量统计） |
+| `src/lib/agent/usage.ts` | 按账号限额：data/agent-limits.json 读写（mtime 热更新）、覆盖值与全局默认合并 |
+| `src/pages/staff/agent.astro` | 管理页「AI 助手管理」：用量一览、按账号限额、查看/撤回任意会话 |
+| `src/pages/api/admin/agent/*` | 管理端点：overview / limits / sessions / messages / retract（site-gate 守卫） |
 | `src/lib/agent/tools.ts` | search_curriculum 工具 |
 | `src/lib/agent/prompt.ts` | system prompt |
 | `src/lib/agent/runner.ts` | 单轮执行：装配 Agent、事件桥接 SSE、落库 |
@@ -76,7 +79,7 @@ AgentWidget.astro                     /api/agent/chat（prerender=false）
 ```bash
 export AGENT_API_KEY=...
 export AUTH_SESSION_SECRET=...
-node dist/server/entry.mjs   # 内测免登录期另加 AGENT_ALLOW_ANONYMOUS=1
+node dist/server/entry.mjs
 ```
 
 ## 隐私
@@ -89,8 +92,7 @@ node dist/server/entry.mjs   # 内测免登录期另加 AGENT_ALLOW_ANONYMOUS=1
 ## 本地联调
 
 ```bash
-# 1. 演示登录拿会话 cookie（jAccount 凭据未配置时可用）
-curl -c /tmp/jar -b /tmp/jar -L "http://127.0.0.1:4321/api/auth/login?mock=1&redirect=/" -o /dev/null
+# 1. 浏览器登录 jAccount 拿会话 cookie（导出 sjtumcm_session 后供 curl 使用）
 
 # 2. 发起对话（SSE 流式）；custom 为可选的自带 API 配置
 curl -N -b /tmp/jar -H 'Content-Type: application/json' \

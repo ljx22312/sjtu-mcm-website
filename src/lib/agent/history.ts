@@ -66,6 +66,9 @@ function open(): Database.Database {
   if (!colsNow.some((c) => c.name === "retracted")) {
     db.exec("ALTER TABLE messages ADD COLUMN retracted INTEGER NOT NULL DEFAULT 0");
   }
+  if (!colsNow.some((c) => c.name === "custom")) {
+    db.exec("ALTER TABLE messages ADD COLUMN custom INTEGER NOT NULL DEFAULT 0");
+  }
   db.exec(`
     CREATE TABLE IF NOT EXISTS session_alloc (
       id INTEGER PRIMARY KEY,
@@ -148,21 +151,22 @@ export function sessionOwnedBy(account: string, sessionId: number): boolean {
   return Boolean(msg && msg.account === account);
 }
 
-/** 追加一条消息。未指定会话时新开一场，不再按 30 分钟自动续进上一场。 */
+/** 追加一条消息。未指定会话时新开一场，不再按 30 分钟自动续进上一场。custom=1 表示自带 API 的用量，不计协会额度。 */
 export function appendMessage(
   account: string,
   role: "user" | "assistant",
   content: string,
   thinking?: string,
   sessionId?: number,
+  custom?: boolean,
 ): AppendedMessage {
   const d = open();
   const sid = sessionId && sessionOwnedBy(account, sessionId) ? sessionId : beginSession(account);
   const info = d
     .prepare(
-      "INSERT INTO messages (account, role, content, thinking, session_id, created_at, retracted) VALUES (?, ?, ?, ?, ?, ?, 0)",
+      "INSERT INTO messages (account, role, content, thinking, session_id, created_at, retracted, custom) VALUES (?, ?, ?, ?, ?, ?, 0, ?)",
     )
-    .run(account, role, content, thinking?.trim() ? thinking : null, sid, Date.now());
+    .run(account, role, content, thinking?.trim() ? thinking : null, sid, Date.now(), custom ? 1 : 0);
   return { sessionId: sid, messageId: Number(info.lastInsertRowid) };
 }
 
@@ -249,6 +253,99 @@ export function listRecent(account: string, limit = 50): HistoryMessage[] {
   return rows.reverse();
 }
 
+/** 某身份自 sinceMs 以来的协会额度提问条数（含已撤回；自带 API 的不计） */
+export function countUserMessages(account: string, sinceMs: number): number {
+  const row = open()
+    .prepare(
+      "SELECT COUNT(*) AS c FROM messages WHERE account = ? AND role = 'user' AND created_at > ? AND custom = 0",
+    )
+    .get(account, sinceMs) as { c: number };
+  return row.c;
+}
+
+export interface WindowUsage {
+  /** 当前窗口内已用条数；窗口已过期或从未使用时为 0 */
+  used: number;
+  /** 当前窗口起点（首条提问时间）；无进行中窗口时为 null */
+  windowStart: number | null;
+  /** 窗口到期时间（windowStart + windowMs）；无进行中窗口时为 null */
+  resetsAt: number | null;
+}
+
+/**
+ * 5 小时固定窗口用量：窗口从首条提问起算，窗口内消息计入同一窗，到期整窗恢复，
+ * 下一条提问再开新窗。按时间正序链式判定：消息距当前窗口起点不足 windowMs 则同窗，
+ * 否则它自己开新窗。
+ */
+export function windowUsage(account: string, windowMs: number): WindowUsage {
+  const rows = open()
+    .prepare(
+      "SELECT created_at FROM messages WHERE account = ? AND role = 'user' AND custom = 0 ORDER BY id",
+    )
+    .all(account) as { created_at: number }[];
+  let start: number | null = null;
+  let used = 0;
+  for (const r of rows) {
+    if (start === null || r.created_at >= start + windowMs) {
+      start = r.created_at;
+      used = 1;
+    } else {
+      used += 1;
+    }
+  }
+  if (start !== null && Date.now() >= start + windowMs) {
+    return { used: 0, windowStart: null, resetsAt: null };
+  }
+  return { used, windowStart: start, resetsAt: start === null ? null : start + windowMs };
+}
+
+export interface AccountUsage {
+  account: string;
+  h1: number; // 最近一小时提问
+  today: number; // 今日（服务器本地时区零点起）提问
+  total: number; // 累计提问
+  sessions: number; // 会话数
+  lastActiveAt: number; // 最后活跃（毫秒）
+}
+
+/** 全部账号的用量一览（管理端用，只统计协会额度）。 */
+export function accountUsageOverview(): AccountUsage[] {
+  const d = open();
+  const now = Date.now();
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const rows = d
+    .prepare(
+      `SELECT account,
+              SUM(CASE WHEN created_at > ? THEN 1 ELSE 0 END) AS h1,
+              SUM(CASE WHEN created_at > ? THEN 1 ELSE 0 END) AS today,
+              COUNT(*) AS total,
+              MAX(created_at) AS lastActiveAt
+       FROM messages WHERE role = 'user' AND custom = 0 GROUP BY account`,
+    )
+    .all(now - 3600_000, todayStart.getTime()) as {
+    account: string;
+    h1: number;
+    today: number;
+    total: number;
+    lastActiveAt: number;
+  }[];
+  const sessions = d
+    .prepare("SELECT account, COUNT(DISTINCT session_id) AS c FROM messages GROUP BY account")
+    .all() as { account: string; c: number }[];
+  const sessionMap = new Map(sessions.map((r) => [r.account, r.c]));
+  return rows
+    .map((r) => ({
+      account: r.account,
+      h1: r.h1,
+      today: r.today,
+      total: r.total,
+      sessions: sessionMap.get(r.account) ?? 0,
+      lastActiveAt: r.lastActiveAt,
+    }))
+    .sort((a, b) => b.lastActiveAt - a.lastActiveAt);
+}
+
 /** 从界面和上下文拿掉该身份的全部消息，行仍保留。 */
 export function clearHistory(account: string): number {
   const info = open().prepare("UPDATE messages SET retracted = 1 WHERE account = ? AND retracted = 0").run(account);
@@ -278,6 +375,39 @@ export function recordFeedback(account: string, messageId: number, vote: number)
     Date.now(),
   );
   return stored;
+}
+
+export interface FeedbackRow {
+  id: number;
+  account: string; // 评价人
+  messageId: number;
+  vote: number; // 1 赞 / -1 踩 / 0 撤销
+  createdAt: number;
+  content: string | null; // 被评的助手回答（消息可能已被撤回或清理，此时为 null）
+  sessionId: number | null;
+  owner: string | null; // 回答所属账号
+  retracted: boolean;
+}
+
+/** 管理端反馈列表（新→旧），联出被评内容与会话归属，供「直达对话」定位。 */
+export function listFeedback(limit = 200): FeedbackRow[] {
+  return open()
+    .prepare(
+      `SELECT f.id, f.account, f.message_id AS messageId, f.vote, f.created_at AS createdAt,
+              m.content AS content, m.session_id AS sessionId, m.account AS owner, m.retracted
+       FROM message_feedback f LEFT JOIN messages m ON m.id = f.message_id
+       ORDER BY f.id DESC LIMIT ?`,
+    )
+    .all(limit) as FeedbackRow[];
+}
+
+/** 赞/踩总量统计（不受 limit 影响） */
+export function feedbackStats(): { up: number; down: number; cancel: number } {
+  const rows = open()
+    .prepare("SELECT vote, COUNT(*) AS c FROM message_feedback GROUP BY vote")
+    .all() as { vote: number; c: number }[];
+  const get = (v: number) => rows.find((r) => r.vote === v)?.c ?? 0;
+  return { up: get(1), down: get(-1), cancel: get(0) };
 }
 
 export interface ShareSnapshot {

@@ -1,7 +1,7 @@
 ---
 /**
  * 右下角 agent 悬浮球 + 聊天面板（纯浏览器脚本，无前端框架依赖）。
- * 默认需登录（jAccount）；服务端开启匿名模式（AGENT_ALLOW_ANONYMOUS=1，内测期）时未登录也可直接对话。
+ * 需登录（jAccount）：未登录时打开面板即显示登录引导，登录后回到当前页。
  *
  * 样式注意：消息气泡由 JS 动态创建，拿不到 Astro 作用域 cid 属性，
  * 因此这里必须用 is:global，选择器统一挂在 #agent-widget 下避免泄漏。
@@ -48,20 +48,6 @@
         <button type="button" id="agent-settings-back" aria-label="返回对话">‹ 返回</button>
         <span>模型设置</span>
       </div>
-      <section class="agent-set-section" id="agent-root-section">
-        <h4>主管理员</h4>
-        <p class="agent-set-desc" id="agent-root-desc">用口令确认后，这个浏览器上的助手使用主管理员身份，与其他访客分开。</p>
-        <form id="agent-root-form">
-          <label class="agent-set-field">
-            <span>密码</span>
-            <input type="password" id="agent-root-password" autocomplete="current-password" />
-          </label>
-          <div class="agent-set-actions">
-            <button type="submit" class="agent-set-btn primary">确认身份</button>
-          </div>
-        </form>
-        <p class="agent-set-hint" id="agent-root-status" hidden></p>
-      </section>
       <div id="agent-settings-body">
         <section class="agent-set-section">
           <h4>自带 API（可选）</h4>
@@ -843,7 +829,7 @@
   const settingsBack = document.getElementById("agent-settings-back") as HTMLButtonElement;
   const NOTICE = (document.querySelector("#agent-body .agent-notice") as HTMLElement)?.outerHTML ?? "";
 
-  let ready = false; // 已确认可对话（已登录，或服务端开启匿名模式）
+  let ready = false; // 已确认可对话（已登录 jAccount）
   let streaming = false;
   /** 当前对话归属的会话；null = 下一条消息由服务端新开一场 */
   let currentSessionId: number | null = null;
@@ -1311,7 +1297,7 @@
     applyFullscreen();
     fab.setAttribute("aria-label", "收起智能助手");
     if (!ready) {
-      /* 直接探测历史接口：200 = 已登录或服务端开了匿名模式；401 = 需要登录 */
+      /* 直接探测历史接口：200 = 已登录；401 = 需要登录 */
       try {
         const res = await fetch("/api/agent/history");
         if (res.status === 401) {
@@ -1342,12 +1328,6 @@
         head.appendChild(badge);
       }
       badge.textContent = data.identity || "";
-      const form = document.getElementById("agent-root-form");
-      const desc = document.getElementById("agent-root-desc");
-      if (data.account === "root") {
-        form?.setAttribute("hidden", "");
-        if (desc) desc.textContent = "当前已是主管理员。这个身份的对话不与其他访客混用。";
-      }
     } catch {
       /* 身份角标失败不影响对话 */
     }
@@ -1573,31 +1553,6 @@
   function hideSettings(): void {
     settingsView.hidden = true;
   }
-
-  document.getElementById("agent-root-form")?.addEventListener("submit", async (ev) => {
-    ev.preventDefault();
-    const statusEl = document.getElementById("agent-root-status") as HTMLElement;
-    const password = (document.getElementById("agent-root-password") as HTMLInputElement).value;
-    setHint(statusEl, "正在确认…");
-    try {
-      const res = await fetch("/api/auth/root", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setHint(statusEl, data.error || "确认失败。", true);
-        return;
-      }
-      (document.getElementById("agent-root-password") as HTMLInputElement).value = "";
-      setHint(statusEl, "已确认主管理员。之后的对话使用这个身份。");
-      currentSessionId = null;
-      await refreshIdentity();
-    } catch {
-      setHint(statusEl, "网络异常，请稍后重试。", true);
-    }
-  });
 
   settingsBtn.addEventListener("click", () => void openSettings());
   settingsBack.addEventListener("click", () => {
@@ -1863,10 +1818,20 @@
         showLoginPrompt();
         return;
       }
+      if (res.status === 403) {
+        const data = await res.json().catch(() => null as unknown as { error?: string } | null);
+        addMsg("error", data?.error === "blocked" ? "这个账号的助手使用权限已被暂停，如有疑问请联系协会。" : "没有使用权限。");
+        return;
+      }
       if (res.status === 429) {
+        const data = await res.json().catch(() => null as unknown as { error?: string } | null);
+        if (data?.error === "blocked") {
+          addMsg("error", "这个账号的助手使用权限已被暂停，如有疑问请联系协会。");
+          return;
+        }
         addMsg(
           "error",
-          usingCustom ? "提问太频繁啦，请一小时后再试。" : "协会模型的每小时提问上限到了，可在「模型设置」里配置自己的 API 继续使用。",
+          usingCustom ? "提问太频繁啦，请一小时后再试。" : "当前时段的提问上限到了，请稍后再试；也可在「模型设置」里配置自己的 API 继续使用。",
         );
         return;
       }

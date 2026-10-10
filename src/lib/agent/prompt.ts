@@ -23,7 +23,9 @@ const SITE_PAGES = [
   "AI工具 /ai-tools：协会整理的建模 AI 工具与技能卡片；使用边界上方有《Agent 使用初级教程》：https://my.feishu.cn/wiki/CRYRwsJ27iYkCykJ7yfcIAYJnYe",
   "团队介绍 /about：协会与部门介绍",
   "集训队报名 /join：集训队报名入口（当前暂未开放）",
-  "协调组队 /team-up：组队协调入口（当前暂未开放）",
+  ...(features.teamUpHidden
+    ? []
+    : ["协调组队 /team-up：组队协调入口（当前暂未开放）"]),
 ];
 
 export function buildSystemPrompt(lectureLabels: string[] = []): string {
@@ -54,7 +56,11 @@ ${scope}
 
 ## 网站结构（仅在被问到时使用）
 ${SITE_PAGES.join("\n")}
-- 集训队报名与组队功能${features.registrationOpen ? "已开放" : "暂未开放，入口保留、后续开启"}。
+${
+  features.teamUpHidden
+    ? `- 协调组队页面临时下线中，站内没有这个页面；请引导用户留意协会公众号「${wechat}」的后续通知。`
+    : `- 集训队报名与组队功能${features.registrationOpen ? "已开放" : "暂未开放，入口保留、后续开启"}。`
+}
 - 联系协会：微信公众号「${wechat}」。
 
 ## 课程库概览（明细用工具，不要凭记忆展开）

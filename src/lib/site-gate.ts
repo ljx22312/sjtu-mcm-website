@@ -44,7 +44,7 @@ export function denyPrivilegedRequest(context: { url: URL; cookies: CookieJar })
     const back = sanitizeRedirect(context.url.pathname, "/");
     return new Response(null, {
       status: 302,
-      headers: { Location: `/login?redirect=${encodeURIComponent(back)}`, ...PRIVATE_HEADERS },
+      headers: { Location: `/api/auth/login?redirect=${encodeURIComponent(back)}`, ...PRIVATE_HEADERS },
     });
   }
   return new Response("Not Found", {

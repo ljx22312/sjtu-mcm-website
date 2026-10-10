@@ -12,7 +12,6 @@
  * 环境变量：
  *   JACCOUNT_CLIENT_ID / JACCOUNT_CLIENT_SECRET  交我办「jAccount接口申请」通过后填
  *   AUTH_SESSION_SECRET  会话 cookie 签名密钥（openssl rand -hex 32；不设则每次启动随机）
- *   AUTH_ALLOW_MOCK      配置正式凭据后是否仍允许演示登录（默认否）
  */
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
@@ -35,8 +34,6 @@ export const clientId = env("JACCOUNT_CLIENT_ID");
 export const clientSecret = env("JACCOUNT_CLIENT_SECRET");
 /** 正式 jAccount 凭据是否已配置 */
 export const jaccountConfigured = Boolean(clientId && clientSecret);
-/** 是否提供演示登录（申请审批期间的过渡态；正式凭据配置后需显式 AUTH_ALLOW_MOCK=1） */
-export const mockAllowed = !jaccountConfigured || env("AUTH_ALLOW_MOCK") === "1";
 
 let ephemeralSecret: string | null = null;
 function sessionSecret(): string {
@@ -54,7 +51,6 @@ export interface SessionUser {
   name: string; // 姓名
   code: string; // 学工号
   type: string; // student / faculty / ...
-  mock?: boolean; // 演示身份
 }
 
 export interface Session {
@@ -172,14 +168,6 @@ export function sanitizeRedirect(raw: string | null | undefined, fallback = "/")
   if (raw.length > 512) return fallback;
   return raw;
 }
-
-export const MOCK_USER: SessionUser = {
-  account: "demo",
-  name: "演示用户",
-  code: "",
-  type: "student",
-  mock: true,
-};
 
 export function cookieOptions(secure: boolean, maxAge: number) {
   return {

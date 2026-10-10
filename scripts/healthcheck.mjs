@@ -8,6 +8,7 @@
  *  4. 顺带清理 14 天前的旧日志
  */
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 
 const ROOT = join(import.meta.dirname, "..");
@@ -18,9 +19,19 @@ const WEBHOOK = process.env.FEISHU_WEBHOOK_URL || "";
 const MUTE_MS = 5 * 60_000;
 const KEEP_DAYS = 14;
 
+/* 组队页可临时下线（src/config.ts features.teamUpHidden）：下线时不拨测 /team-up（否则每 5 分钟误报 404） */
+const teamUpHidden = (() => {
+  try {
+    return /teamUpHidden:\s*true/.test(readFileSync(join(ROOT, "src/config.ts"), "utf8"));
+  } catch {
+    return false; /* 读不到配置则保守拨测，宁可误报不可漏报 */
+  }
+})();
+
 const PATHS = [
-  "/", "/news", "/calendar", "/ai-tools", "/about", "/join", "/team-up", "/knowledge",
+  "/", "/news", "/calendar", "/ai-tools", "/about", "/join", "/knowledge",
   "/login", "/api/auth/me",
+  ...(teamUpHidden ? [] : ["/team-up"]),
 ];
 
 /** @type {{offsets: Record<string, number>, mutes: Record<string, number>, down: Record<string, number>}} */
@@ -89,6 +100,21 @@ function normalize(s) {
 
 async function main() {
   const problems = [];
+
+  /* 0. systemd 托管状态：服务若被手动 nohup 进程顶替端口会陷入崩溃循环（2026-10-06 事故），is-active 立刻暴露 */
+  try {
+    const st = execFileSync("systemctl", ["is-active", "sjtu-mcm-website.service"], {
+      encoding: "utf8",
+      timeout: 5000,
+    }).trim();
+    if (st !== "active") {
+      problems.push({ key: "svc:sjtu-mcm-website", text: `sjtu-mcm-website systemd 服务状态异常：${st}（可能被手动进程占用端口或已停止）` });
+    }
+  } catch (e) {
+    /* systemctl is-active 非活跃时以非零码退出，状态在 e.stdout 里 */
+    const st = String(e?.stdout ?? "").trim() || "unknown";
+    problems.push({ key: "svc:sjtu-mcm-website", text: `sjtu-mcm-website systemd 服务状态异常：${st}（可能被手动进程占用端口或已停止）` });
+  }
 
   /* 1. 拨测 */
   for (const path of PATHS) {

@@ -12,7 +12,12 @@ const items = navItems.map((item) => ({
   label: item.label,
   href: base ? (item.href === "/" ? base : `${base}${item.href}`) : item.href,
 }));
-if (base === "/staff") items.push({ href: "/staff/admins", label: "管理员名单" });
+if (base === "/staff") {
+  items.push({ href: "/staff/agent", label: "AI 助手管理" });
+  items.push({ href: "/staff/feedback", label: "助手反馈" });
+  items.push({ href: "/staff/audit", label: "审计流水" });
+  items.push({ href: "/staff/admins", label: "管理员名单" });
+}
 
 function isCurrent(href: string): boolean {
   if (href === "/" || href === "/next" || href === "/staff") return currentPath === href;
@@ -43,7 +48,7 @@ function isCurrent(href: string): boolean {
           </li>
         ))}
         <li class="nav-auth">
-          <a href="/login" id="auth-entry" class="auth-link">登录</a>
+          <a href="/api/auth/login" id="auth-entry" class="auth-link">登录</a>
         </li>
       </ul>
     </nav>
@@ -66,16 +71,30 @@ function isCurrent(href: string): boolean {
     toggle.setAttribute("aria-expanded", String(open));
   });
 
-  // 登录态：静态页统一向 /api/auth/me 查询（未登录时保持「登录」入口指向 /login）
+  // 登录失败提示（/api/auth/callback 失败后带 login_error 回到首页）
+  const loginError = new URLSearchParams(location.search).get("login_error");
+  if (loginError) {
+    const banner = document.createElement("div");
+    banner.textContent = `登录失败：${loginError}。请重试；反复失败请联系协会。`;
+    banner.style.cssText =
+      "background:#fdecea;color:#b3261e;padding:10px 16px;text-align:center;font-size:.92rem;border-bottom:1px solid #f5c6c2";
+    document.body.prepend(banner);
+    history.replaceState(null, "", location.pathname);
+  }
+
+  // 登录态：静态页统一向 /api/auth/me 查询；未登录时「登录」直达 jAccount 并在登录后回到当前页
   const authEntry = document.getElementById("auth-entry");
   if (authEntry) {
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (d?.authenticated) {
-          authEntry.textContent = d.user?.mock ? "演示身份 · 退出" : `${d.user?.name || d.user?.account} · 退出`;
+          authEntry.textContent = `${d.user?.name || d.user?.account} · 退出`;
           authEntry.href = "/api/auth/logout";
           authEntry.classList.add("logged-in");
+        } else {
+          const back = location.pathname + location.search;
+          if (back && back !== "/") authEntry.href = `/api/auth/login?redirect=${encodeURIComponent(back)}`;
         }
         if (d?.admin) {
           const path = location.pathname.replace(/\/+$/, "") || "/";

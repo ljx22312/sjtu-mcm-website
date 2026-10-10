@@ -7,7 +7,7 @@
  *   - data/site-admins.json 的 admins（/staff 页面可增删，改完即生效）
  *   - 环境变量 SITE_ADMIN_ACCOUNTS（逗号分隔；页面上只展示，不能删除）
  *
- * 账号必须与 jAccount 的 sub 完全一致（演示登录的账号是 demo）。
+ * 账号必须与 jAccount 的 sub 完全一致。
  * 名单为空时，没有任何账号能打开内部视角。
  */
 import { mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";

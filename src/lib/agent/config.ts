@@ -6,13 +6,15 @@
  *   AGENT_BASE_URL   Anthropic 兼容端点，默认 https://open.bigmodel.cn/api/anthropic
  *   AGENT_MODEL      模型 id，默认 glm-4.6（可选 glm-4.5-air）
  *   AGENT_ALLOW_MOCK 配置正式 Key 后是否仍允许演示模式（默认否；未配置 Key 时自动演示）
- *   AGENT_ALLOW_ANONYMOUS  设为 1 时未登录也可使用 agent（内测期临时开关；匿名访客共用 "anonymous" 身份与历史）
- *   AGENT_RATE_LIMIT 每用户每小时可发送的消息数（官方模型），默认 20
- *   AGENT_RATE_LIMIT_CUSTOM 自带 API 用户每小时的的消息数上限，默认 100（花自己的额度，只防失控不防正常使用）
+ *   AGENT_WINDOW_MESSAGES 协会额度每窗口条数，默认 60
+ *   AGENT_WINDOW_MINUTES 窗口时长（分钟），默认 300（5 小时）。窗口从用户首条提问起算，
+ *                        到期整窗恢复，下次提问再开新窗（详见 usage.ts / history.ts 的窗口计算）
  *   AGENT_ADMIN_ACCOUNTS 管理员 jAccount 账号（逗号分隔；与 data/agent-admin.json 的 admins 合并）
  *   AGENT_ADMIN_CONFIG  官方模型运行参数文件路径，默认 <项目根>/data/agent-admin.json
  *   AGENT_HISTORY_DB        SQLite 历史库路径，默认 <项目根>/data/agent-history.db
  *   AGENT_HISTORY_RETENTION_DAYS 对话记录保留天数，默认 180
+ *
+ * 注意：astro build 会把 .env 值内联进产物，改任何环境变量都要重新 build + 重启，只重启不生效。
  */
 
 /* 独立 node 运行时只有 process.env；astro dev/build 下 import.meta.env 也可用 */
@@ -32,12 +34,12 @@ export const agentBaseUrl = env("AGENT_BASE_URL") || "https://open.bigmodel.cn/a
 export const agentModelId = env("AGENT_MODEL") || "glm-4.6";
 /** 正式 LLM 凭据是否已配置 */
 export const agentConfigured = Boolean(agentApiKey);
-/** 是否提供演示模式（与 jAccount 演示登录同一策略：未配置自动开启，配置后需显式允许） */
+/** 是否提供演示模式（未配置 Key 时自动开启，配置后需显式 AGENT_ALLOW_MOCK=1） */
 export const agentMockAllowed = !agentConfigured || env("AGENT_ALLOW_MOCK") === "1";
-/** 内测期是否允许未登录使用（匿名共用同一份历史；正式部署保持关闭，回到 jAccount 登录门槛） */
-export const agentAllowAnonymous = env("AGENT_ALLOW_ANONYMOUS") === "1";
-/** 每用户每小时的聊天消息上限（官方模型） */
-export const agentRateLimitPerHour = envInt("AGENT_RATE_LIMIT", 20);
+/** 协会额度：每个窗口的条数（默认 60）。窗口从首条提问起算，到期整窗恢复 */
+export const agentWindowMessages = envInt("AGENT_WINDOW_MESSAGES", 60);
+/** 窗口时长（分钟），默认 300 = 5 小时 */
+export const agentWindowMinutes = envInt("AGENT_WINDOW_MINUTES", 300);
 /** 自带 API 用户每小时的聊天消息上限（花用户自己的额度，仅防失控） */
 export const agentRateLimitCustomPerHour = envInt("AGENT_RATE_LIMIT_CUSTOM", 100);
 /** 管理员账号列表（环境变量部分；与 agent-admin.json 的 admins 合并） */

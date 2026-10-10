@@ -1,0 +1,416 @@
+---
+export const prerender = false;
+
+import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
+import { denyPrivilegedRequest } from "../../lib/site-gate";
+
+const blocked = denyPrivilegedRequest(Astro);
+if (blocked) return blocked;
+---
+
+<PrivilegedLayout view="staff" title="AI 助手管理" description="数模小助手的用量与对话管理，仅管理员可查看。">
+  <h1 class="page-title">AI 助手管理</h1>
+  <p class="page-subtitle">按账号查看用量、单独调整限额、查看并处置对话。改限额立即生效（热加载 data/agent-limits.json）。</p>
+
+  <section class="section">
+    <h2 class="section-title">用量一览</h2>
+    <p class="muted" id="defaults-line">全局默认：加载中…。窗口条数取值：正数=条数，0=禁止，-1=不限，留空=跟默认。自带 API 的提问不计入协会额度，另有独立的突发限流。</p>
+    <p class="muted agent-tip">说明：协会额度按固定窗口计（从用户首条提问起算，窗口内用满即拒，到期整窗恢复，下次提问再开新窗），用量持久计数、重启不清零。「禁用」对该账号整个助手生效，包括自带 API。</p>
+
+    <input id="usage-filter" type="search" placeholder="按姓名筛选…" autocomplete="off" />
+    <div class="table-wrap">
+      <table class="usage-table" id="usage-table">
+        <thead>
+          <tr>
+            <th>用户</th>
+            <th>本窗口</th>
+            <th>窗口恢复于</th>
+            <th>今日</th>
+            <th>累计</th>
+            <th>会话</th>
+            <th>最后活跃</th>
+            <th>限额</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="usage-body">
+          <tr><td colspan="9" class="muted">加载中…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p id="usage-msg" class="muted" aria-live="polite"></p>
+  </section>
+
+  <section class="section" id="conv-section" hidden>
+    <h2 class="section-title" id="conv-title">对话查看</h2>
+    <button type="button" class="btn btn-outline btn-small" id="conv-close">关闭</button>
+    <div id="conv-list" class="conv-list"></div>
+    <div id="conv-messages" class="conv-messages" hidden></div>
+  </section>
+</PrivilegedLayout>
+
+<style>
+  .usage-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+  .usage-table th,
+  .usage-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+  .usage-table th {
+    background: #fafafa;
+    font-weight: 600;
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  #usage-filter {
+    width: min(100%, 280px);
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 10px 0;
+    font: inherit;
+  }
+  .limit-editor td {
+    background: #fffdf5;
+    white-space: normal;
+  }
+  .limit-editor label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 12px;
+    font-size: 0.88rem;
+  }
+  .limit-editor input[type="number"] {
+    width: 90px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font: inherit;
+  }
+  .limit-editor input[type="text"] {
+    width: 160px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font: inherit;
+  }
+  .row-actions button {
+    margin-right: 6px;
+  }
+  .conv-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .conv-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    background: #fff;
+  }
+  .conv-item:hover {
+    border-color: var(--blue);
+  }
+  .conv-item .conv-meta {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .conv-messages {
+    margin-top: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    max-height: 480px;
+    overflow-y: auto;
+  }
+  .conv-msg {
+    margin: 10px 0;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .conv-msg .who {
+    font-weight: 600;
+    margin-right: 8px;
+  }
+  .conv-msg.user .who { color: var(--blue-dark); }
+  .conv-msg.assistant .who { color: var(--red); }
+  .agent-tip { font-size: 0.85rem; }
+</style>
+
+<script>
+  interface UsageUser {
+    account: string;
+    name: string;
+    type: string;
+    windowUsed: number;
+    windowStartAt: number | null;
+    windowResetsAt: number | null;
+    today: number;
+    total: number;
+    sessions: number;
+    lastActiveAt: number;
+    limits: { window: number; blocked: boolean; overridden: boolean; note: string };
+  }
+  interface Defaults { windowMessages: number; windowMinutes: number; customHourly: number; }
+
+  let defaults: Defaults = { windowMessages: 60, windowMinutes: 300, customHourly: 100 };
+  let users: UsageUser[] = [];
+  let editorOpenFor = "";
+  let convAccount = "";
+  /* 展示一律用真名；账号只作内部键（data 属性、URL 参数），不显示 */
+  const nameMap = new Map<string, string>();
+  const displayName = (account: string): string => nameMap.get(account) || "未登记用户";
+
+  const body = document.getElementById("usage-body") as HTMLElement;
+  const msgEl = document.getElementById("usage-msg") as HTMLElement;
+  const filterEl = document.getElementById("usage-filter") as HTMLInputElement;
+  const say = (text: string) => { msgEl.textContent = text; };
+  const fmtTime = (ms: number) => new Date(ms).toLocaleString("zh-CN", { hour12: false });
+  const esc = (s: string) =>
+    s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+
+  function limitText(u: UsageUser): string {
+    if (u.limits.blocked) return "已禁用";
+    const window = u.limits.window <= 0 ? (u.limits.window === 0 ? "禁" : "不限") : `${u.limits.window}/窗`;
+    return (u.limits.overridden ? "*" : "") + window;
+  }
+
+  function render(): void {
+    const q = filterEl.value.trim().toLowerCase();
+    const rows = users.filter(
+      (u) => !q || u.account.toLowerCase().includes(q) || (u.name && u.name.toLowerCase().includes(q)),
+    );
+    if (rows.length === 0) {
+      body.innerHTML = '<tr><td colspan="9" class="muted">没有匹配的用户。</td></tr>';
+      return;
+    }
+    body.innerHTML = rows
+      .map((u) => {
+        const who = esc(u.name || "未登记用户");
+        const typeBadge = u.type === "faculty" ? '<span class="badge badge-gold">教师</span>' : "";
+        const cap = u.limits.blocked ? "—" : u.limits.window <= 0 ? (u.limits.window === 0 ? "禁" : "∞") : String(u.limits.window);
+        const resets = u.windowResetsAt
+          ? fmtTime(u.windowResetsAt)
+          : u.windowStartAt
+            ? "—"
+            : '<span class="muted">未开窗</span>';
+        const main = `
+          <tr data-account="${esc(u.account)}">
+            <td>${who} ${typeBadge}</td>
+            <td>${u.limits.blocked ? "—" : `${u.windowUsed}/${cap}`}</td>
+            <td>${resets}</td>
+            <td>${u.today}</td>
+            <td>${u.total}</td>
+            <td>${u.sessions}</td>
+            <td>${fmtTime(u.lastActiveAt)}</td>
+            <td>${limitText(u)}</td>
+            <td class="row-actions">
+              <button type="button" class="btn btn-outline btn-small" data-act="limit" data-account="${esc(u.account)}">限额</button>
+              <button type="button" class="btn btn-outline btn-small" data-act="conv" data-account="${esc(u.account)}">对话</button>
+            </td>
+          </tr>`;
+        const editor =
+          editorOpenFor === u.account
+            ? `<tr class="limit-editor" data-editor="${esc(u.account)}">
+                 <td colspan="9">
+                   <form data-limit-form="${esc(u.account)}">
+                     <label>每窗口条数 <input type="number" name="window" min="-1" max="100000" placeholder="默认 ${defaults.windowMessages}" /></label>
+                     <label><input type="checkbox" name="blocked" ${u.limits.blocked ? "checked" : ""} /> 禁用助手</label>
+                     <label>备注 <input type="text" name="note" placeholder="管理员备注" value="${esc(u.limits.note || "")}" /></label>
+                     <button type="submit" class="btn btn-primary btn-small">保存</button>
+                     ${u.limits.overridden ? `<button type="button" class="btn btn-outline btn-small" data-act="clear" data-account="${esc(u.account)}">清除覆盖</button>` : ""}
+                     <span class="muted">窗口时长全局统一（当前 ${defaults.windowMinutes} 分钟）；留空 = 跟默认；-1 不限；0 禁止</span>
+                   </form>
+                 </td>
+               </tr>`
+            : "";
+        return main + editor;
+      })
+      .join("");
+  }
+
+  async function loadOverview(): Promise<void> {
+    try {
+      const res = await fetch("/api/admin/agent/overview");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = (await res.json()) as { defaults: Defaults; users: UsageUser[] };
+      defaults = data.defaults;
+      users = data.users;
+      nameMap.clear();
+      users.forEach((u) => nameMap.set(u.account, u.name || "未登记用户"));
+      const dl = document.getElementById("defaults-line");
+      if (dl) {
+        dl.textContent = `全局默认：每窗口 ${defaults.windowMessages} 条，窗口时长 ${defaults.windowMinutes} 分钟（可用环境变量 AGENT_WINDOW_MESSAGES / AGENT_WINDOW_MINUTES 调整，改后需重新构建）；自带 API 突发限流 ${defaults.customHourly} 条/小时。`;
+      }
+      render();
+    } catch {
+      body.innerHTML = '<tr><td colspan="9" class="muted">加载失败，请刷新重试。</td></tr>';
+    }
+  }
+
+  body.addEventListener("click", (ev) => {
+    const btn = (ev.target as HTMLElement).closest("button[data-act]") as HTMLButtonElement | null;
+    if (!btn) return;
+    const account = btn.getAttribute("data-account") ?? "";
+    const act = btn.getAttribute("data-act");
+    if (act === "limit") {
+      editorOpenFor = editorOpenFor === account ? "" : account;
+      render();
+    } else if (act === "conv") {
+      void openConversations(account);
+    } else if (act === "clear") {
+      if (!confirm(`清除 ${displayName(account)} 的限额覆盖，回到全局默认？`)) return;
+      void (async () => {
+        const res = await fetch(`/api/admin/agent/limits?account=${encodeURIComponent(account)}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+        say(res.ok ? "已清除覆盖。" : "清除失败。");
+        editorOpenFor = "";
+        await loadOverview();
+      })();
+    }
+  });
+
+  body.addEventListener("submit", (ev) => {
+    const form = (ev.target as HTMLElement).closest("form[data-limit-form]") as HTMLFormElement | null;
+    if (!form) return;
+    ev.preventDefault();
+    const account = form.getAttribute("data-limit-form") ?? "";
+    const fd = new FormData(form);
+    const windowRaw = String(fd.get("window") ?? "").trim();
+    void (async () => {
+      const res = await fetch("/api/admin/agent/limits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          account,
+          ...(windowRaw !== "" ? { window: Number(windowRaw) } : {}),
+          blocked: fd.get("blocked") === "on",
+          note: String(fd.get("note") ?? ""),
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { message?: string };
+      say(res.ok ? `已保存 ${displayName(account)} 的限额。` : `保存失败：${data.message ?? res.status}`);
+      if (res.ok) editorOpenFor = "";
+      await loadOverview();
+    })();
+  });
+
+  filterEl.addEventListener("input", render);
+
+  /* ---------- 对话查看 ---------- */
+  const convSection = document.getElementById("conv-section") as HTMLElement;
+  const convTitle = document.getElementById("conv-title") as HTMLElement;
+  const convList = document.getElementById("conv-list") as HTMLElement;
+  const convMessages = document.getElementById("conv-messages") as HTMLElement;
+  const convClose = document.getElementById("conv-close") as HTMLElement;
+
+  async function openConversations(account: string): Promise<void> {
+    convAccount = account;
+    convSection.removeAttribute("hidden");
+    convTitle.textContent = `对话查看：${displayName(account)}`;
+    convMessages.hidden = true;
+    convList.innerHTML = '<p class="muted">加载中…</p>';
+    convSection.scrollIntoView({ behavior: "smooth" });
+    try {
+      const res = await fetch(`/api/admin/agent/sessions?account=${encodeURIComponent(account)}`);
+      const data = (await res.json()) as {
+        sessions: { session_id: number; title: string; message_count: number; started_at: number; last_active_at: number }[];
+      };
+      if (data.sessions.length === 0) {
+        convList.innerHTML = '<p class="muted">这个账号没有可见会话（可能全部已撤回，或只用过自带 API 提问且均已撤回）。</p>';
+        return;
+      }
+      convList.innerHTML = data.sessions
+        .map(
+          (s) => `
+            <div class="conv-item" data-session="${s.session_id}">
+              <span>${esc(s.title)}</span>
+              <span class="conv-meta">${s.message_count} 条 · ${fmtTime(s.last_active_at)}</span>
+            </div>`,
+        )
+        .join("");
+    } catch {
+      convList.innerHTML = '<p class="muted">加载失败。</p>';
+    }
+  }
+
+  async function openSessionMessages(account: string, sessionId: number): Promise<void> {
+    convMessages.hidden = false;
+    convMessages.innerHTML = '<p class="muted">加载中…</p>';
+    try {
+      const res = await fetch(`/api/admin/agent/messages?account=${encodeURIComponent(account)}&session=${sessionId}`);
+      const data = (await res.json()) as {
+        messages: { id: number; role: "user" | "assistant"; content: string; created_at: number }[];
+      };
+      convMessages.innerHTML =
+        `<p><button type="button" class="btn btn-outline btn-small" id="retract-session" data-session="${sessionId}">撤回这场对话（对用户隐藏）</button></p>` +
+        data.messages
+          .map(
+            (m) =>
+              `<div class="conv-msg ${m.role}"><span class="who">${m.role === "user" ? "问" : "答"} ${fmtTime(m.created_at)}</span>${esc(m.content)}</div>`,
+          )
+          .join("");
+    } catch {
+      convMessages.innerHTML = '<p class="muted">加载失败。</p>';
+    }
+  }
+
+  convList.addEventListener("click", (ev) => {
+    const item = (ev.target as HTMLElement).closest(".conv-item") as HTMLElement | null;
+    if (!item) return;
+    const sessionId = Number(item.getAttribute("data-session"));
+    void openSessionMessages(convAccount, sessionId);
+  });
+
+  convMessages.addEventListener("click", (ev) => {
+    const btn = (ev.target as HTMLElement).closest("#retract-session") as HTMLButtonElement | null;
+    if (!btn) return;
+    const sessionId = Number(btn.getAttribute("data-session"));
+    if (!confirm(`确认撤回会话 ${sessionId}？该用户界面与模型上下文里都会消失（数据库留档）。`)) return;
+    void (async () => {
+      const res = await fetch("/api/admin/agent/retract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ account: convAccount, sessionId }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { removed?: number };
+      say(res.ok ? `已撤回 ${data.removed ?? 0} 条消息。` : "撤回失败。");
+      await Promise.all([openConversations(convAccount), loadOverview()]);
+    })();
+  });
+
+  convClose.addEventListener("click", () => {
+    convSection.setAttribute("hidden", "");
+  });
+
+  /* 从助手反馈页「查看对话」跳转过来：?account=xxx&session=123 直达该会话 */
+  const qParams = new URLSearchParams(location.search);
+  const qAccount = qParams.get("account");
+  const qSession = Number(qParams.get("session"));
+  if (qAccount) {
+    void openConversations(qAccount).then(() => {
+      if (Number.isInteger(qSession) && qSession > 0) void openSessionMessages(qAccount, qSession);
+    });
+  }
+
+  void loadOverview();
+</script>

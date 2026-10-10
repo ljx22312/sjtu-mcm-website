@@ -5,6 +5,10 @@ export const wechat = "SJTU数学建模";
 export const features = {
   registrationOpen: false,
   teamUpOpen: false,
+  /** 协调组队页面临时下线（true）：
+   *  导航隐藏；/team-up、/next/team-up、/staff/team-up 一律 404；AI 助手不再介绍该页；巡检不拨测该路径。
+   *  恢复：改回 false → npm run build → systemctl restart sjtu-mcm-website（巡检自动恢复拨测）。 */
+  teamUpHidden: true,
 };
 
 export const friendLinks = [
@@ -20,5 +24,5 @@ export const navItems = [
   { href: "/ai-tools", label: "AI工具" },
   { href: "/about", label: "团队介绍" },
   { href: "/join", label: "集训队报名" },
-  { href: "/team-up", label: "协调组队" },
+  ...(features.teamUpHidden ? [] : [{ href: "/team-up", label: "协调组队" }]),
 ];

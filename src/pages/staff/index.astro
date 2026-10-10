@@ -2,13 +2,203 @@
 export const prerender = false;
 
 import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
-import HomeBody from "../../views/HomeBody.astro";
 import { denyPrivilegedRequest } from "../../lib/site-gate";
+import { getDashboardInsights, type UserRow, type LoginRecord } from "../../lib/admin/insights";
 
 const blocked = denyPrivilegedRequest(Astro);
 if (blocked) return blocked;
+
+const data = getDashboardInsights(30, 10);
+
+const fmtTime = (isoOrMs: string | number): string =>
+  new Date(isoOrMs).toLocaleString("zh-CN", { hour12: false });
+const fmtUptime = (sec: number): string => {
+  const d = Math.floor(sec / 86400);
+  const h = Math.floor((sec % 86400) / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  return d > 0 ? `${d} 天 ${h} 小时` : h > 0 ? `${h} 小时 ${m} 分` : `${m} 分`;
+};
+const typeLabel = (type: string): string =>
+  type === "student" ? "学生" : type === "faculty" ? "教师" : type || "—";
+
+const cards = [
+  { label: "今日登录", value: `${data.today.loginUnique} 人`, sub: `${data.today.loginCount} 人次` },
+  { label: "累计用户", value: `${data.users.length} 人`, sub: "jAccount 登录过" },
+  { label: "今日助手提问", value: `${data.today.agentQuestions} 条`, sub: "协会额度" },
+  {
+    label: "今日限流 / 禁用",
+    value: `${data.today.rateLimited} / ${data.today.blockedAttempts} 次`,
+    sub: "被拒的助手请求",
+  },
+  { label: "今日错误", value: `${data.today.errors} 条`, sub: "error 级日志" },
+  { label: "服务运行", value: fmtUptime(data.service.uptimeSec), sub: `内存 ${data.service.rssMB} MB · Node ${data.service.nodeVersion}` },
+];
 ---
 
-<PrivilegedLayout view="staff" title="首页">
-  <HomeBody base="/staff" />
+<PrivilegedLayout view="staff" title="管理总览" description="站点运行与用户数据总览，仅管理员可见。">
+  <h1 class="page-title">管理总览</h1>
+  <p class="page-subtitle">
+    数据实时读取（刷新页面更新）：jAccount 登录记录、用户名册、助手用量与服务状态。
+    <a href="/staff" class="refresh-link">刷新</a>
+  </p>
+
+  <section class="section">
+    <div class="stat-grid">
+      {cards.map((c) => (
+        <div class="stat-card">
+          <div class="stat-value">{c.value}</div>
+          <div class="stat-label">{c.label}</div>
+          <div class="stat-sub muted">{c.sub}</div>
+        </div>
+      ))}
+    </div>
+    <p class="muted service-note">
+      jAccount 登录：{data.service.jaccountConfigured ? "✓ 已配置" : "✗ 未配置"} ·
+      助手模型 Key：{data.service.agentConfigured ? "✓ 已配置" : "✗ 未配置（演示模式）"} ·
+      数据截至 {fmtTime(data.service.nowIso)}
+    </p>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">登录记录（最近 {data.logins.length} 条）</h2>
+    <p class="muted">每次 jAccount 登录成功都会记录；更早的记录随日志文件保留，当前日志覆盖自
+      {data.logCoverageFrom ? fmtTime(data.logCoverageFrom) : "（无日志）"} 起。
+    </p>
+    <div class="table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr><th>时间</th><th>姓名</th><th>学工号</th><th>身份</th></tr>
+        </thead>
+        <tbody>
+          {data.logins.length === 0 && <tr><td colspan="4" class="muted">暂无登录记录。</td></tr>}
+          {data.logins.map((l: LoginRecord) => (
+            <tr>
+              <td>{fmtTime(l.t)}</td>
+              <td>{l.name || "—"}</td>
+              <td class="mono">{l.code || "—"}</td>
+              <td>{typeLabel(l.type)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">用户总览（{data.users.length} 人）</h2>
+    <p class="muted">所有用 jAccount 登录过的账号（资料在登录时自动登记）；「助手」列为协会额度的提问量，按账号的限额调整在 <a href="/staff/agent">AI 助手管理</a>。</p>
+    <div class="table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr><th>姓名</th><th>学工号</th><th>身份</th><th>最后登录</th><th>助手·今日</th><th>助手·累计</th></tr>
+        </thead>
+        <tbody>
+          {data.users.length === 0 && <tr><td colspan="6" class="muted">还没有用户登录过。</td></tr>}
+          {data.users.map((u: UserRow) => (
+            <tr>
+              <td>{u.name || "—"}</td>
+              <td class="mono">{u.code || "—"}</td>
+              <td>{typeLabel(u.type)}</td>
+              <td>{u.lastLoginAt ? fmtTime(u.lastLoginAt) : "—"}</td>
+              <td>{u.agentToday}</td>
+              <td>{u.agentTotal}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">最近错误（{data.recentErrors.length} 条）</h2>
+    <p class="muted">error 级日志的最新片段；完整日志在服务器 logs/ 目录，异常也会推送到飞书告警。</p>
+    {data.recentErrors.length === 0 && <p class="muted">近期没有错误，一切正常。</p>}
+    <ul class="error-list">
+      {data.recentErrors.map((e) => (
+        <li>
+          <span class="mono err-time">{fmtTime(e.t)}</span>
+          <span class="err-event">{e.event}</span>
+          <span class="muted">{e.message}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
 </PrivilegedLayout>
+
+<style>
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+  }
+  .stat-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    background: #fff;
+  }
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--blue-dark);
+  }
+  .stat-label {
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .stat-sub {
+    font-size: 0.82rem;
+    margin-top: 2px;
+  }
+  .service-note {
+    margin-top: 14px;
+    font-size: 0.88rem;
+  }
+  .refresh-link {
+    margin-left: 6px;
+    color: var(--blue);
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  .dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+  .dash-table th,
+  .dash-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+  }
+  .dash-table th {
+    background: #fafafa;
+    font-weight: 600;
+  }
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+  }
+  .error-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .error-list li {
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+  }
+  .err-time {
+    color: var(--text-light);
+  }
+  .err-event {
+    font-weight: 600;
+    color: var(--red);
+  }
+</style>

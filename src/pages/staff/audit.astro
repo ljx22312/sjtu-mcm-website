@@ -1,0 +1,100 @@
+---
+export const prerender = false;
+
+import PrivilegedLayout from "../../layouts/PrivilegedLayout.astro";
+import { denyPrivilegedRequest } from "../../lib/site-gate";
+import { getAuditTrail, type AuditEntry } from "../../lib/admin/insights";
+
+const blocked = denyPrivilegedRequest(Astro);
+if (blocked) return blocked;
+
+const entries = getAuditTrail(100);
+const fmtTime = (iso: string) => new Date(iso).toLocaleString("zh-CN", { hour12: false });
+
+const counts = entries.reduce<Record<string, number>>((acc, e) => {
+  acc[e.label] = (acc[e.label] ?? 0) + 1;
+  return acc;
+}, {});
+const who = (e: AuditEntry) => e.actorName || "（未知）";
+const target = (e: AuditEntry) => (e.target ? e.targetName || "（未登记账号）" : "—");
+---
+
+<PrivilegedLayout view="staff" title="审计流水" description="管理员敏感操作的时间线，仅管理员可见。">
+  <h1 class="page-title">审计流水</h1>
+  <p class="page-subtitle">
+    管理员的敏感操作留痕：管理员增删、助手限额调整、会话处置。谁在什么时候对谁做了什么，一目了然。
+  </p>
+
+  <section class="section">
+    <div class="chips">
+      {Object.entries(counts).map(([label, n]) => <span class="chip">{label} × {n}</span>)}
+      {entries.length === 0 && <span class="muted">还没有任何敏感操作记录。</span>}
+    </div>
+
+    {entries.length === 0 ? (
+      <p class="muted">暂无记录。当有管理员添加/移除、调整限额或撤回会话时，这里会出现时间线。</p>
+    ) : (
+      <ul class="audit-list">
+        {entries.map((e) => (
+          <li>
+            <div class="audit-head">
+              <span class="audit-time mono">{fmtTime(e.t)}</span>
+              <span class="audit-action">{e.label}</span>
+              <span class="muted">{who(e)} → {target(e)}</span>
+            </div>
+            {e.detail && <div class="audit-detail muted">{e.detail}</div>}
+          </li>
+        ))}
+      </ul>
+    )}
+    <p class="muted">记录随日志文件保留（当前日志自服务器部署起）；登录记录见管理总览页。</p>
+  </section>
+</PrivilegedLayout>
+
+<style>
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .chip {
+    border: 1px solid var(--border);
+    background: #fafafa;
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-size: 0.88rem;
+  }
+  .audit-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .audit-list li {
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .audit-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: baseline;
+    font-size: 0.94rem;
+  }
+  .audit-time {
+    color: var(--text-light);
+    font-size: 0.86rem;
+  }
+  .audit-action {
+    font-weight: 600;
+    color: var(--blue-dark);
+  }
+  .audit-detail {
+    margin-top: 2px;
+    padding-left: 2px;
+    font-size: 0.86rem;
+  }
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+</style>

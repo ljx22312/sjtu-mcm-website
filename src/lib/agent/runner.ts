@@ -212,9 +212,10 @@ async function runAgentTurnBody(opts: {
     );
   }
 
-  // 用户消息先落库（撤回后仍保留），并确定本场会话 id
+  // 用户消息先落库（撤回后仍保留），并确定本场会话 id；自带 API 的用量单独标记，不计协会额度
+  const usingCustom = Boolean(opts.runtime);
   let streamed = "";
-  const userRow = appendMessage(account, "user", message, undefined, sessionId);
+  const userRow = appendMessage(account, "user", message, undefined, sessionId, usingCustom);
   const sid = userRow.sessionId;
   handlers.onSession?.(sid);
   handlers.onUserMessage?.(userRow.messageId);

@@ -3,17 +3,17 @@ import { logEvent } from "../../../lib/logger";
 import {
   AGENT_MAX_MESSAGE_CHARS,
   agentRateLimitCustomPerHour,
-  agentRateLimitPerHour,
 } from "../../../lib/agent/config";
 import { resolveAgentAccount } from "../../../lib/agent/account";
-import { sessionOwnedBy } from "../../../lib/agent/history";
+import { sessionOwnedBy, windowUsage } from "../../../lib/agent/history";
+import { effectiveLimits } from "../../../lib/agent/usage";
 import { agentTurnTimeoutMs, runAgentTurn } from "../../../lib/agent/runner";
 import { getCustomRuntime, type CustomLlmConfig } from "../../../lib/agent/models";
 import { REASONING_LEVELS, type ReasoningLevel } from "../../../lib/agent/admin";
 
 export const prerender = false;
 
-/** 单进程内存限流：account → 最近一小时的消息时间戳（key: account / account|custom） */
+/** 自带 API 的内存级突发限流（官方额度的持久限流见 usage.ts，按历史库计数） */
 const rateWindow = new Map<string, number[]>();
 
 function allowMessage(key: string, limit: number): boolean {
@@ -49,7 +49,7 @@ function parseCustomConfig(raw: unknown): CustomLlmConfig | { error: string } {
 
 /**
  * POST /api/agent/chat  body: {"message": "...", "sessionId": 123?, "custom"?: {baseUrl,apiKey,model,reasoning}}
- * 需登录（jAccount 会话）；内测期可设 AGENT_ALLOW_ANONYMOUS=1 免登录。SSE 流式返回：
+ * 需登录（jAccount 会话）。SSE 流式返回：
  *   {"type":"session","sessionId":123}            本轮归入的会话 id（首个事件）
  *   {"type":"thinking","text":"..."}             思考增量（正文出现前）
  *   {"type":"tool","name":"search_curriculum"}   工具执行提示
@@ -63,7 +63,7 @@ function parseCustomConfig(raw: unknown): CustomLlmConfig | { error: string } {
  * 官方 Key 未配置（演示模式）时忽略 custom。
  */
 export const POST: APIRoute = async ({ request, cookies }) => {
-  /* 已登录用自己的账号；未登录的匿名访客每人一份身份，不再共用 anonymous */
+  /* jAccount 会话认定身份；无会话即 401（widget 显示登录引导） */
   const account = resolveAgentAccount(cookies);
   if (!account) {
     return new Response(JSON.stringify({ error: "unauthorized" }), {
@@ -106,7 +106,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  /* 自带 API 的用户走独立限流（默认 100 条/小时，花自己的额度） */
+  /* 自带 API 的用户走独立限流（默认 100 条/小时，花自己的额度）；
+     协会额度按 5 小时固定窗口：首条提问开窗，窗口内用满即拒，到期整窗恢复，下次提问再开新窗 */
   const custom = customRaw === undefined ? null : parseCustomConfig(customRaw);
   if (custom && "error" in custom) {
     return new Response(JSON.stringify({ error: custom.error }), {
@@ -114,13 +115,37 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
     });
   }
-  const rateKey = custom ? `${account}|custom` : account;
-  if (!allowMessage(rateKey, custom ? agentRateLimitCustomPerHour : agentRateLimitPerHour)) {
-    logEvent("warn", "agent_rate_limited", { account, custom: Boolean(custom) });
-    return new Response(JSON.stringify({ error: "rate_limited" }), {
-      status: 429,
+  const limits = effectiveLimits(account);
+  if (limits.blocked) {
+    logEvent("warn", "agent_blocked_attempt", { account });
+    return new Response(JSON.stringify({ error: "blocked" }), {
+      status: 403,
       headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
     });
+  }
+  if (custom) {
+    if (!allowMessage(`${account}|custom`, agentRateLimitCustomPerHour)) {
+      logEvent("warn", "agent_rate_limited", { account, custom: true });
+      return new Response(JSON.stringify({ error: "rate_limited" }), {
+        status: 429,
+        headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
+      });
+    }
+  } else if (limits.windowMessages !== -1) {
+    const usage = windowUsage(account, limits.windowMinutes * 60_000);
+    if (usage.used >= limits.windowMessages) {
+      logEvent("warn", "agent_rate_limited", {
+        account,
+        custom: false,
+        scope: "window",
+        limit: limits.windowMessages,
+        used: usage.used,
+      });
+      return new Response(JSON.stringify({ error: "rate_limited" }), {
+        status: 429,
+        headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
+      });
+    }
   }
 
   const encoder = new TextEncoder();

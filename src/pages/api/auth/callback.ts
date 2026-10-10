@@ -10,16 +10,17 @@ import {
   verifyIdToken,
 } from "../../../lib/auth";
 import { logEvent } from "../../../lib/logger";
+import { saveProfile } from "../../../lib/profiles";
 
 export const prerender = false;
 
 /**
  * GET /api/auth/callback?code=...&state=...
  * 校验 state（与登录时写入的 httpOnly cookie 比对）→ 换 token → 验签 id_token → 发会话。
- * 任何一步失败都回 /login 带错误说明，不暴露细节。
+ * 任何一步失败都回首页并带上 login_error 提示（由页头展示），不暴露细节。
  */
 export const GET: APIRoute = async ({ url, request, cookies, redirect }) => {
-  const fail = (msg: string) => redirect(`/login?notice=error&msg=${encodeURIComponent(msg)}`, 302);
+  const fail = (msg: string) => redirect(`/?login_error=${encodeURIComponent(msg)}`, 302);
 
   const stateCookie = cookies.get(OAUTH_STATE_COOKIE)?.json() as { s?: string; n?: string } | null;
   cookies.delete(OAUTH_STATE_COOKIE, { path: "/" });
@@ -37,6 +38,8 @@ export const GET: APIRoute = async ({ url, request, cookies, redirect }) => {
     const user = verifyIdToken(tokens.id_token);
     const secure = isRequestSecure(url, request.headers);
     cookies.set(SESSION_COOKIE, signSession(user), cookieOptions(secure, 7 * 24 * 3600));
+    logEvent("info", "login_success", { account: user.account, name: user.name, code: user.code, type: user.type });
+    saveProfile(user.account, user.name, user.code, user.type);
     return redirect(sanitizeRedirect(stateCookie.n), 302);
   } catch (e) {
     const err = e as Error & { stack?: string };

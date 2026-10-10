@@ -1,6 +1,14 @@
 ---
+export const prerender = false;
+
 import BaseLayout from "../layouts/BaseLayout.astro";
 import TeamUpBody from "../views/TeamUpBody.astro";
+import { features } from "../config";
+
+/* 页面临时下线时直接 404（与站内不存在的路径表现一致）；开关与恢复方式见 config.ts features.teamUpHidden */
+if (features.teamUpHidden) {
+  return new Response("Not Found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+}
 ---
 
 <BaseLayout title="协调组队" description="协会协调组队服务介绍：组队规则与找队友流程。">

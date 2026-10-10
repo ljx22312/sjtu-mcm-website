@@ -25,7 +25,7 @@ HOST=127.0.0.1 PORT=4321 node dist/server/entry.mjs   # 生产运行
 
 ## 目录速览
 
-- `src/pages/` — 公开页面 + `/login`；`/next`、`/staff` 仅网站管理员（服务端鉴权）
+- `src/pages/` — 公开页面（登录入口在页头，直达 jAccount）；`/next`、`/staff` 仅网站管理员（服务端鉴权）
 - `src/data/` — 新闻 / 赛事日历 / 两张集训大表（由规划包脚本生成）
 - `src/lib/auth.ts` — jAccount OIDC 客户端与会话签名（仅服务端引用）
 - `src/config.ts` — 站点配置（导航、友链、功能开关）
